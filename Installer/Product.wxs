@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi"><?define ReportScheduleManagement_TargetDir=$(var.ReportScheduleManagement.TargetDir)?>
+	<Product Id="*" Name="MFC Report Schedule Management" Language="1033" Version="1.0.0.0" Manufacturer="Grizzled Corporation" UpgradeCode="68560118-1c1a-435a-afb6-ecc264bc63c1" Codepage="1251">
+		<Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
+
+		<MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+		<MediaTemplate />
+
+		<Feature Id="ProductFeature" Title="Installer" Level="1">
+			<ComponentGroupRef Id="ProductComponents" />
+		</Feature>
+	</Product>
+
+	<Fragment>
+		<Directory Id="TARGETDIR" Name="SourceDir">
+			<Directory Id="ProgramFilesFolder">
+				<Directory Id="INSTALLFOLDER" Name="Installer" />
+			</Directory>
+		</Directory>
+	</Fragment>
+
+	<Fragment>
+		<ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+			<!-- TODO: Remove the comments around this Component element and the ComponentRef below in order to add resources to this installer. -->
+			<!-- <Component Id="ProductComponent"> -->
+				<!-- TODO: Insert files, registry keys, and other resources here. -->
+			<!-- </Component> -->
+			<Component Id="ReportScheduleManagement.exe" Guid="63f590ba-134f-4b1c-b725-bba746b5add3">
+			  <File Id="ReportScheduleManagement.exe" Name="ReportScheduleManagement.exe" Source="$(var.ReportScheduleManagement_TargetDir)ReportScheduleManagement.exe" />
+        <ServiceInstall Id="ServiceInstaller" Type="ownProcess" Name="ReportScheduleManagement" DisplayName="Report Schedule Management by Grizzled" Description="Служба работы с расписанием отчетов из АИС ГАУ МФЦ РС(Я)" Start="auto" ErrorControl="normal" />
+        <!-- Tell WiX to start the Service -->
+        <ServiceControl Id="StartService" Start="install" Stop="both" Remove="uninstall" Name="ReportScheduleManagement" Wait="yes" />
+			</Component>
+			<Component Id="ReportScheduleManagement.exe.config" Guid="9625e71d-daea-4222-b704-00ea1a103883">
+			  <File Id="ReportScheduleManagement.exe.config" Name="ReportScheduleManagement.exe.config" Source="$(var.ReportScheduleManagement_TargetDir)ReportScheduleManagement.exe.config" />
+			</Component>
+		</ComponentGroup>
+	</Fragment>
+</Wix>
