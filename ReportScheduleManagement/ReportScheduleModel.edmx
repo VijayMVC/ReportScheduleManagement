@@ -1,0 +1,313 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+      <Schema Namespace="ReportScheduleModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="Places">
+          <Key>
+            <PropertyRef Name="place_id" />
+          </Key>
+          <Property Name="place_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="place_name" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="place_connection" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="place_name_in_report" Type="nvarchar(max)" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Report_data">
+          <Key>
+            <PropertyRef Name="report_data_id" />
+          </Key>
+          <Property Name="report_data_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="report_data_task_id" Type="int" Nullable="false" />
+          <Property Name="report_data_createdate" Type="datetime" Nullable="false" />
+          <Property Name="report_data_xml" Type="nvarchar(max)" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Report_types">
+          <Key>
+            <PropertyRef Name="report_type_id" />
+          </Key>
+          <Property Name="report_type_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="report_type_name" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="report_type_xml" Type="nvarchar(max)" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Tasks">
+          <Key>
+            <PropertyRef Name="task_id" />
+          </Key>
+          <Property Name="task_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="task_startdate" Type="datetime" Nullable="false" />
+          <Property Name="task_wish_id" Type="int" Nullable="false" />
+          <Property Name="task_place_id" Type="int" Nullable="false" />
+          <Property Name="task_number_attempts" Type="int" />
+          <Property Name="task_status" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="task_last_error_text" Type="nvarchar(max)" />
+        </EntityType>
+        <EntityType Name="Wishes">
+          <Key>
+            <PropertyRef Name="wish_id" />
+          </Key>
+          <Property Name="wish_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="wish_createdate" Type="datetime" Nullable="false" />
+          <Property Name="wish_deadline" Type="datetime" Nullable="false" />
+          <Property Name="wish_total_attempts" Type="int" />
+          <Property Name="wish_report_type_name" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="wish_report_type_xml" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="wish_status" Type="nvarchar" MaxLength="50" Nullable="false" />
+        </EntityType>
+        <Association Name="FK_Report_data_Tasks">
+          <End Role="Tasks" Type="Self.Tasks" Multiplicity="1" />
+          <End Role="Report_data" Type="Self.Report_data" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Tasks">
+              <PropertyRef Name="task_id" />
+            </Principal>
+            <Dependent Role="Report_data">
+              <PropertyRef Name="report_data_task_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Tasks_Places">
+          <End Role="Places" Type="Self.Places" Multiplicity="1" />
+          <End Role="Tasks" Type="Self.Tasks" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Places">
+              <PropertyRef Name="place_id" />
+            </Principal>
+            <Dependent Role="Tasks">
+              <PropertyRef Name="task_place_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Tasks_Wishes">
+          <End Role="Wishes" Type="Self.Wishes" Multiplicity="1" />
+          <End Role="Tasks" Type="Self.Tasks" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Wishes">
+              <PropertyRef Name="wish_id" />
+            </Principal>
+            <Dependent Role="Tasks">
+              <PropertyRef Name="task_wish_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="ReportScheduleModelStoreContainer">
+          <EntitySet Name="Places" EntityType="Self.Places" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Report_data" EntityType="Self.Report_data" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Report_types" EntityType="Self.Report_types" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Tasks" EntityType="Self.Tasks" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Wishes" EntityType="Self.Wishes" Schema="dbo" store:Type="Tables" />
+          <AssociationSet Name="FK_Report_data_Tasks" Association="Self.FK_Report_data_Tasks">
+            <End Role="Tasks" EntitySet="Tasks" />
+            <End Role="Report_data" EntitySet="Report_data" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Tasks_Places" Association="Self.FK_Tasks_Places">
+            <End Role="Places" EntitySet="Places" />
+            <End Role="Tasks" EntitySet="Tasks" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Tasks_Wishes" Association="Self.FK_Tasks_Wishes">
+            <End Role="Wishes" EntitySet="Wishes" />
+            <End Role="Tasks" EntitySet="Tasks" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema>
+    </edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="ReportScheduleModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="Places">
+          <Key>
+            <PropertyRef Name="place_id" />
+          </Key>
+          <Property Name="place_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="place_name" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="place_connection" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="place_name_in_report" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
+          <NavigationProperty Name="Tasks" Relationship="Self.FK_Tasks_Places" FromRole="Places" ToRole="Tasks" />
+        </EntityType>
+        <EntityType Name="Report_data">
+          <Key>
+            <PropertyRef Name="report_data_id" />
+          </Key>
+          <Property Name="report_data_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="report_data_task_id" Type="Int32" Nullable="false" />
+          <Property Name="report_data_createdate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="report_data_xml" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
+          <NavigationProperty Name="Tasks" Relationship="Self.FK_Report_data_Tasks" FromRole="Report_data" ToRole="Tasks" />
+        </EntityType>
+        <EntityType Name="Report_types">
+          <Key>
+            <PropertyRef Name="report_type_id" />
+          </Key>
+          <Property Name="report_type_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="report_type_name" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="report_type_xml" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Tasks">
+          <Key>
+            <PropertyRef Name="task_id" />
+          </Key>
+          <Property Name="task_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="task_startdate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="task_wish_id" Type="Int32" Nullable="false" />
+          <Property Name="task_place_id" Type="Int32" Nullable="false" />
+          <Property Name="task_number_attempts" Type="Int32" />
+          <Property Name="task_status" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="task_last_error_text" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Places" Relationship="Self.FK_Tasks_Places" FromRole="Tasks" ToRole="Places" />
+          <NavigationProperty Name="Report_data" Relationship="Self.FK_Report_data_Tasks" FromRole="Tasks" ToRole="Report_data" />
+          <NavigationProperty Name="Wishes" Relationship="Self.FK_Tasks_Wishes" FromRole="Tasks" ToRole="Wishes" />
+        </EntityType>
+        <EntityType Name="Wishes">
+          <Key>
+            <PropertyRef Name="wish_id" />
+          </Key>
+          <Property Name="wish_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="wish_createdate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="wish_deadline" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="wish_total_attempts" Type="Int32" />
+          <Property Name="wish_report_type_name" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="wish_report_type_xml" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="wish_status" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <NavigationProperty Name="Tasks" Relationship="Self.FK_Tasks_Wishes" FromRole="Wishes" ToRole="Tasks" />
+        </EntityType>
+        <Association Name="FK_Tasks_Places">
+          <End Role="Places" Type="Self.Places" Multiplicity="1" />
+          <End Role="Tasks" Type="Self.Tasks" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Places">
+              <PropertyRef Name="place_id" />
+            </Principal>
+            <Dependent Role="Tasks">
+              <PropertyRef Name="task_place_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Report_data_Tasks">
+          <End Role="Tasks" Type="Self.Tasks" Multiplicity="1" />
+          <End Role="Report_data" Type="Self.Report_data" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Tasks">
+              <PropertyRef Name="task_id" />
+            </Principal>
+            <Dependent Role="Report_data">
+              <PropertyRef Name="report_data_task_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Tasks_Wishes">
+          <End Role="Wishes" Type="Self.Wishes" Multiplicity="1" />
+          <End Role="Tasks" Type="Self.Tasks" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Wishes">
+              <PropertyRef Name="wish_id" />
+            </Principal>
+            <Dependent Role="Tasks">
+              <PropertyRef Name="task_wish_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="ReportScheduleEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="Places" EntityType="Self.Places" />
+          <EntitySet Name="Report_data" EntityType="Self.Report_data" />
+          <EntitySet Name="Report_types" EntityType="Self.Report_types" />
+          <EntitySet Name="Tasks" EntityType="Self.Tasks" />
+          <EntitySet Name="Wishes" EntityType="Self.Wishes" />
+          <AssociationSet Name="FK_Tasks_Places" Association="Self.FK_Tasks_Places">
+            <End Role="Places" EntitySet="Places" />
+            <End Role="Tasks" EntitySet="Tasks" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Report_data_Tasks" Association="Self.FK_Report_data_Tasks">
+            <End Role="Tasks" EntitySet="Tasks" />
+            <End Role="Report_data" EntitySet="Report_data" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Tasks_Wishes" Association="Self.FK_Tasks_Wishes">
+            <End Role="Wishes" EntitySet="Wishes" />
+            <End Role="Tasks" EntitySet="Tasks" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="ReportScheduleModelStoreContainer" CdmEntityContainer="ReportScheduleEntities">
+          <EntitySetMapping Name="Places">
+            <EntityTypeMapping TypeName="ReportScheduleModel.Places">
+              <MappingFragment StoreEntitySet="Places">
+                <ScalarProperty Name="place_id" ColumnName="place_id" />
+                <ScalarProperty Name="place_name" ColumnName="place_name" />
+                <ScalarProperty Name="place_connection" ColumnName="place_connection" />
+                <ScalarProperty Name="place_name_in_report" ColumnName="place_name_in_report" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Report_data">
+            <EntityTypeMapping TypeName="ReportScheduleModel.Report_data">
+              <MappingFragment StoreEntitySet="Report_data">
+                <ScalarProperty Name="report_data_id" ColumnName="report_data_id" />
+                <ScalarProperty Name="report_data_task_id" ColumnName="report_data_task_id" />
+                <ScalarProperty Name="report_data_createdate" ColumnName="report_data_createdate" />
+                <ScalarProperty Name="report_data_xml" ColumnName="report_data_xml" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Report_types">
+            <EntityTypeMapping TypeName="ReportScheduleModel.Report_types">
+              <MappingFragment StoreEntitySet="Report_types">
+                <ScalarProperty Name="report_type_id" ColumnName="report_type_id" />
+                <ScalarProperty Name="report_type_name" ColumnName="report_type_name" />
+                <ScalarProperty Name="report_type_xml" ColumnName="report_type_xml" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Tasks">
+            <EntityTypeMapping TypeName="ReportScheduleModel.Tasks">
+              <MappingFragment StoreEntitySet="Tasks">
+                <ScalarProperty Name="task_id" ColumnName="task_id" />
+                <ScalarProperty Name="task_startdate" ColumnName="task_startdate" />
+                <ScalarProperty Name="task_wish_id" ColumnName="task_wish_id" />
+                <ScalarProperty Name="task_place_id" ColumnName="task_place_id" />
+                <ScalarProperty Name="task_number_attempts" ColumnName="task_number_attempts" />
+                <ScalarProperty Name="task_status" ColumnName="task_status" />
+                <ScalarProperty Name="task_last_error_text" ColumnName="task_last_error_text" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Wishes">
+            <EntityTypeMapping TypeName="ReportScheduleModel.Wishes">
+              <MappingFragment StoreEntitySet="Wishes">
+                <ScalarProperty Name="wish_id" ColumnName="wish_id" />
+                <ScalarProperty Name="wish_createdate" ColumnName="wish_createdate" />
+                <ScalarProperty Name="wish_deadline" ColumnName="wish_deadline" />
+                <ScalarProperty Name="wish_total_attempts" ColumnName="wish_total_attempts" />
+                <ScalarProperty Name="wish_report_type_name" ColumnName="wish_report_type_name" />
+                <ScalarProperty Name="wish_report_type_xml" ColumnName="wish_report_type_xml" />
+                <ScalarProperty Name="wish_status" ColumnName="wish_status" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="false" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

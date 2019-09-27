@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.ServiceProcess;
+﻿using System.ServiceProcess;
 using System.Timers;
 using System.Runtime.InteropServices;
 
@@ -7,8 +6,9 @@ namespace ReportScheduleManagement
 {
     public partial class ReportScheduleManagement : ServiceBase
     {
+        private ReportScheduleEntities db = new ReportScheduleEntities();
         private int eventId = 1;
-
+        
         public enum ServiceState
         {
             SERVICE_STOPPED = 0x00000001,
@@ -67,7 +67,8 @@ namespace ReportScheduleManagement
 
         public void OnTimer(object sender, ElapsedEventArgs args)
         {
-            eventLog1.WriteEntry("Мониторинг системы", EventLogEntryType.Information, eventId++);
+
+            //eventLog1.WriteEntry("Мониторинг системы", EventLogEntryType.Information, eventId++);
         }
 
         protected override void OnStop()
