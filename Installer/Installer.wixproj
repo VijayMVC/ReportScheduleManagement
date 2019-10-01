@@ -25,6 +25,14 @@
     <Content Include="Installer.wax" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ReportScheduleInForm\ReportScheduleInForm.csproj">
+      <Name>ReportScheduleInForm</Name>
+      <Project>{7de2a79a-e6b2-4b13-9f82-e36a6bc269ee}</Project>
+      <Private>True</Private>
+      <DoNotHarvest>True</DoNotHarvest>
+      <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
+      <RefTargetDir>INSTALLFOLDER</RefTargetDir>
+    </ProjectReference>
     <ProjectReference Include="..\ReportScheduleManagement\ReportScheduleManagement.csproj">
       <Name>ReportScheduleManagement</Name>
       <Project>{d60788e9-51d7-4937-8be5-149ea1c74aa3}</Project>

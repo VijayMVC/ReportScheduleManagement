@@ -34,6 +34,9 @@
 			<Component Id="ReportScheduleManagement.exe.config" Guid="9625e71d-daea-4222-b704-00ea1a103883">
 			  <File Id="ReportScheduleManagement.exe.config" Name="ReportScheduleManagement.exe.config" Source="$(var.ReportScheduleManagement_TargetDir)ReportScheduleManagement.exe.config" />
 			</Component>
+			<Component Id="EntityFramework.dll" Guid="0e78904e-4aa0-470a-96c0-914376232184">
+			  <File Id="EntityFramework.dll" Name="EntityFramework.dll" Source="$(var.ReportScheduleManagement_TargetDir)EntityFramework.dll" />
+			</Component>
 		</ComponentGroup>
 	</Fragment>
 </Wix>

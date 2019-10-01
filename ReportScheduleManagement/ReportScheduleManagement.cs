@@ -1,12 +1,19 @@
 ﻿using System.ServiceProcess;
 using System.Timers;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
+using System.Linq;
+using System;
+using System.Xml.Serialization;
+using System.IO;
+using System.Diagnostics;
+using System.Data;
+using System.Data.SqlClient;
 
 namespace ReportScheduleManagement
 {
     public partial class ReportScheduleManagement : ServiceBase
     {
-        private ReportScheduleEntities db = new ReportScheduleEntities();
         private int eventId = 1;
         
         public enum ServiceState
@@ -67,8 +74,155 @@ namespace ReportScheduleManagement
 
         public void OnTimer(object sender, ElapsedEventArgs args)
         {
+            try
+            {
+                eventLog1.WriteEntry("Сканируем таблицу запроса отчетов", EventLogEntryType.Information, eventId++);
+                var task = WorkAsync();
+            }
+            catch(Exception ex)
+            {
+                eventLog1.WriteEntry("Произошла ошибка: " + ex, EventLogEntryType.Information, eventId++);
+            }
+        }
 
-            //eventLog1.WriteEntry("Мониторинг системы", EventLogEntryType.Information, eventId++);
+        private async Task WorkAsync()
+        {
+            using (var db = new ReportScheduleEntities())
+            {
+                foreach (Wishes w in db.Wishes.Where(x => x.wish_status != "done" && x.wish_status != "fail"))
+                {
+
+                    eventLog1.WriteEntry("Нашли задание wish_id = " + w.wish_id.ToString(), EventLogEntryType.Information, eventId++);
+
+                    //Прошел срок исполнения задачи
+                    if (w.wish_deadline <= System.DateTime.Now)
+                    {
+                        if (db.Tasks.Where(x => x.task_wish_id == w.wish_id && x.task_status != "done").Count() != 0)
+                        {
+                            w.wish_status = "fail";
+
+                            //Всем не завершенным задачам ставим статус "провала"
+                            foreach (Tasks t in db.Tasks.Where(x => x.task_wish_id == w.wish_id && x.task_status != "done" && x.task_status != "fail"))
+                            {
+                                t.task_last_error_text = "Прошел срок выполнения выгрузки отчета";
+                                t.task_status = "fail";
+                            }
+                        }
+                    }
+                    else
+                    {
+
+                        eventLog1.WriteEntry("Точка 2", EventLogEntryType.Information, eventId++);
+
+                        w.wish_status = "work";
+
+                        foreach (Tasks t in db.Tasks.Where(x => x.task_wish_id == w.wish_id && x.task_status != "done" && x.task_status != "fail" && x.task_status != "work"))
+                        {
+
+                            eventLog1.WriteEntry("Точка 3", EventLogEntryType.Information, eventId++);
+
+                            if (t.task_startdate > System.DateTime.Now)
+                            {
+                                t.task_status = "wait";
+                                break;
+                            }
+
+                            t.task_number_attempts = t.task_number_attempts ?? 0;
+
+                            //Превышено количество попыток
+                            if ((w.wish_total_attempts != null) && (t.task_number_attempts >= w.wish_total_attempts))
+                            {
+                                t.task_status = "fail";
+                                break;
+                            }
+
+                            eventLog1.WriteEntry("Точка 4", EventLogEntryType.Information, eventId++);
+
+
+                            await Task.Run(() => ReportRequest(t.task_id, w.wish_report_type_xml));
+
+                        }
+
+                        if (db.Tasks.Where(x => x.task_wish_id == w.wish_id && x.task_status != "done").Count() == 0)
+                        {
+                            w.wish_status = "done";
+                        }
+                    }
+                }
+                db.SaveChanges();
+            }
+        }
+
+        private void ReportRequest(int task_id, string report_xml)
+        {
+            using (var db = new ReportScheduleEntities())
+            {
+                Tasks task = db.Tasks.Where(x => x.task_id == task_id).FirstOrDefault();
+                try
+                {
+                    task.task_number_attempts++;
+                    task.task_status = "work";
+
+                    eventLog1.WriteEntry("Точка 5", EventLogEntryType.Information, eventId++);
+
+
+                    XmlSerializer serializer = new XmlSerializer(typeof(ReportModel));
+
+                    using (TextReader reader = new StringReader(report_xml))
+                    {
+                        ReportModel report = (ReportModel)serializer.Deserialize(reader);
+
+                        string report_data_xml = String.Empty;
+                        string conn_string = db.Places.Where(x => x.place_id == task.task_place_id).FirstOrDefault().place_connection;
+                        string cmd_text = report.SelectCommand;
+
+                        DataTable table_result = new DataTable();
+
+                        using (SqlConnection sqlConnection = new SqlConnection(conn_string))
+                        {
+                            sqlConnection.Open();
+                            SqlCommand sqlCmd = new SqlCommand(cmd_text, sqlConnection);
+                            foreach (var p in report.Parameters)
+                            {
+                                sqlCmd.Parameters.AddWithValue(p.ParameterName, p.ParameterValue);
+                            }
+
+                            SqlDataAdapter sda = new SqlDataAdapter(sqlCmd);
+                            sda.Fill(table_result);
+                        }
+
+                        foreach (DataRow row in table_result.Rows)
+                        {
+                            report_data_xml += @"<row>";
+                            foreach (var col in report.Columns)
+                            {
+                                report_data_xml += @"<" + col.ColumnAlias + @">" + row[col.ColumnName].ToString() + @"</" + col.ColumnAlias + @">";
+                            }
+                            report_data_xml += @"</row>";
+                        }
+
+                        Report_data rd = new Report_data();
+
+                        rd.report_data_task_id = task.task_id;
+                        rd.report_data_createdate = System.DateTime.Now;
+                        rd.report_data_xml = @"<Root>" + report_data_xml + @"</Root>";
+
+                        db.Report_data.Add(rd);
+
+                        task.task_status = "done";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    task.task_status = "wait";
+                    task.task_last_error_text = ex.Message;
+                    eventLog1.WriteEntry("Ошибка при попытки выгрузки отчета", EventLogEntryType.Information, eventId++);
+                }
+                finally
+                {
+                    db.SaveChanges();
+                }
+            }
         }
 
         protected override void OnStop()
