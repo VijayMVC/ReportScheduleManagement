@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using EncryptStringSample;
+using System.Configuration;
 
 namespace ReportScheduleInForm
 {
@@ -18,6 +19,8 @@ namespace ReportScheduleInForm
             InitializeComponent();
             this.StyleManager = metroStyleManager1;
         }
+
+        string password = ConfigurationManager.AppSettings.Get("password");
 
         //Проверка задания на дедлайн
         private bool CheckDeadline(Wishes w)
@@ -137,7 +140,6 @@ namespace ReportScheduleInForm
                     }
 
                     tasks.Add(Task.Run(() => ReportRequest(t.task_id, w.wish_report_type_xml)));
-                    //ReportRequestAsync(t.task_id, w.wish_report_type_xml);
                 }
                 db.SaveChanges();
 
@@ -153,8 +155,6 @@ namespace ReportScheduleInForm
                 wish.wish_status = CheckWishDone(wish) ? "done" : "wait";
                 db.SaveChanges();
             }
-
-            //await Task.Run(() => ReportRequest(task_id, report_xml));
         }
 
 
@@ -176,7 +176,7 @@ namespace ReportScheduleInForm
                         ReportModel report = (ReportModel)serializer.Deserialize(reader);
 
                         string report_data_xml = String.Empty;
-                        string conn_string = StringCipher.Decrypt(db.Places.Where(x => x.place_id == task.task_place_id).FirstOrDefault().place_connection, db.Places.Where(x => x.place_id == task.task_place_id).FirstOrDefault().place_name);
+                        string conn_string = StringCipher.Decrypt(db.Places.Where(x => x.place_id == task.task_place_id).FirstOrDefault().place_connection, password);
                         string cmd_text = report.SelectCommand;
 
                         DataTable table_result = new DataTable();
@@ -218,8 +218,7 @@ namespace ReportScheduleInForm
                 catch (Exception ex)
                 {
                     task.task_status = "wait";
-                    //task.task_startdate = System.DateTime.Now.AddMinutes(5);
-                    task.task_startdate = System.DateTime.Now.AddSeconds(10);
+                    task.task_startdate = System.DateTime.Now.AddMinutes(5);
                     task.task_last_error_text = ex.Message;
 
                     WriteOnStory("Ошибка при попытки выгрузки отчета: " + ex.Message);
