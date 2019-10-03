@@ -102,16 +102,22 @@ namespace ReportScheduleInForm
 
                     if (w.wish_status == "fail") return;
 
-                    doWorkAsync(w);
+                    Task.Run(() => doWork(w));
                 }
             }
         }
 
-        private async void doWorkAsync(Wishes w)
+        private void doWork(Wishes w)
         {
+            ReportRequestAsync(w);
+        }
+
+        private async void ReportRequestAsync(Wishes w)
+        {
+            var tasks = new List<Task>();
             using (ReportScheduleEntities db = new ReportScheduleEntities())
             {
-                foreach (Tasks t in db.Tasks.Where(x => x.task_wish_id == w.wish_id && x.task_status != "done" && x.task_status != "fail" && x.task_status != "work"))
+                foreach (Tasks t in db.Tasks.Where(x => x.task_wish_id == w.wish_id && x.task_status != "done" && x.task_status != "fail"))
                 {
                     if (System.DateTime.Compare(t.task_startdate, System.DateTime.Now) > 0)
                     {
@@ -130,24 +136,30 @@ namespace ReportScheduleInForm
                         break;
                     }
 
-                    await Task.Run(() => ReportRequest(t.task_id, w.wish_report_type_xml));
+                    tasks.Add(Task.Run(() => ReportRequest(t.task_id, w.wish_report_type_xml)));
                     //ReportRequestAsync(t.task_id, w.wish_report_type_xml);
                 }
                 db.SaveChanges();
 
+                Task task_wait = Task.WhenAll(tasks);
+
+                try
+                {
+                    await task_wait;
+                }
+                catch { }
+
                 Wishes wish = db.Wishes.Where(x => x.wish_id == w.wish_id).FirstOrDefault();
-                wish.wish_status = CheckWishDone(w) ? "done" : "wait";
+                wish.wish_status = CheckWishDone(wish) ? "done" : "wait";
                 db.SaveChanges();
             }
+
+            //await Task.Run(() => ReportRequest(task_id, report_xml));
         }
 
-        private async void ReportRequestAsync(int task_id, string report_xml)
-        {
-            await Task.Run(() => ReportRequest(task_id, report_xml));
-        }
 
         private void ReportRequest(int task_id, string report_xml)
-        { 
+        {
             using (ReportScheduleEntities db = new ReportScheduleEntities())
             {
                 Tasks task = db.Tasks.Where(x => x.task_id == task_id).FirstOrDefault();
@@ -206,7 +218,8 @@ namespace ReportScheduleInForm
                 catch (Exception ex)
                 {
                     task.task_status = "wait";
-                    task.task_startdate = System.DateTime.Now.AddMinutes(5);
+                    //task.task_startdate = System.DateTime.Now.AddMinutes(5);
+                    task.task_startdate = System.DateTime.Now.AddSeconds(10);
                     task.task_last_error_text = ex.Message;
 
                     WriteOnStory("Ошибка при попытки выгрузки отчета: " + ex.Message);
