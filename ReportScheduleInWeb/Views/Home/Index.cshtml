@@ -1,31 +1,78 @@
 ﻿@{
-    ViewBag.Title = "Home Page";
+    ViewBag.Title = "Главная страница";
 }
 
-<div class="jumbotron">
-    <h1>ASP.NET</h1>
-    <p class="lead">ASP.NET is a free web framework for building great Web sites and Web applications using HTML, CSS and JavaScript.</p>
-    <p><a href="https://asp.net" class="btn btn-primary btn-lg">Learn more &raquo;</a></p>
-</div>
-
-<div class="row">
-    <div class="col-md-4">
-        <h2>Getting started</h2>
-        <p>
-            ASP.NET MVC gives you a powerful, patterns-based way to build dynamic websites that
-            enables a clean separation of concerns and gives you full control over markup
-            for enjoyable, agile development.
-        </p>
-        <p><a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301865">Learn more &raquo;</a></p>
+    <div class="card-deck mb-3 text-center">
+        <div class="card mb-4 box-shadow">
+            <div class="card-header">
+                <h5 class="my-0 font-weight-normal">Библиотека МФЦ</h5>
+            </div>
+            <div class="card-body">
+                <h1 class="card-title pricing-card-title" id="my_status_workdocuments"></h1>
+                <p id="my_status_workdocuments_label"></p>
+                @Html.ActionLink("Показать", "Index", "WorkDocuments", null, new { @class = "btn btn-lg btn-block btn-warning" })
+            </div>
+        </div>
+        <div class="card mb-4 box-shadow">
+            <div class="card-header">
+                <h5 class="my-0 font-weight-normal">Мои материалы</h5>
+            </div>
+            <div class="card-body">
+                <h1 class="card-title pricing-card-title" id="my_status_materials"></h1>
+                <p id="my_status_materials_label"></p>
+                @Html.ActionLink("Показать", "Index", "Library", null, new { @class = "btn btn-lg btn-block btn-warning" })
+            </div>
+        </div>
+        <div class="card mb-4 box-shadow">
+            <div class="card-header">
+                <h5 class="my-0 font-weight-normal">Мои обучения</h5>
+            </div>
+            <div class="card-body">
+                <h1 class="card-title pricing-card-title" id="my_status_education"></h1>
+                <p>пройдено</p>
+                @Html.ActionLink("Показать", "Index", "Educations", null, new { @class = "btn btn-lg btn-block btn-warning" })
+            </div>
+        </div>
     </div>
-    <div class="col-md-4">
-        <h2>Get more libraries</h2>
-        <p>NuGet is a free Visual Studio extension that makes it easy to add, remove, and update libraries and tools in Visual Studio projects.</p>
-        <p><a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301866">Learn more &raquo;</a></p>
+    <div class="card-deck mb-3 text-center">
+        <div class="card mb-4 box-shadow">
+            <div class="card-header">
+                <h5 class="my-0 font-weight-normal">Мой вектор развития</h5>
+            </div>
+            <div class="card-body">
+                <h1 class="card-title pricing-card-title" id="my_status_mistakes"></h1>
+                <p id="my_status_mistakes_label"></p>
+                @Html.ActionLink("Показать", "Index", "Mistakes", null, new { @class = "btn btn-lg btn-block btn-warning" })
+            </div>
+        </div>
+        <div class="card mb-4 box-shadow">
+            <div class="card-header">
+                <h5 class="my-0 font-weight-normal">Диаграмма развития</h5>
+            </div>
+            <div class="card-body" id="error_diagram" style="cursor:pointer">
+                <div class="chart_container">
+                    <canvas id="popChart" width="338" height="188"></canvas>
+                </div>
+            </div>
+        </div>
+        @*<div class="card mb-4 box-shadow">
+            <div class="card-header">
+                <h5 class="my-0 font-weight-normal">Мои задания</h5>
+            </div>
+            <div class="card-body">
+                <h1 class="card-title pricing-card-title" id="my_status_tasks"></h1>
+                <p>проверено</p>
+                @Html.ActionLink("Показать", "Index", "Jobs", null, new { @class = "btn btn-lg btn-block btn-warning" })
+            </div>
+        </div>*@
+        <div class="card mb-4 box-shadow">
+            <div class="card-header">
+                <h5 class="my-0 font-weight-normal">Мой чат</h5>
+            </div>
+            <div class="card-body">
+                <h1 class="card-title pricing-card-title" id="my_status_messages"></h1>
+                <p>новых</p>
+                <button type="button" class="btn btn-lg btn-block btn-warning disabled">В разработке</button>
+            </div>
+        </div>
     </div>
-    <div class="col-md-4">
-        <h2>Web Hosting</h2>
-        <p>You can easily find a web hosting company that offers the right mix of features and price for your applications.</p>
-        <p><a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301867">Learn more &raquo;</a></p>
-    </div>
-</div>

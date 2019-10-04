@@ -1,6 +1,8 @@
 ﻿body {
-    padding-top: 50px;
-    padding-bottom: 20px;
+    background: url("bg_layout.jpg") fixed;
+    background-size: cover;
+    padding-top: 0;
+    padding-bottom: 0;
 }
 
 /* Set padding to keep content from hitting the edges */
