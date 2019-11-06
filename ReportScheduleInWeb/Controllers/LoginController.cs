@@ -62,5 +62,12 @@ namespace ReportScheduleInWeb.Controllers
                 }
             }
         }
+
+        public ActionResult LogOut()
+        {
+            int userId = (int)Session["userID"];
+            Session.Abandon();
+            return RedirectToAction("Index", "Login");
+        }
     }
 }
