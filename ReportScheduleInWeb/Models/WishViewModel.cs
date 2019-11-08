@@ -15,8 +15,13 @@ namespace ReportScheduleInWeb.Models
     {
         public string Name { get; set; }
 
+        [DisplayName("Параметр")]
+        public string Alias { get; set; }
+
+        [DisplayName("Значение")]
         public string Value { get; set; }
 
+        [DisplayName("Тип")]
         public string Type { get; set; }
     }
 
@@ -39,7 +44,7 @@ namespace ReportScheduleInWeb.Models
         [DisplayName("Попытки")]
         public Nullable<int> wish_total_attempts { get; set; }
 
-        [DisplayName("Отчет")]
+        [DisplayName("Тип отчета")]
         public string wish_report_type_name { get; set; }
 
         public string report_type_id { get; set; }

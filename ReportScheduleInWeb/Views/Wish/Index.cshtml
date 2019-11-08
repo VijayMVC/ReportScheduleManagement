@@ -1,4 +1,5 @@
 ﻿@model ReportScheduleInWeb.Models.WishViewModel
+@{ ReportScheduleInWeb.Models.ParameterType parameterModel = null; }
 
 @{
     ViewBag.Title = "Создать задание";
@@ -15,28 +16,38 @@
     <div class="program-selection">
 
         <ul class="nav nav-tabs">
-            <li class="nav-item"><a class="nav-link active" href="#program-selection-step-1" data-toggle="tab">Тип отчета</a></li>
-            <li class="nav-item"><a class="nav-link" href="#program-selection-step-2" data-toggle="tab">Параметры</a></li>
-            <li class="nav-item"><a class="nav-link" href="#program-selection-step-3" data-toggle="tab">Места</a></li>
-            <li class="nav-item"><a class="nav-link" href="#program-selection-step-4" data-toggle="tab">Расписание</a></li>
-            <li class="nav-item"><a class="nav-link" href="#program-selection-step-5" data-toggle="tab">Подтверждение</a></li>
+            <li class="nav-item pr-1"><a class="nav-link text-dark bg-white active" href="#program-selection-step-1" data-toggle="tab">Тип отчета</a></li>
+            <li class="nav-item pr-1"><a class="nav-link text-white bg-dark disabled" href="#program-selection-step-2" data-toggle="tab">Параметры</a></li>
+            <li class="nav-item pr-1"><a class="nav-link text-white bg-dark disabled" href="#program-selection-step-3" data-toggle="tab">Места</a></li>
+            <li class="nav-item pr-1"><a class="nav-link text-white bg-dark disabled" href="#program-selection-step-4" data-toggle="tab">Расписание</a></li>
+            <li class="nav-item pr-1"><a class="nav-link text-white bg-dark disabled" href="#program-selection-step-5" data-toggle="tab">Подтверждение</a></li>
         </ul>
 
         <div class="tab-content">
-            <div class="tab-pane fade in active show" id="program-selection-step-1">
-                <p class="h4">Тип отчета</p>
-                <div class="row">
-                    <div class="col-md-3">
-                        @Html.LabelFor(m => m.wish_report_type_name)
-                    </div>
-                    <div class="col-md-9">
-                        @Html.DropDownListFor(m => m.report_type_id, new SelectList(db.Report_types.ToList(), "report_type_id", "report_type_name"), "Не выбрано", new { @class = "form-control" })
-                    </div>
+            <div class="tab-pane fade in active show bg-dark p-3 mt-1 mr-1" id="program-selection-step-1">
+                <p class="h4 text-white pb-2">Выберите тип отчета</p>
+                <div class="pb-3">
+                    @Html.DropDownListFor(m => m.report_type_id, new SelectList(db.Report_types.ToList(), "report_type_id", "report_type_name"), "Не выбрано", new { @class = "custom-select form-control", @style = "width:100%" })
                 </div>
                 <input value="Далее" class="btn btn-primary program-selection__button next" type="button" data-href="#program-selection-step-2">
             </div><!-- tab-pane -->
-            <div class="tab-pane fade" id="program-selection-step-2">
-                Параметры
+            <div class="tab-pane fade bg-dark p-3 mt-1 mr-1" id="program-selection-step-2">
+                <p class="h4 text-white bg-dark pb-2">Значения параметров</p>
+                <table class="table table-bordered table-hover table-striped table-light">
+                    <tr class="bg-secondary" style="text-align:center">
+                        <th scope="col">
+                            @Html.DisplayNameFor(p => parameterModel.Alias).ToString()
+                        </th>
+                        <th scope="col">
+                            @Html.DisplayNameFor(p => parameterModel.Type).ToString()
+                        </th>
+                        <th scope="col">
+                            @Html.DisplayNameFor(p => parameterModel.Value).ToString()
+                        </th>
+                    </tr>
+                    <tbody id="SetParameterList">
+                    </tbody>
+                </table>
                 <input value="Назад" class="btn btn-danger program-selection__button" type="button" data-href="#program-selection-step-1">
                 <input value="Далее" class="btn btn-primary program-selection__button next" type="button" data-href="#program-selection-step-3">
             </div><!-- tab-pane -->
@@ -62,17 +73,58 @@
 
 @section scripts {
     <script>
+        function fillParameterList(report_type_id) {
+            $("#SetParameterList").empty();
+
+            //var url = mainURL + "/Users/GetUserList";
+
+            $.ajax({
+                type: "GET",
+                url: url,
+                success: function (response) {
+                    var Data = "";
+                    for (var i = 0; i < response.length; i++) {
+                        Data += "<tr class='row_" + response[i].user_id + "'>" +
+                                "<td>" + response[i].user_login + "</td>" +
+                                "<td>" + response[i].user_surname + "</td>" +
+                                "<td>" + response[i].user_name + "</td>";
+                        if (response[i].user_patronymic == null) {
+                            Data += "<td> </td>";
+                        }
+                        else {
+                            Data += "<td>" + response[i].user_patronymic + "</td>";
+                        }
+                        Data += "<td><span class='custom-checkbox'><input type='checkbox' id='checkbox" + response[i].user_id + "' name='options[]' value='1' onclick='return false;'";
+                        if (response[i].user_isdeleted) {
+                            Data += "checked";
+                        }
+
+                        Data += "><label for='checkbox" + response[i].user_id + "'></label></span></td>";
+                        Data += "<td>" + response[i].filial + "</td>";
+                        Data += "<td>" + "<a href='#' class='edit lead' data-toggle='modal' onclick='EditUserRecord(" + response[i].user_id + ")'>Редактировать</a>"
+                             + "</td>" + "</tr>";
+                    }
+
+                    $("#SetParameterList").append(Data);
+                }
+            })
+        }
+
         function checkParams() {
             var $program_selection = $('div.program-selection');
             var report_type_id = $('#report_type_id').val();
-     
-            if(report_type_id.length != 0) {
+
+            if (report_type_id.length != 0) {
                 $('input.next', $program_selection).removeAttr('disabled');
+
+                //Подгрузка параметров отчета
+                fillParameterList(report_type_id);
             }
             else {
                 $('input.next', $program_selection).attr('disabled', 'disabled');
             }
         }
+
         function initProgramSelection() {
             var $program_selection = $('div.program-selection');
 
@@ -84,6 +136,19 @@
                 e.preventDefault();
 
                 var id = $(this).data('href');
+
+                $('ul.nav-tabs a', $program_selection).removeClass('text-dark');
+                $('ul.nav-tabs a', $program_selection).removeClass('bg-white');
+                $('ul.nav-tabs a', $program_selection).addClass('text-white');
+                $('ul.nav-tabs a', $program_selection).addClass('bg-dark');
+                $('ul.nav-tabs a', $program_selection).addClass('disabled');
+
+                $('a[href="' + id + '"]', $program_selection).removeClass('text-white');
+                $('a[href="' + id + '"]', $program_selection).removeClass('bg-dark');
+                $('a[href="' + id + '"]', $program_selection).addClass('text-dark');
+                $('a[href="' + id + '"]', $program_selection).addClass('bg-white');
+
+                $('a[href="' + id + '"]', $program_selection).removeClass('disabled');
                 $('a[href="' + id + '"]', $program_selection).tab('show');
             });
         }
@@ -91,6 +156,10 @@
         $(function () {
             checkParams();
             initProgramSelection();
+        });
+
+        $("#report_type_id").change(function () {
+            checkParams();
         });
     </script>
 }
