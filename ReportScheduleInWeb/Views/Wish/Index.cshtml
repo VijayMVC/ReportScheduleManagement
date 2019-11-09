@@ -29,7 +29,7 @@
                 <div class="pb-3">
                     @Html.DropDownListFor(m => m.report_type_id, new SelectList(db.Report_types.ToList(), "report_type_id", "report_type_name"), "Не выбрано", new { @class = "custom-select form-control", @style = "width:100%" })
                 </div>
-                <input value="Далее" class="btn btn-primary program-selection__button next" type="button" data-href="#program-selection-step-2">
+                <input value="Далее" class="btn btn-primary program-selection__button one-next" type="button" data-href="#program-selection-step-2">
             </div><!-- tab-pane -->
             <div class="tab-pane fade bg-dark p-3 mt-1 mr-1" id="program-selection-step-2">
                 <p class="h4 text-white bg-dark pb-2">Значения параметров</p>
@@ -49,22 +49,22 @@
                     </tbody>
                 </table>
                 <input value="Назад" class="btn btn-danger program-selection__button" type="button" data-href="#program-selection-step-1">
-                <input value="Далее" class="btn btn-primary program-selection__button next" type="button" data-href="#program-selection-step-3">
+                <input value="Далее" class="btn btn-primary program-selection__button two-next" type="button" data-href="#program-selection-step-3">
             </div><!-- tab-pane -->
-            <div class="tab-pane fade" id="program-selection-step-3">
-                Места
+            <div class="tab-pane fade bg-dark p-3 mt-1 mr-1" id="program-selection-step-3">
+                <p class="h4 text-white bg-dark pb-2">Места</p>
                 <input value="Назад" class="btn btn-danger program-selection__button" type="button" data-href="#program-selection-step-2">
-                <input value="Далее" class="btn btn-primary program-selection__button next" type="button" data-href="#program-selection-step-4">
+                <input value="Далее" class="btn btn-primary program-selection__button three-next" type="button" data-href="#program-selection-step-4">
             </div><!-- tab-pane -->
             <div class="tab-pane fade" id="program-selection-step-4">
                 Расписание
                 <input value="Назад" class="btn btn-danger program-selection__button" type="button" data-href="#program-selection-step-3">
-                <input value="Далее" class="btn btn-primary program-selection__button next" type="button" data-href="#program-selection-step-5">
+                <input value="Далее" class="btn btn-primary program-selection__button four-next" type="button" data-href="#program-selection-step-5">
             </div><!-- tab-pane -->
             <div class="tab-pane fade" id="program-selection-step-5">
                 Подтверждение
                 <input value="Назад" class="btn btn-danger program-selection__button" type="button" data-href="#program-selection-step-4">
-                <input value="Сохранить" class="btn btn-success program-selection__button" type="button" data-href="#">
+                <input value="Сохранить" class="btn btn-success" type="submit" data-href="#">
             </div><!-- tab-pane -->
         </div><!-- tab-content -->
 
@@ -74,54 +74,69 @@
 @section scripts {
     <script>
         function fillParameterList(report_type_id) {
-            $("#SetParameterList").empty();
-
-            //var url = mainURL + "/Users/GetUserList";
+            var url = mainURL + "/Wish/GetParameters?ReportTypeId=" + report_type_id;
 
             $.ajax({
                 type: "GET",
                 url: url,
-                success: function (response) {
-                    var Data = "";
-                    for (var i = 0; i < response.length; i++) {
-                        Data += "<tr class='row_" + response[i].user_id + "'>" +
-                                "<td>" + response[i].user_login + "</td>" +
-                                "<td>" + response[i].user_surname + "</td>" +
-                                "<td>" + response[i].user_name + "</td>";
-                        if (response[i].user_patronymic == null) {
-                            Data += "<td> </td>";
-                        }
-                        else {
-                            Data += "<td>" + response[i].user_patronymic + "</td>";
-                        }
-                        Data += "<td><span class='custom-checkbox'><input type='checkbox' id='checkbox" + response[i].user_id + "' name='options[]' value='1' onclick='return false;'";
-                        if (response[i].user_isdeleted) {
-                            Data += "checked";
-                        }
-
-                        Data += "><label for='checkbox" + response[i].user_id + "'></label></span></td>";
-                        Data += "<td>" + response[i].filial + "</td>";
-                        Data += "<td>" + "<a href='#' class='edit lead' data-toggle='modal' onclick='EditUserRecord(" + response[i].user_id + ")'>Редактировать</a>"
-                             + "</td>" + "</tr>";
+                success: function (ParameterList) {
+                    var SetData = $("#SetParameterList");
+                    SetData.empty();
+                    if (ParameterList.length == 0) {
+                        var Data = "<tr class='row_0'> <td colspan='3'>Параметров нет.</td></tr>";
+                        SetData.append(Data);
                     }
+                    else {
+                        for (var i = 0; i < ParameterList.length; i++) {
+                            var Data = "<tr class='row_" + ParameterList[i].Name + "'>" +
+                                "<td>" + ParameterList[i].Alias + "</td>" +
+                                "<td>" + ParameterList[i].Type + "</td>";
+                            switch (ParameterList[i].Type) {
+                                case 'string':
+                                    Data += "<td><input type='text' class='parameterValue' placeholder='Введите значение'></td>";
+                                    break;
+                                case 'startdate':
+                                    var now = new Date();
+                                    Data += "<td><input type='datetime-local' class='parameterValue' value='" + now.getFullYear() + "-" + ("0" + (now.getMonth() + 1)).slice(-2) + "-" + ("0" + now.getDate()).slice(-2) + "T00:00' required></td>";
+                                    break;
+                                case 'enddate':
+                                    var now = new Date();
+                                    Data += "<td><input type='datetime-local' class='parameterValue' value='" + now.getFullYear() + "-" + ("0" + (now.getMonth() + 1)).slice(-2) + "-" + ("0" + now.getDate()).slice(-2) + "T23:59' required></td>";
+                                    break;
+                            }
 
-                    $("#SetParameterList").append(Data);
+                                    
+                            Data += "</tr>";
+                            SetData.append(Data);
+                        }
+                    }
                 }
             })
         }
 
-        function checkParams() {
+        function checkReportType() {
             var $program_selection = $('div.program-selection');
             var report_type_id = $('#report_type_id').val();
+            var no_param = $('#row_0');
 
+            //Выбрали отчет
             if (report_type_id.length != 0) {
-                $('input.next', $program_selection).removeAttr('disabled');
+                $('input.one-next', $program_selection).removeAttr('disabled');
 
                 //Подгрузка параметров отчета
                 fillParameterList(report_type_id);
             }
             else {
-                $('input.next', $program_selection).attr('disabled', 'disabled');
+                $('input.one-next', $program_selection).attr('disabled', 'disabled');
+            }
+
+            //Есть параметры
+            if (no_param.length == 0) {
+                
+                $('input.two-next', $program_selection).removeAttr('disabled');
+            }
+            else {
+                $('input.two-next', $program_selection).attr('disabled', 'disabled');
             }
         }
 
@@ -154,12 +169,27 @@
         }
 
         $(function () {
-            checkParams();
+            checkReportType();
             initProgramSelection();
         });
 
         $("#report_type_id").change(function () {
-            checkParams();
+            checkReportType();
+        });
+
+        $('input.two-next').click(function () {
+            var $program_selection = $('div.program-selection');
+            var no_param = $('#row_0');
+
+            //Есть параметры
+            if (no_param.length == 0) {
+                
+                $('input.two-next', $program_selection).removeAttr('disabled');
+            }
+            else {
+                $('input.two-next', $program_selection).attr('disabled', 'disabled');
+            }
+
         });
     </script>
 }

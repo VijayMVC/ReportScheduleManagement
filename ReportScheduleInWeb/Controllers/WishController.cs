@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using System.Xml.Serialization;
+using EncryptStringSample;
 using ReportScheduleInWeb.Models;
 
 namespace ReportScheduleInWeb.Controllers
@@ -16,25 +19,33 @@ namespace ReportScheduleInWeb.Controllers
         {
             return View();
         }
-        public JsonResult GetParameterList()
+
+        public JsonResult GetParameters(int ReportTypeId)
         {
-            List<WishViewModel> WishList = db.Wishes.Select(x => new WishViewModel
+            List<ParameterType> ParameterList = new List<ParameterType>();
+
+            string report_xml = db.Report_types.Where(x => x.report_type_id == ReportTypeId).SingleOrDefault().report_type_xml ?? "";
+
+            if (!String.IsNullOrEmpty(report_xml))
             {
-                wish_id
+                XmlSerializer serializer = new XmlSerializer(typeof(ReportModel));
 
-                user_id = x.user_id,
-                user_login = x.user_login,
-                user_password = x.user_password,
-                user_isdeleted = x.user_isdeleted,
-                user_surname = x.user_surname,
-                user_name = x.user_name,
-                user_patronymic = x.user_patronymic,
-                user_role_id = x.user_role_id,
-                user_fil_id = x.user_fil_id,
-                filial = x.user_fil_id == null ? "" : db.filials.FirstOrDefault(f => f.filial_id == x.user_fil_id).filial_name
-            }).OrderBy(x => x.user_surname).ThenBy(x => x.user_name).ThenBy(x => x.user_patronymic).ToList();
+                using (TextReader reader = new StringReader(report_xml))
+                {
+                    ReportModel report = (ReportModel)serializer.Deserialize(reader);
 
-            return Json(WishList, JsonRequestBehavior.AllowGet);
+                    foreach (var p in report.Parameters)
+                    {
+                        ParameterList.Add(new ParameterType
+                        {
+                            Name = p.ParameterName,
+                            Alias = p.ParameterAlias,
+                            Type = p.ParameterDataType
+                        });
+                    }
+                }
+            }
+            return Json(ParameterList, JsonRequestBehavior.AllowGet);
         }
 
     }

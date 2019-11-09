@@ -132,6 +132,7 @@
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\LoginController.cs" />
     <Compile Include="Controllers\WishController.cs" />
+    <Compile Include="EncryptStringSample.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -143,6 +144,7 @@
     <Compile Include="Models\Places.cs">
       <DependentUpon>ReportScheduleModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\ReportModel.cs" />
     <Compile Include="Models\ReportScheduleModel.Context.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

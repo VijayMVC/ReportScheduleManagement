@@ -47,3 +47,7 @@ textarea {
     stroke-width: 1;
 }
 
+.parameterValue {
+    display: block;
+    width: 100%;
+}
