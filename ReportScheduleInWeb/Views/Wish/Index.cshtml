@@ -93,7 +93,7 @@
                                 "<td>" + ParameterList[i].Type + "</td>";
                             switch (ParameterList[i].Type) {
                                 case 'string':
-                                    Data += "<td><input type='text' class='parameterValue' placeholder='Введите значение'></td>";
+                                    Data += "<td><input type='text' class='parameterValue' placeholder='Введите значение' required></td>";
                                     break;
                                 case 'startdate':
                                     var now = new Date();
@@ -117,7 +117,6 @@
         function checkReportType() {
             var $program_selection = $('div.program-selection');
             var report_type_id = $('#report_type_id').val();
-            var no_param = $('#row_0');
 
             //Выбрали отчет
             if (report_type_id.length != 0) {
@@ -129,15 +128,41 @@
             else {
                 $('input.one-next', $program_selection).attr('disabled', 'disabled');
             }
+        }
+
+        function checkParameters() {
+            var $program_selection = $('div.program-selection');
+            var no_param = $('#row_0');
 
             //Есть параметры
             if (no_param.length == 0) {
-                
-                $('input.two-next', $program_selection).removeAttr('disabled');
+                var flag = true;
+                $('input.parameterValue', $program_selection).each(function () {
+                    switch ($(this).attr('type')) {
+                        case 'text':
+                            var value = $(this).val().replace(/ +/g, '');
+                            if (value.length === 0) {
+                                flag = false;
+                            }
+                            break;
+                        case 'datetime-local':
+                            var value = $(this).val();
+                            if ((this.validity.badInput) || (value.length === 0)) {
+                                flag = false;
+                            }
+                            break;
+                    }
+                    if (!flag)
+                        return false;
+                });
+
+                if (!flag) {
+                    alert("Ошибка! Проверьте введенные значения параметров.");
+                    return false;
+                }
             }
-            else {
-                $('input.two-next', $program_selection).attr('disabled', 'disabled');
-            }
+
+            return true;
         }
 
         function initProgramSelection() {
@@ -151,6 +176,10 @@
                 e.preventDefault();
 
                 var id = $(this).data('href');
+
+                if (id == '#program-selection-step-3')
+                    if (!checkParameters())
+                        return false;
 
                 $('ul.nav-tabs a', $program_selection).removeClass('text-dark');
                 $('ul.nav-tabs a', $program_selection).removeClass('bg-white');
@@ -175,21 +204,6 @@
 
         $("#report_type_id").change(function () {
             checkReportType();
-        });
-
-        $('input.two-next').click(function () {
-            var $program_selection = $('div.program-selection');
-            var no_param = $('#row_0');
-
-            //Есть параметры
-            if (no_param.length == 0) {
-                
-                $('input.two-next', $program_selection).removeAttr('disabled');
-            }
-            else {
-                $('input.two-next', $program_selection).attr('disabled', 'disabled');
-            }
-
         });
     </script>
 }
