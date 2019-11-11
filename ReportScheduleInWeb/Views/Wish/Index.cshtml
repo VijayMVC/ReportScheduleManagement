@@ -81,7 +81,7 @@
             <div class="tab-pane fade bg-dark p-3 mt-1 mr-1" id="program-selection-step-4">
                 <p class="h4 text-white bg-dark pb-2">Расписание запуска отчета</p>
                 <div class="row pb-3">
-                    <div class="col-4">
+                    <div class="col-4 text-right">
                         <div class="custom-control custom-switch">
                             <input type="checkbox" class="custom-control-input" id="customSwitch" checked>
                             <label class="custom-control-label text-white" for="customSwitch">- общий запуск</label>
@@ -94,13 +94,26 @@
                         <input value="Установить всем" class="btn btn-sm btn-info" type="button" onclick="SetStartDateForAll()" id="startdateButton">
                     </div>
                 </div>
-                <table class="table table-bordered table-hover table-striped table-light" id="scheduleTable" style="display:none" >
+                <div class="row pb-3">
+                    <div class="col-4 text-right">
+                        <label class="text-white">Дедлайн</label>
+                    </div>
+                    <div class="col-5">
+                        <input type='datetime-local' class='deadlineValue' id="deadlineValue" required>
+                    </div>
+                    <div class="col-3">
+                        &nbsp;
+                    </div>
+                </div>
+                <table class="table table-bordered table-hover table-striped table-light" id="scheduleTable" style="display:none">
                     <tr class="bg-secondary" style="text-align:center">
-                        <th scope="col">
+                        <th scope="col" style="visibility:hidden">
+                        </th>
+                        <th scope="col" width="60%">
                             Место
                         </th>
-                        <th scope="col">
-                            Дата и время запуска
+                        <th scope="col" width="40%">
+                            Запуск
                         </th>
                     </tr>
                     <tbody id="SetScheduleList"></tbody>
@@ -263,7 +276,7 @@
             });
         }
 
-        function SetStartDateForAll() {
+        function CheckStartDateForAll() {
             var startDate = document.getElementById('startdateValue');
             var value = startDate.value;
 
@@ -271,27 +284,91 @@
                 alert("Ошибка! Сначала установите дату и время запуска.");
                 return false;
             }
+
+            return true;
         }
 
-		function initProgramSelection() {
-			var $program_selection = $('div.program-selection');
+        function CheckDeadline() {
+            var deadlinetDate = document.getElementById('deadlineValue');
+            var value = deadlinetDate.value;
 
-			$('ul.nav-tabs a', $program_selection).on('click', function () {
-				return false;
-			});
+            if ((deadlinetDate.validity.badInput) || (value.length === 0)) {
+                alert("Ошибка! Проверьте дату и время дедлайна.");
+                return false;
+            }
 
-			$('input.program-selection__button', $program_selection).on('click', function (e) {
-				e.preventDefault();
+            return true;
+        }
 
-				var id = $(this).data('href');
+        function SetStartDateForAll() {
+            if (!CheckStartDateForAll())
+                return false;
+        }
 
-				if (id == '#program-selection-step-3')
-					if (!checkParameters())
-						return false;
+        function fillscheduleTable() {
+            var arr1 = $('.chosen-select option:selected').map(function () {
+                return {
+                    'id': $(this).val(),
+                    'name': $(this).text()
+                }
+            }).get();
+
+            var arr2 = $('#SetScheduleList tr').map(function (i, row) {
+                return {
+                    'id': row.cells[0].textContent,
+                    'name': row.cells[1].textContent,
+                    'startDate': row.cells[2].textContent
+                }
+            }).get();
+            
+            arr2.forEach(function (item) {
+                var result = $.grep(arr1, function (e) { return e.id == item.id && e.name == item.name; });
+                if (result.length > 0) {
+
+                }
+            });
+
+        }
+
+        function initProgramSelection() {
+            var $program_selection = $('div.program-selection');
+
+            $('ul.nav-tabs a', $program_selection).on('click', function () {
+                return false;
+            });
+
+            $('input.program-selection__button', $program_selection).on('click', function (e) {
+                e.preventDefault();
+
+                var id = $(this).data('href');
+
+                if (id == '#program-selection-step-3')
+                    if (!checkParameters())
+                        return false;
 
                 if (id == '#program-selection-step-4')
-					if (!checkPlaces())
-						return false;
+                    if (!checkPlaces()) {
+                        return false
+                    }
+                    else {
+                        fillscheduleTable()
+                    }
+
+
+                if (id == '#program-selection-step-5') {
+                    if (!CheckDeadline()) {
+                        return false;
+                    }
+
+                    var checkBox = document.getElementById('customSwitch');
+                    if (checkBox.checked) {
+                        if (!CheckStartDateForAll())
+                            return false;
+                    }
+                    else {
+
+                    }
+                }
 
 				$('ul.nav-tabs a', $program_selection).removeClass('text-dark');
 				$('ul.nav-tabs a', $program_selection).removeClass('bg-white');
@@ -322,6 +399,10 @@
             var now = new Date();
             var startDate = document.getElementById('startdateValue');
             startDate.value = now.getFullYear() + "-" + ("0" + (now.getMonth() + 1)).slice(-2) + "-" + ("0" + now.getDate()).slice(-2) + "T00:00";
+
+            var deadlineDate = document.getElementById('deadlineValue');
+            now.setDate(now.getDate() + 1);
+            deadlineDate.value = now.getFullYear() + "-" + ("0" + (now.getMonth() + 1)).slice(-2) + "-" + ("0" + now.getDate()).slice(-2) + "T00:00";
         }
 
 		$("#Report_type_id").change(function () {
@@ -345,7 +426,7 @@
             else {
                 startDate.style.display = 'none';
                 startDateButton.style.display = 'none';
-                scheduleTable.style.display = 'block';
+                scheduleTable.style.display = '';
             }
         });
 	</script>
