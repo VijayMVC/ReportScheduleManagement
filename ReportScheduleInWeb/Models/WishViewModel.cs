@@ -25,40 +25,52 @@ namespace ReportScheduleInWeb.Models
         public string Type { get; set; }
     }
 
+    public class Place
+    {
+        public string Place_id { get; set; }
+
+        [DisplayName("Место")]
+        public string Place_name { get; set; }
+    }
+
     public class WishViewModel
     {
         public WishViewModel()
         {
-            columns = new List<ColumnType>();
-            parameters = new List<ParameterType>();
+            Columns = new List<ColumnType>();
+            Parameters = new List<ParameterType>();
+            Places = new List<Place>();
         }
 
         public int wish_id { get; set; }
 
         [DisplayName("Дата создания")]
-        public System.DateTime wish_createdate { get; set; }
+        public System.DateTime Wish_createdate { get; set; }
 
         [DisplayName("Дедлайн")]
-        public System.DateTime wish_deadline { get; set; }
+        public System.DateTime Wish_deadline { get; set; }
 
         [DisplayName("Попытки")]
-        public Nullable<int> wish_total_attempts { get; set; }
+        public Nullable<int> Wish_total_attempts { get; set; }
 
         [DisplayName("Тип отчета")]
-        public string wish_report_type_name { get; set; }
+        public string Wish_report_type_name { get; set; }
 
-        public string report_type_id { get; set; }
+        public string Report_type_id { get; set; }
 
         [DisplayName("Скрипт")]
-        public string select_command { get; set; }
+        public string Select_command { get; set; }
 
         [DisplayName("Поля")]
-        public List<ColumnType> columns { get; set; }
+        public List<ColumnType> Columns { get; set; }
 
         [DisplayName("Параметры")]
-        public List<ParameterType> parameters { get; set; }
+        public List<ParameterType> Parameters { get; set; }
 
         [DisplayName("Статус")]
-        public string wish_status { get; set; }
+        public string Wish_status { get; set; }
+
+        [DisplayName("Места")]
+        public List<Place> Places { get; set; }
     }
 }

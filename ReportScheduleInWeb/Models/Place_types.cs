@@ -12,22 +12,17 @@ namespace ReportScheduleInWeb.Models
     using System;
     using System.Collections.Generic;
     
-    public partial class Places
+    public partial class Place_types
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public Places()
+        public Place_types()
         {
-            this.Tasks = new HashSet<Tasks>();
             this.Place_type_relation = new HashSet<Place_type_relation>();
         }
     
-        public int place_id { get; set; }
-        public string place_name { get; set; }
-        public string place_connection { get; set; }
-        public string place_name_in_report { get; set; }
+        public int placetype_id { get; set; }
+        public string placetype_name { get; set; }
     
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Tasks> Tasks { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Place_type_relation> Place_type_relation { get; set; }
     }

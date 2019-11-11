@@ -48,5 +48,16 @@ namespace ReportScheduleInWeb.Controllers
             return Json(ParameterList, JsonRequestBehavior.AllowGet);
         }
 
+        public JsonResult GetPlacesByPlaceTypeId(int PlaceTypeId)
+        {
+            List<int> PlaceList = db.Place_type_relation.Where(x => x.ptr_place_type_id == PlaceTypeId).Select(x => x.ptr_place_id).ToList();
+
+            if (PlaceTypeId == 0)
+            {
+                List<int> EmptyList = new List<int>();
+                return Json(EmptyList, JsonRequestBehavior.AllowGet);
+            }
+            return Json(PlaceList, JsonRequestBehavior.AllowGet);
+        }
     }
 }

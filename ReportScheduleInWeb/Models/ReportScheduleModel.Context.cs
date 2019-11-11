@@ -35,5 +35,7 @@ namespace ReportScheduleInWeb.Models
         public virtual DbSet<User_roles> User_roles { get; set; }
         public virtual DbSet<Users> Users { get; set; }
         public virtual DbSet<Wishes> Wishes { get; set; }
+        public virtual DbSet<Place_type_relation> Place_type_relation { get; set; }
+        public virtual DbSet<Place_types> Place_types { get; set; }
     }
 }

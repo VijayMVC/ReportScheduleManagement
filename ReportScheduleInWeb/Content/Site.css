@@ -51,3 +51,7 @@ textarea {
     display: block;
     width: 100%;
 }
+
+.tab-content {
+    max-width: 602px;
+}
