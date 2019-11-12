@@ -180,7 +180,7 @@
                 </div>
 
                 <input value="Назад" class="btn btn-danger program-selection__button" type="button" data-href="#program-selection-step-4">
-                <input value="Заказать отчет" class="btn btn-success" type="submit" data-href="#">
+                <input value="Заказать отчет" class="btn btn-success" type="submit" onclick="InsertNewWish()">
             </div><!-- tab-pane -->
 		</div><!-- tab-content -->
 
@@ -561,8 +561,6 @@
 			});
         }
 
-        
-
 		$(function () {
 			checkReportType();
             initProgramSelection();
@@ -618,6 +616,105 @@
             else {
 				$('input.btn-success', $program_selection).attr('disabled', 'disabled');
             }
+        }
+
+        function InsertNewWish() {
+            //Проверка всех данных перед отправкой
+            var deadlineValue;
+            var attemptsCount;
+            var report_type_id;
+            var parameters = [];
+            var places = [];
+            try {
+                //----------Дедлайн---------------
+                var deadline = document.getElementById('deadlineValue');
+                deadlineValue = deadline.value;
+
+                if ((deadline.validity.badInput) || (deadlineValue.length === 0)) {
+                    alert("Ошибка! Проверьте дату и время дедлайна.");
+                    return false;
+                }
+
+                //----------Попытки---------------
+                var attempts = document.getElementById('attemptsValue');
+                if (attempts.value == '')
+                    attemptsCount = null
+                else
+                    attemptsCount = attempts.value;
+
+                //----------Тип отчета------------
+                var reportTypeId = document.getElementById('Report_type_id');
+                report_type_id = reportTypeId.options[reportTypeId.selectedIndex].value;
+
+                //----------Параметры-------------
+                var ParamTable = document.getElementById('SetParameterList');
+                if (ParamTable.rows[0].cells.length > 1) {
+                    parameters = $('#SetParameterList tr').map(function (i, row) {
+                        return {
+                            'name': row.className.replace('row_',''),
+                            'value': row.cells[2].childNodes[0].value
+                        }
+                    }).get();
+                }
+
+                //----------Места-----------------
+                var checkBox = document.getElementById('customSwitch');
+                if (checkBox.checked) {
+                    var startDate = document.getElementById('startdateValue');
+                    var startdateValue = startDate.value;
+
+                    if ((startDate.validity.badInput) || (startdateValue.length === 0)) {
+                        alert("Ошибка! Проверьте дату и время запуска.");
+                        return false;
+                    }
+                    places = $('#SetScheduleList tr').map(function (i, row) {
+                        return {
+                            'id': row.cells[0].textContent,
+                            'startdate': startdateValue
+                        }
+                    }).get();
+                }
+                else {
+                    places = $('#SetScheduleList tr').map(function (i, row) {
+                        return {
+                            'id': row.cells[0].textContent,
+                            'startdate': row.cells[2].childNodes[0].value
+                        }
+                    }).get();
+                }
+            }
+            catch
+            {
+                alert("Ошибка при проверке данных! Проверьте данные по вкладкам.");
+                return false;
+            }
+
+            var data = 'report_type_id=' + report_type_id.toString();
+
+            data += '&deadlineValue=' + deadlineValue;
+
+            if (attemptsCount == null)
+                data += '&attemptsCount=null'
+            else
+                data += '&attemptsCount=' + attemptsCount.toString();
+
+            data += '&parameters=' + JSON.stringify(parameters)
+
+            data += '&places=' +  JSON.stringify(places)
+
+            $.ajax({
+                type: "Post",
+                data: data,
+                url: mainURL + "/Wish/AddWish",
+                success: function (result) {
+                    if (result == 1) {
+                        alert("Ошибка при добавлении нового задания!")
+                        return false;
+                    }
+                    alert("Новое задание добавлено");
+                    window.location.href = mainURL + "/Home/Index";
+                }
+            })
         }
 	</script>
 }
