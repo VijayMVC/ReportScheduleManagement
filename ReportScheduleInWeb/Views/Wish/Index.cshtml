@@ -104,6 +104,17 @@
                         &nbsp;
                     </div>
                 </div>
+                <div class="row pb-3">
+                    <div class="col-4 text-right">
+                        <label class="text-white">Количество попыток</label>
+                    </div>
+                    <div class="col-5">
+                        <input type='number' class='attemptsValue' id="attemptsValue" min="0" max="99" title="Введите количество попыток, максимум = 99. Можно не заполнять.">
+                    </div>
+                    <div class="col-3">
+                        &nbsp;
+                    </div>
+                </div>
                 <table class="table table-bordered table-hover table-striped table-light" id="scheduleTable" style="display:none">
                     <tr class="bg-secondary" style="text-align:center">
                         <th scope="col" width="5%">
@@ -145,6 +156,14 @@
                     </div>
                     <div class="col-9">
                         <label class="text-light" id="labelDeadlineReport"></label>
+                    </div>
+                </div>
+                <div class="row pb-3">
+                    <div class="col-3">
+                        <label class="text-warning h6">Количество попыток:</label>
+                    </div>
+                    <div class="col-9">
+                        <label class="text-light" id="labelAttemptsReport"></label>
                     </div>
                 </div>
                 <div class="row pb-3">
@@ -413,6 +432,13 @@
             //Дедлайн
             $("#labelDeadlineReport").empty();
             $("#labelDeadlineReport").text($("#deadlineValue").val());
+
+            //Количество попыток
+            $("#labelAttemptsReport").empty();
+            if ($("#attemptsValue").val() == '')
+                $("#labelAttemptsReport").text('-')
+            else
+                $("#labelAttemptsReport").text($("#attemptsValue").val());
 
             //Расписание
             var SetData2 = $("#labelPlacesReport");
