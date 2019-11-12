@@ -1,7 +1,6 @@
 ﻿@model ReportScheduleInWeb.Models.WishViewModel
 @{ 
 	ReportScheduleInWeb.Models.ParameterType parameterModel = null;
-	ReportScheduleInWeb.Models.Place placeModel = null;
 }
 
 @{
@@ -26,15 +25,15 @@
 			<li class="nav-item pr-1"><a class="nav-link text-white bg-dark disabled" href="#program-selection-step-5" data-toggle="tab">Подтверждение</a></li>
 		</ul>
 
-		<div class="tab-content">
-			<div class="tab-pane fade in active show bg-dark p-3 mt-1 mr-1" id="program-selection-step-1">
+		<div class="tab-content bg-dark mr-1 mt-1">
+			<div class="tab-pane fade in active show p-3" id="program-selection-step-1">
 				<p class="h4 text-white pb-2">Выберите тип отчета</p>
 				<div class="pb-3">
 					@Html.DropDownListFor(m => m.Report_type_id, new SelectList(db.Report_types.ToList(), "Report_type_id", "Report_type_name"), "Не выбрано", new { @class = "custom-select form-control", @style = "width:100%" })
 				</div>
-				<input value="Далее" class="btn btn-primary program-selection__button one-next" type="button" data-href="#program-selection-step-2">
+                <input value="Далее" class="btn btn-primary program-selection__button one-next" type="button" data-href="#program-selection-step-2">
 			</div><!-- tab-pane -->
-			<div class="tab-pane fade bg-dark p-3 mt-1 mr-1" id="program-selection-step-2">
+			<div class="tab-pane fade p-3" id="program-selection-step-2">
 				<p class="h4 text-white bg-dark pb-2">Значения параметров</p>
 				<table class="table table-bordered table-hover table-striped table-light">
 					<tr class="bg-secondary" style="text-align:center">
@@ -54,7 +53,7 @@
 				<input value="Назад" class="btn btn-danger program-selection__button" type="button" data-href="#program-selection-step-1">
 				<input value="Далее" class="btn btn-primary program-selection__button two-next" type="button" data-href="#program-selection-step-3">
 			</div><!-- tab-pane -->
-            <div class="tab-pane fade bg-dark p-3 mt-1 mr-1" id="program-selection-step-3">
+            <div class="tab-pane fade p-3" id="program-selection-step-3">
                 <p class="h4 text-white bg-dark pb-2">Выберите места запуска отчета</p>
                 <div class="row align-items-center pb-2">
                     <div class="col-4 mt-2">
@@ -78,7 +77,7 @@
                 <input value="Назад" class="btn btn-danger program-selection__button" type="button" data-href="#program-selection-step-2">
                 <input value="Далее" class="btn btn-primary program-selection__button three-next" type="button" data-href="#program-selection-step-4">
             </div><!-- tab-pane -->
-            <div class="tab-pane fade bg-dark p-3 mt-1 mr-1" id="program-selection-step-4">
+            <div class="tab-pane fade p-3" id="program-selection-step-4">
                 <p class="h4 text-white bg-dark pb-2">Расписание запуска отчета</p>
                 <div class="row pb-3">
                     <div class="col-4 text-right">
@@ -107,12 +106,13 @@
                 </div>
                 <table class="table table-bordered table-hover table-striped table-light" id="scheduleTable" style="display:none">
                     <tr class="bg-secondary" style="text-align:center">
-                        <th scope="col" style="visibility:hidden">
+                        <th scope="col" width="5%">
+                            ID
                         </th>
-                        <th scope="col" width="60%">
+                        <th scope="col" width="65%">
                             Место
                         </th>
-                        <th scope="col" width="40%">
+                        <th scope="col" width="30%">
                             Запуск
                         </th>
                     </tr>
@@ -121,11 +121,48 @@
                 <input value="Назад" class="btn btn-danger program-selection__button" type="button" data-href="#program-selection-step-3">
                 <input value="Далее" class="btn btn-primary program-selection__button four-next" type="button" data-href="#program-selection-step-5">
             </div><!-- tab-pane -->
-			<div class="tab-pane fade" id="program-selection-step-5">
-				Подтверждение
-				<input value="Назад" class="btn btn-danger program-selection__button" type="button" data-href="#program-selection-step-4">
-				<input value="Сохранить" class="btn btn-success" type="submit" data-href="#">
-			</div><!-- tab-pane -->
+            <div class="tab-pane fade p-3" id="program-selection-step-5">
+                <p class="h4 text-white bg-dark pb-2">Проверка и подтверждение</p>
+                <div class="row pb-3">
+                    <div class="col-3">
+                        <label class="text-warning h6">Тип отчета:</label>
+                    </div>
+                    <div class="col-9">
+                        <label class="text-light" id="labelTypeReport"></label>
+                    </div>
+                </div>
+                <div class="row pb-3">
+                    <div class="col-3">
+                        <label class="text-warning h6">Параметры:</label>
+                    </div>
+                    <div class="col-9">
+                        <label class="text-light" id="labelParameterReport"></label>
+                    </div>
+                </div>
+                <div class="row pb-3">
+                    <div class="col-3">
+                        <label class="text-warning h6">Дедлайн:</label>
+                    </div>
+                    <div class="col-9">
+                        <label class="text-light" id="labelDeadlineReport"></label>
+                    </div>
+                </div>
+                <div class="row pb-3">
+                    <div class="col-3">
+                        <label class="text-warning h6">Расписание:</label>
+                    </div>
+                    <div class="col-9">
+                        <label class="text-light" id="labelPlacesReport"></label>
+                    </div>
+                </div>
+                <div class="custom-control custom-checkbox pb-3">
+                    <input type="checkbox" class="custom-control-input" id="customCheck">
+                    <label class="custom-control-label text-white" for="customCheck">- все верно</label>
+                </div>
+
+                <input value="Назад" class="btn btn-danger program-selection__button" type="button" data-href="#program-selection-step-4">
+                <input value="Заказать отчет" class="btn btn-success" type="submit" data-href="#">
+            </div><!-- tab-pane -->
 		</div><!-- tab-content -->
 
 	</div><!-- program-selection -->
@@ -288,6 +325,26 @@
             return true;
         }
 
+        function CheckStartDatePlaces() {
+            var flag = true;
+            var $program_selection = $('div.program-selection');
+            $('input.startDatePlace', $program_selection).each(function () {
+                var value = $(this).val();
+                if ((this.validity.badInput) || (value.length === 0)) {
+                    flag = false;
+                }
+                if (!flag) 
+                    return false;
+            });
+
+            if (!flag) {
+                alert("Ошибка! Проверьте введенные значения запуска.");
+                return false;
+            }
+
+			return true;
+        }
+
         function CheckDeadline() {
             var deadlinetDate = document.getElementById('deadlineValue');
             var value = deadlinetDate.value;
@@ -303,13 +360,85 @@
         function SetStartDateForAll() {
             if (!CheckStartDateForAll())
                 return false;
+
+            var startDate = document.getElementById('startdateValue');
+            var value = startDate.value;
+
+            var arr1 = $('#SetScheduleList tr').map(function (i, row) {
+                return {
+                    'id': row.cells[0].textContent,
+                    'name': row.cells[1].textContent,
+                    'startDate': value
+                }
+            }).get();
+
+            var SetData = $("#SetScheduleList");
+            SetData.empty();
+            for (var i = 0; i < arr1.length; i++) {
+                var Data = "<tr><td>" + arr1[i].id + "</td><td>" + arr1[i].name + "</td>";
+                Data += "<td><input type='datetime-local' class='startDatePlace' value='" + arr1[i].startDate + "' required></td></tr>";
+                SetData.append(Data);
+            }
+        }
+
+        function fillInfoReport() {
+            //Тип отчета
+            $("#labelTypeReport").empty();
+            $("#labelTypeReport").text($("#Report_type_id option:selected").text());
+
+            //Параметры
+            var SetData = $("#labelParameterReport");
+            SetData.empty();
+
+            var Data = "";
+
+            var table = document.getElementById('SetParameterList');
+            if (table.rows[0].cells.length > 1) {
+                var arr1 = $('#SetParameterList tr').map(function (i, row) {
+                    return {
+                        'name': row.cells[0].textContent,
+                        'value': row.cells[2].childNodes[0].value
+                    }
+                }).get();
+
+                for (var i = 0; i < arr1.length; i++) {
+                    Data += arr1[i].name + ' = ' + arr1[i].value + '<br>';
+                }
+            }
+            else {
+                Data = "-";
+            }
+            SetData.append(Data);
+
+            //Дедлайн
+            $("#labelDeadlineReport").empty();
+            $("#labelDeadlineReport").text($("#deadlineValue").val());
+
+            //Расписание
+            var SetData2 = $("#labelPlacesReport");
+            SetData2.empty();
+            Data = "";
+
+            var arr2 = $('#SetScheduleList tr').map(function (i, row) {
+                return {
+                    'id': row.cells[0].textContent,
+                    'name': row.cells[1].textContent,
+                    'startDate': row.cells[2].childNodes[0].value
+                }
+            }).get();
+
+            for (var i = 0; i < arr2.length; i++) {
+                Data += arr2[i].name + ' (Запуск: ' + arr2[i].startDate + ')<br>';
+            }
+            SetData2.append(Data);
         }
 
         function fillscheduleTable() {
             var arr1 = $('.chosen-select option:selected').map(function () {
                 return {
                     'id': $(this).val(),
-                    'name': $(this).text()
+                    'name': $(this).text(),
+                    'startDate': ""
                 }
             }).get();
 
@@ -317,17 +446,29 @@
                 return {
                     'id': row.cells[0].textContent,
                     'name': row.cells[1].textContent,
-                    'startDate': row.cells[2].textContent
+                    'startDate': row.cells[2].childNodes[0].value
                 }
             }).get();
-            
-            arr2.forEach(function (item) {
-                var result = $.grep(arr1, function (e) { return e.id == item.id && e.name == item.name; });
-                if (result.length > 0) {
 
+            var now = new Date();
+
+            arr1.forEach(function (item) {
+                var result = $.grep(arr2, function (e) { return e.id == item.id && e.name == item.name; });
+                if (result.length > 0) {
+                    item.startDate = result[0].startDate;
+                }
+                else {
+                    item.startDate = now.getFullYear() + "-" + ("0" + (now.getMonth() + 1)).slice(-2) + "-" + ("0" + now.getDate()).slice(-2) + "T00:00";
                 }
             });
 
+            var SetData = $("#SetScheduleList");
+			SetData.empty();
+            for (var i = 0; i < arr1.length; i++) {
+                var Data = "<tr><td>" + arr1[i].id + "</td><td>" + arr1[i].name + "</td>";
+                Data += "<td><input type='datetime-local' class='startDatePlace' value='" + arr1[i].startDate + "' required></td></tr>";
+                SetData.append(Data);
+            }
         }
 
         function initProgramSelection() {
@@ -351,6 +492,7 @@
                         return false
                     }
                     else {
+                        if ($(this).hasClass("btn btn-primary program-selection__button three-next"))
                         fillscheduleTable()
                     }
 
@@ -366,8 +508,15 @@
                             return false;
                     }
                     else {
-
+                        if (!CheckStartDatePlaces())
+                            return false;
                     }
+
+                    var checkBox = document.getElementById('customCheck');
+                    checkBox.checked = false;
+                    checkCustomCheck();
+
+                    fillInfoReport();
                 }
 
 				$('ul.nav-tabs a', $program_selection).removeClass('text-dark');
@@ -429,5 +578,20 @@
                 scheduleTable.style.display = '';
             }
         });
+
+        $("#customCheck").change(function () {
+            checkCustomCheck();
+        });
+
+        function checkCustomCheck() {
+            var $program_selection = $('div.program-selection');
+            var checkBox = document.getElementById('customCheck');
+            if (checkBox.checked) {
+                $('input.btn-success', $program_selection).removeAttr('disabled');
+            }
+            else {
+				$('input.btn-success', $program_selection).attr('disabled', 'disabled');
+            }
+        }
 	</script>
 }
