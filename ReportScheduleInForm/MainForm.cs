@@ -76,12 +76,19 @@ namespace ReportScheduleInForm
                     if (item.wish_status == "wait")
                     {
                         //Проверка прошло ли время
-                        foreach (Tasks t in db.Tasks.Where(x => x.task_wish_id == item.wish_id && x.task_status == "wait"))
+                        foreach (Tasks t in db.Tasks.Where(x => x.task_wish_id == item.wish_id && ((x.task_status == "wait") || (x.task_status == "new"))))
                         {
                             if (System.DateTime.Compare(t.task_startdate, System.DateTime.Now) <= 0)
                             {
                                 w = item;
                                 break;
+                            }
+                            else
+                            {
+                                if (t.task_status == "new")
+                                {
+                                    t.task_status = "wait";
+                                }
                             }
                         }
                     }
@@ -91,6 +98,7 @@ namespace ReportScheduleInForm
                     }
                     if (w != null) break;
                 }
+                db.SaveChanges();
 
                 if (w != null)
                 {
@@ -125,7 +133,7 @@ namespace ReportScheduleInForm
                     if (System.DateTime.Compare(t.task_startdate, System.DateTime.Now) > 0)
                     {
                         t.task_status = "wait";
-                        break;
+                        continue;
                     }
 
                     t.task_number_attempts = t.task_number_attempts ?? 0;
@@ -136,7 +144,7 @@ namespace ReportScheduleInForm
                         t.task_last_error_text = t.task_last_error_text ?? "";
                         t.task_last_error_text = "Исчерпано количество попыток выгрузки отчета. " + t.task_last_error_text;
                         t.task_status = "fail";
-                        break;
+                        continue;
                     }
 
                     tasks.Add(Task.Run(() => ReportRequest(t.task_id, w.wish_report_type_xml)));

@@ -141,7 +141,7 @@ namespace ReportScheduleInWeb.Controllers
                 Wish.wish_deadline = deadlineValue;
                 Wish.wish_total_attempts = attemptsCount;
                 Wish.wish_report_type_name = report_type_name;
-                Wish.wish_status = "new";
+                Wish.wish_status = "not_ready";
                 Wish.wish_report_type_xml = wish_report_type_xml; 
                 db.Wishes.Add(Wish);
                 db.SaveChanges();
@@ -159,6 +159,7 @@ namespace ReportScheduleInWeb.Controllers
                     Task.task_last_error_text = null;
                     db.Tasks.Add(Task);
                 }
+                Wish.wish_status = "new";
                 db.SaveChanges();
             }
             catch (Exception ex)
