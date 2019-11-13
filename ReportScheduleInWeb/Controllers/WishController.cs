@@ -81,90 +81,85 @@ namespace ReportScheduleInWeb.Controllers
             {
                 //Вытаскиваем данные из запроса
                 int report_type_id = Convert.ToInt32(Request.Form["report_type_id"]);
+                string report_type_name = db.Report_types.Where(x => x.report_type_id == report_type_id).SingleOrDefault().report_type_name;
                 DateTime deadlineValue = DateTime.ParseExact(Request.Form["deadlineValue"].ToString(), "yyyy-MM-ddTHH:mm", System.Globalization.CultureInfo.InvariantCulture);
-                int attemptsCount = Request.Form["attemptsCount"].ToString() == "null" ? 0 : Convert.ToInt32(Request.Form["attemptsCount"]);
+                int? attemptsCount = Request.Form["attemptsCount"].ToString() != "null" ? Convert.ToInt32(Request.Form["attemptsCount"].ToString()) : (int?)null;
                 List<parameters> ParamList = JsonConvert.DeserializeObject<List<parameters>>(Request.Form["parameters"].ToString());
                 List<places> PlaceList = JsonConvert.DeserializeObject<List<places>>(Request.Form["places"].ToString());
-                //var places = [];
-                //var seldep = Request.Form["departments"].Split(',').Select(Int32.Parse).ToList();
 
-                ////Редактирование пользователя
-                //if (model.user_id > 0)
-                //{
-                //    if (!CheckUserLogin(model.user_login, model.user_id))
-                //    {
-                //        user Use = db.users.SingleOrDefault(x => x.user_id == model.user_id);
-                //        Use.user_login = model.user_login;
-                //        Use.user_surname = model.user_surname;
-                //        Use.user_name = model.user_name;
-                //        Use.user_patronymic = model.user_patronymic;
-                //        Use.user_isdeleted = model.user_isdeleted;
-                //        Use.user_pos_id = model.pos_id;
-                //        Use.user_role_id = model.role_id;
+                string wish_report_type_xml = String.Empty;
 
-                //        //Отделы/ТОСП пользователя ДО редактирования
-                //        List<department_users_relation> Dur = new List<department_users_relation>();
-                //        foreach (department_users_relation dur in db.department_users_relation.Where(x => x.dur_user_id == model.user_id))
-                //        {
-                //            Dur.Add(dur);
-                //        }
+                string report_type_xml = db.Report_types.Where(x => x.report_type_id == report_type_id).SingleOrDefault().report_type_xml ?? "";
 
-                //        foreach (department d in db.departments)
-                //        {
-                //            if (seldep.Contains(d.dep_id))
-                //            {
-                //                if (Dur.Find(x => x.dur_department_id == d.dep_id) == null)
-                //                {
-                //                    db.department_users_relation.Add(new department_users_relation() { dur_user_id = model.user_id, dur_department_id = d.dep_id });
-                //                }
-                //            }
-                //            else
-                //            {
-                //                if (Dur.Find(x => x.dur_department_id == d.dep_id) != null)
-                //                {
-                //                    db.department_users_relation.Remove(Dur.Find(x => x.dur_department_id == d.dep_id));
-                //                }
-                //            }
-                //        }
-                //        db.SaveChanges();
-                //    }
-                //    else
-                //    {
-                //        result = 1;
-                //    }
-                //}
-                ////Создание нового пользователя
-                //else
-                //{
-                //    if (!CheckUserLogin(model.user_login, 0))
-                //    {
-                //        user Use = new user();
-                //        Use.user_login = model.user_login;
-                //        Use.user_password = encryption(model.user_password);
-                //        Use.user_surname = model.user_surname;
-                //        Use.user_name = model.user_name;
-                //        Use.user_patronymic = model.user_patronymic;
-                //        Use.user_isdeleted = model.user_isdeleted;
-                //        Use.user_pos_id = model.pos_id;
-                //        Use.user_role_id = model.role_id;
-                //        db.users.Add(Use);
-                //        db.SaveChanges();
+                List<ParameterType> ParameterList = new List<ParameterType>();
 
-                //        foreach (department d in db.departments)
-                //        {
-                //            if (seldep.Contains(d.dep_id))
-                //            {
-                //                db.department_users_relation.Add(new department_users_relation() { dur_user_id = Use.user_id, dur_department_id = d.dep_id });
-                //            }
-                //        }
+                if (!String.IsNullOrEmpty(report_type_xml))
+                {
+                    XmlSerializer serializer = new XmlSerializer(typeof(ReportModel));
 
-                //        db.SaveChanges();
-                //    }
-                //    else
-                //    {
-                //        result = 1;
-                //    }
-                //}
+                    using (TextReader reader = new StringReader(report_type_xml))
+                    {
+                        ReportModel report = (ReportModel)serializer.Deserialize(reader);
+
+                        foreach (var p in report.Parameters)
+                        {
+                            ParameterList.Add(new ParameterType
+                            {
+                                Name = p.ParameterName,
+                                Value = 
+                                    (p.ParameterDataType == "startdate") || (p.ParameterDataType == "enddate")
+                                    ? DateTime.ParseExact(ParamList.Where(x => x.name == p.ParameterName).SingleOrDefault().value, "yyyy-MM-ddTHH:mm", System.Globalization.CultureInfo.InvariantCulture).ToString("yyyy-MM-dd HH:mm:ss") 
+                                    : ParamList.Where(x => x.name == p.ParameterName).SingleOrDefault().value
+                            });
+                        }
+
+                        wish_report_type_xml = "<?xml version=\"1.0\" encoding=\"utf-16\"?>";
+                        wish_report_type_xml += "<TableDataSource SelectCommand=\"" + report.SelectCommand + "\">";
+                        foreach (var c in report.Columns)
+                        {
+                            wish_report_type_xml += "<Column Name=\"" + c.ColumnName + "\" Alias=\"" + c.ColumnAlias + "\" />";
+                        }
+                        if (ParamList.Count != 0)
+                        {
+                            foreach (var p in ParameterList)
+                            {
+                                wish_report_type_xml += "<CommandParameter Name=\"" + p.Name + "\" Value=\"" + p.Value + "\" />";
+                            }
+                        }
+                        wish_report_type_xml += "</TableDataSource>";
+                    }
+                }
+                else
+                {
+                    result = 1;
+                }
+
+
+
+                Wishes Wish = new Wishes();
+                Wish.wish_createdate = Convert.ToDateTime(DateTime.Now);
+                Wish.wish_deadline = deadlineValue;
+                Wish.wish_total_attempts = attemptsCount;
+                Wish.wish_report_type_name = report_type_name;
+                Wish.wish_status = "new";
+                Wish.wish_report_type_xml = wish_report_type_xml; 
+                db.Wishes.Add(Wish);
+                db.SaveChanges();
+
+                int wish_id = Wish.wish_id;
+
+                foreach (var p in PlaceList)
+                {
+                    Tasks Task = new Tasks();
+                    Task.task_startdate = DateTime.ParseExact(p.startdate, "yyyy-MM-ddTHH:mm", System.Globalization.CultureInfo.InvariantCulture); ;
+                    Task.task_wish_id = wish_id;
+                    Task.task_place_id = p.id;
+                    Task.task_number_attempts = null;
+                    Task.task_status = "new";
+                    Task.task_last_error_text = null;
+                    db.Tasks.Add(Task);
+                }
+                db.SaveChanges();
             }
             catch (Exception ex)
             {

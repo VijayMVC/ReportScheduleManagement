@@ -707,10 +707,6 @@
                 data: data,
                 url: mainURL + "/Wish/AddWish",
                 success: function (result) {
-                    if (result == 1) {
-                        alert("Ошибка при добавлении нового задания!")
-                        return false;
-                    }
                     alert("Новое задание добавлено");
                     window.location.href = mainURL + "/Home/Index";
                 }
