@@ -254,6 +254,7 @@
     <Content Include="Models\ReportScheduleModel.edmx.diagram">
       <DependentUpon>ReportScheduleModel.edmx</DependentUpon>
     </Content>
+    <Content Include="App_Data\ReportSchedule.bak" />
     <None Include="Scripts\jquery-3.4.1.intellisense.js" />
     <Content Include="Scripts\jquery-3.4.1.js" />
     <Content Include="Scripts\jquery-3.4.1.min.js" />
@@ -301,9 +302,7 @@
     <Content Include="Views\Wish\Index.cshtml" />
     <Content Include="Views\Monitor\Index.cshtml" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="App_Data\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
