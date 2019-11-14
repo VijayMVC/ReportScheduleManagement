@@ -15,26 +15,32 @@
     </div>
 </div>
 
-<nav class="navbar navbar-dark bg-dark card">
-    <div class="container-fluid">
-        <div class="row flex-row">
-            <div class="col-12">
-                <form class="form-inline">
-                    @Html.DropDownList("search_places", new SelectList(db.Places.ToList(), "place_id", "place_name"), new { @class = "form-control chosen-select", @multiple = "true" })
-                    <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
-                    <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
-                </form>
+<nav class="navbar navbar-dark bg-dark card m-0 p-0">
+    <div class="container-fluid p-3">
+        <div class="row" style="width:100%">
+            <div class="col-4 m-0 p-0">
+                <div class="custom-control m-0">
+                    <label class="text-white" for="search_report_type_id" style="width:10%">Отчет:</label>
+                    @Html.DropDownList("search_report_type_id", new SelectList(db.Report_types.ToList(), "Report_type_id", "Report_type_name"), "Не выбрано", new { @style = "width:85%" })
+                </div>
             </div>
-        </div>
+            <div class="col-4">
+                @Html.DropDownList("search_places", new SelectList(db.Places.ToList(), "place_id", "place_name"), new { @class = "chosen-select", @multiple = "true" })
+            </div>
+            <div class="col-4">
+                <input type="search" placeholder="Search" aria-label="Search">
+                <button class="btn btn-outline-success my-2 my-sm-0" type="button">Search</button>
+            </div>
+            </div>
     </div>
 </nav>
 
 @section scripts {
     <script>
 		$(".chosen-select").chosen({
-            width: "100%",
+            width: '100%',
+            placeholder_text_multiple: "Любое место",
             no_results_text: "Ничего не найдено",
-            placeholder_text_multiple: "Выберите места",
             search_contains: true,
             display_disabled_options: false,
             display_selected_options: false,
