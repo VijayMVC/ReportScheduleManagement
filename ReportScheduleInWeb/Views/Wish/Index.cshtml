@@ -691,6 +691,8 @@
 
             var data = 'report_type_id=' + report_type_id.toString();
 
+            data += '&user_id=' + $('#current_user_id').val();
+
             data += '&deadlineValue=' + deadlineValue;
 
             if (attemptsCount == null)

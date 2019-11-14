@@ -1,0 +1,46 @@
+﻿@model ReportScheduleInWeb.Models.MonitorViewModel
+@{
+    ReportScheduleInWeb.Models.Place placeModel = null;
+}
+
+@{
+    ViewBag.Title = "Мониторинг";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var db = new ReportScheduleInWeb.Models.ReportScheduleEntities();
+}
+
+<div class="row align-items-center">
+    <div class="col-12">
+        <p class="display-4" style="color: #663333 !important">Мониторинг</p>
+    </div>
+</div>
+
+<nav class="navbar navbar-dark bg-dark card">
+    <div class="container-fluid">
+        <div class="row flex-row">
+            <div class="col-12">
+                <form class="form-inline">
+                    @Html.DropDownList("search_places", new SelectList(db.Places.ToList(), "place_id", "place_name"), new { @class = "form-control chosen-select", @multiple = "true" })
+                    <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+                    <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</nav>
+
+@section scripts {
+    <script>
+		$(".chosen-select").chosen({
+            width: "100%",
+            no_results_text: "Ничего не найдено",
+            placeholder_text_multiple: "Выберите места",
+            search_contains: true,
+            display_disabled_options: false,
+            display_selected_options: false,
+            max_shown_results: Infinity
+        });
+
+        $(".chosen-choices").css('font-size', '1rem');
+    </script>
+}

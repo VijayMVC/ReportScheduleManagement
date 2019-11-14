@@ -18,6 +18,7 @@ namespace ReportScheduleInWeb.Models
         public Users()
         {
             this.User_roles = new HashSet<User_roles>();
+            this.Wishes = new HashSet<Wishes>();
         }
     
         public int user_id { get; set; }
@@ -30,5 +31,7 @@ namespace ReportScheduleInWeb.Models
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<User_roles> User_roles { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Wishes> Wishes { get; set; }
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security;
 using System.Web;
 using System.Web.Mvc;
 using System.Xml.Serialization;
@@ -81,6 +82,7 @@ namespace ReportScheduleInWeb.Controllers
             {
                 //Вытаскиваем данные из запроса
                 int report_type_id = Convert.ToInt32(Request.Form["report_type_id"]);
+                int user_id = Convert.ToInt32(Request.Form["user_id"]);
                 string report_type_name = db.Report_types.Where(x => x.report_type_id == report_type_id).SingleOrDefault().report_type_name;
                 DateTime deadlineValue = DateTime.ParseExact(Request.Form["deadlineValue"].ToString(), "yyyy-MM-ddTHH:mm", System.Globalization.CultureInfo.InvariantCulture);
                 int? attemptsCount = Request.Form["attemptsCount"].ToString() != "null" ? Convert.ToInt32(Request.Form["attemptsCount"].ToString()) : (int?)null;
@@ -114,7 +116,7 @@ namespace ReportScheduleInWeb.Controllers
                         }
 
                         wish_report_type_xml = "<?xml version=\"1.0\" encoding=\"utf-16\"?>";
-                        wish_report_type_xml += "<TableDataSource SelectCommand=\"" + report.SelectCommand + "\">";
+                        wish_report_type_xml += "<TableDataSource SelectCommand=\"" + SecurityElement.Escape(report.SelectCommand) + "\">";
                         foreach (var c in report.Columns)
                         {
                             wish_report_type_xml += "<Column Name=\"" + c.ColumnName + "\" Alias=\"" + c.ColumnAlias + "\" />";
@@ -142,7 +144,8 @@ namespace ReportScheduleInWeb.Controllers
                 Wish.wish_total_attempts = attemptsCount;
                 Wish.wish_report_type_name = report_type_name;
                 Wish.wish_status = "not_ready";
-                Wish.wish_report_type_xml = wish_report_type_xml; 
+                Wish.wish_report_type_xml = wish_report_type_xml;
+                Wish.wish_user_id = user_id;
                 db.Wishes.Add(Wish);
                 db.SaveChanges();
 

@@ -131,12 +131,14 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\LoginController.cs" />
+    <Compile Include="Controllers\MonitorController.cs" />
     <Compile Include="Controllers\WishController.cs" />
     <Compile Include="EncryptStringSample.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\LoginViewModel.cs" />
+    <Compile Include="Models\MonitorViewModel.cs" />
     <Compile Include="Models\Permissions.cs">
       <DependentUpon>ReportScheduleModel.tt</DependentUpon>
     </Compile>
@@ -297,6 +299,7 @@
     <Content Include="Scripts\popper-utils.min.js.map" />
     <Content Include="Scripts\popper-utils.js.map" />
     <Content Include="Views\Wish\Index.cshtml" />
+    <Content Include="Views\Monitor\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

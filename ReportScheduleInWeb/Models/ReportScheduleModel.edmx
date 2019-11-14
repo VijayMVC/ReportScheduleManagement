@@ -111,6 +111,7 @@
           <Property Name="wish_report_type_name" Type="nvarchar(max)" Nullable="false" />
           <Property Name="wish_report_type_xml" Type="nvarchar(max)" Nullable="false" />
           <Property Name="wish_status" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="wish_user_id" Type="int" Nullable="false" />
         </EntityType>
         <Association Name="FK_Place_type_relation_Place_types">
           <End Role="Place_types" Type="Self.Place_types" Multiplicity="1" />
@@ -220,6 +221,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_Wishes_Users">
+          <End Role="Users" Type="Self.Users" Multiplicity="1" />
+          <End Role="Wishes" Type="Self.Wishes" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="user_id" />
+            </Principal>
+            <Dependent Role="Wishes">
+              <PropertyRef Name="wish_user_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <EntityContainer Name="ReportScheduleModelStoreContainer">
           <EntitySet Name="Permissions" EntityType="Self.Permissions" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Place_type_relation" EntityType="Self.Place_type_relation" Schema="dbo" store:Type="Tables" />
@@ -268,6 +281,10 @@
           <AssociationSet Name="FK_User_roles_Users" Association="Self.FK_User_roles_Users">
             <End Role="Users" EntitySet="Users" />
             <End Role="User_roles" EntitySet="User_roles" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Wishes_Users" Association="Self.FK_Wishes_Users">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Wishes" EntitySet="Wishes" />
           </AssociationSet>
         </EntityContainer>
       </Schema></edmx:StorageModels>
@@ -367,6 +384,7 @@
           <Property Name="user_name" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
           <Property Name="user_patronymic" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
           <NavigationProperty Name="User_roles" Relationship="Self.FK_User_roles_Users" FromRole="Users" ToRole="User_roles" />
+          <NavigationProperty Name="Wishes" Relationship="ReportScheduleModel.FK_Wishes_Users" FromRole="Users" ToRole="Wishes" />
         </EntityType>
         <EntityType Name="Wishes">
           <Key>
@@ -380,6 +398,8 @@
           <Property Name="wish_report_type_xml" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
           <Property Name="wish_status" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
           <NavigationProperty Name="Tasks" Relationship="Self.FK_Tasks_Wishes" FromRole="Wishes" ToRole="Tasks" />
+          <Property Name="wish_user_id" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Users" Relationship="ReportScheduleModel.FK_Wishes_Users" FromRole="Wishes" ToRole="Users" />
         </EntityType>
         <Association Name="FK_Role_permissions_Permissions">
           <End Role="Permissions" Type="Self.Permissions" Multiplicity="1" />
@@ -514,6 +534,10 @@
             <End Role="Places" EntitySet="Places" />
             <End Role="Place_type_relation" EntitySet="Place_type_relation" />
           </AssociationSet>
+          <AssociationSet Name="FK_Wishes_Users" Association="ReportScheduleModel.FK_Wishes_Users">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Wishes" EntitySet="Wishes" />
+          </AssociationSet>
         </EntityContainer>
         <EntityType Name="Place_type_relation">
           <Key>
@@ -554,6 +578,18 @@
             </Principal>
             <Dependent Role="Place_type_relation">
               <PropertyRef Name="ptr_place_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Wishes_Users">
+          <End Type="ReportScheduleModel.Users" Role="Users" Multiplicity="1" />
+          <End Type="ReportScheduleModel.Wishes" Role="Wishes" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="user_id" />
+            </Principal>
+            <Dependent Role="Wishes">
+              <PropertyRef Name="wish_user_id" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -655,6 +691,7 @@
           <EntitySetMapping Name="Wishes">
             <EntityTypeMapping TypeName="ReportScheduleModel.Wishes">
               <MappingFragment StoreEntitySet="Wishes">
+                <ScalarProperty Name="wish_user_id" ColumnName="wish_user_id" />
                 <ScalarProperty Name="wish_id" ColumnName="wish_id" />
                 <ScalarProperty Name="wish_createdate" ColumnName="wish_createdate" />
                 <ScalarProperty Name="wish_deadline" ColumnName="wish_deadline" />

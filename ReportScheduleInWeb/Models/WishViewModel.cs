@@ -72,5 +72,7 @@ namespace ReportScheduleInWeb.Models
 
         [DisplayName("Места")]
         public List<Place> Places { get; set; }
+
+        public string User_id { get; set; }
     }
 }

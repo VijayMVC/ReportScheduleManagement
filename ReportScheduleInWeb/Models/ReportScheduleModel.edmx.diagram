@@ -26,6 +26,7 @@
         <EntityTypeShape EntityType="ReportScheduleModel.Place_types" Width="1.5" PointX="0.75" PointY="19.625" />
         <AssociationConnector Association="ReportScheduleModel.FK_Place_type_relation_Place_types" />
         <AssociationConnector Association="ReportScheduleModel.FK_Place_type_relation_Places" />
+        <AssociationConnector Association="ReportScheduleModel.FK_Wishes_Users" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>
