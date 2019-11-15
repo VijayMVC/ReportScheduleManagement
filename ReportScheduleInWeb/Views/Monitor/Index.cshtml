@@ -56,7 +56,7 @@
                     <input type="date" value="" id="search_enddate" name="search_enddate">
                 </div>
                 <div class="col-xl-4 input-group mb-2">
-                    <button class="btn btn-outline-success my-2 my-sm-0 container-fluid mr-1" type="submit" onclick="ClickSearch()">Искать</button>
+                    <button class="btn btn-outline-success my-2 my-sm-0 container-fluid mr-1" type="button" onclick="ClickSearch()">Искать</button>
                     <button class="btn btn-outline-danger my-2 my-sm-0 container-fluid ml-1" type="button" onclick="ClearSearch()">Очистить</button>
                 </div>
             </div>
@@ -111,48 +111,75 @@
             localStorage.setItem("search_enddate", $("#search_enddate").val());
             localStorage.setItem("search_places", $("#search_places").val());
 
+            data += "&search_places=0";
+
             $.ajax({
                 type: "Post",
                 data: data,
                 url: mainURL + "/Monitor/SearchWishes",
-                success: function (result) {
-                    window.location.href = mainURL + "/Users/Index";
-                    $("#MyModal").modal("hide");
+                success: function (WishList) {
+                    var SetData = $("#FoundWishesList");
+					SetData.empty();
+					if (WishList.length == 0) {
+						var Data = "<tr class='row_0'> <td colspan='4'>Ничего не найдено</td></tr>";
+						SetData.append(Data);
+					}
+					else {
+						for (var i = 0; i < WishList.length; i++) {
+                            var Data = "<tr class='row_" + WishList[i].Wish_id + "'>" +
+                                "<td>" + timeConverter(WishList[i].Wish_createdate) + "</td>" +
+                                "<td>" + WishList[i].Wish_report_type_name + "</td>" +
+                                "<td></td>" + "<td></td>";
+									
+							Data += "</tr>";
+							SetData.append(Data);
+						}
+					}
                 }
             })
-            return false;
-    }
+        }
 
-    function ClearSearch() {
+        function timeConverter(UNIX_timestamp) {
+            var a = new Date(UNIX_timestamp.replace(/\D+/g, '')*1);
+            var year = a.getFullYear();
+            var month = a.getMonth();
+            var date = a.getDate();
+            var hour = a.getHours();
+            var min = a.getMinutes();
+            var time = date + '.' + month + '.' + year + ' ' + hour + ':' + min;
+            return time;
+        }
+
+        function ClearSearch() {
             localStorage.setItem("search_user_id", "");
             localStorage.setItem("search_report_type_id", "");
             localStorage.setItem("search_status", "");
             localStorage.setItem("search_startdate", "");
             localStorage.setItem("search_enddate", "");
             localStorage.setItem("search_places", "");
-        $('#search_user_id').val("");
-        $('#search_report_type_id').val("");
-        $('#search_status').val("");
-        $('#search_startdate').val(""); 
-        $('#search_enddate').val("");
-        $(".chosen-select").val("").trigger('chosen:updated');
-        ClickSearch();
-    }
+            $('#search_user_id').val("");
+            $('#search_report_type_id').val("");
+            $('#search_status').val("");
+            $('#search_startdate').val("");
+            $('#search_enddate').val("");
+            $(".chosen-select").val("").trigger('chosen:updated');
+            ClickSearch();
+        }
 
-    window.onload = function () {
-        var search_user_id = localStorage.getItem("search_user_id");
-        var search_report_type_id = localStorage.getItem("search_report_type_id");
-        var search_status = localStorage.getItem("search_status");
-        var search_startdate = localStorage.getItem("search_startdate");
-        var search_enddate = localStorage.getItem("search_enddate");
-        var search_places = localStorage.getItem("search_places");
+        window.onload = function () {
+            var search_user_id = localStorage.getItem("search_user_id");
+            var search_report_type_id = localStorage.getItem("search_report_type_id");
+            var search_status = localStorage.getItem("search_status");
+            var search_startdate = localStorage.getItem("search_startdate");
+            var search_enddate = localStorage.getItem("search_enddate");
+            var search_places = localStorage.getItem("search_places");
 
-        if (search_user_id !== null) $('#search_user_id').val(search_user_id);
-        if (search_report_type_id !== null) $('#search_report_type_id').val(search_report_type_id);
-        if (search_status !== null) $('#search_status').val(search_status);
-        if (search_startdate !== null) $('#search_startdate').val(search_startdate);
-        if (search_enddate !== null) $('#search_enddate').val(search_enddate);
-        if (search_places !== null) $(".chosen-select").val(search_places.split(',')).trigger('chosen:updated');
-    }
+            if (search_user_id !== null) $('#search_user_id').val(search_user_id);
+            if (search_report_type_id !== null) $('#search_report_type_id').val(search_report_type_id);
+            if (search_status !== null) $('#search_status').val(search_status);
+            if (search_startdate !== null) $('#search_startdate').val(search_startdate);
+            if (search_enddate !== null) $('#search_enddate').val(search_enddate);
+            if (search_places !== null) $(".chosen-select").val(search_places.split(',')).trigger('chosen:updated');
+        }
     </script>
 }

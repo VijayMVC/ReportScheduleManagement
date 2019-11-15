@@ -42,7 +42,7 @@ namespace ReportScheduleInWeb.Models
             Places = new List<Place>();
         }
 
-        public int wish_id { get; set; }
+        public int Wish_id { get; set; }
 
         [DisplayName("Дата создания")]
         public System.DateTime Wish_createdate { get; set; }
@@ -75,6 +75,6 @@ namespace ReportScheduleInWeb.Models
         public List<Place> Places { get; set; }
 
         [DisplayName("Заказчик")]
-        public string User_id { get; set; }
+        public int User_id { get; set; }
     }
 }

@@ -9,9 +9,11 @@ namespace ReportScheduleInWeb.Models
 
         public int Task_wish_id { get; set; }
 
-        public string Task_place_id { get; set; }
+        [DisplayName("Место")]
+        public string Task_place_name { get; set; }
+        public int Task_place_id { get; set; }
 
-        [DisplayName("Дата запуска")]
+        [DisplayName("Дата и время запуска")]
         public System.DateTime Task_startdate { get; set; }
 
         [DisplayName("Попытки")]
