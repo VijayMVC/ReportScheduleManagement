@@ -138,7 +138,6 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\LoginViewModel.cs" />
-    <Compile Include="Models\MonitorViewModel.cs" />
     <Compile Include="Models\Permissions.cs">
       <DependentUpon>ReportScheduleModel.tt</DependentUpon>
     </Compile>

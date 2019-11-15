@@ -56,6 +56,7 @@ namespace ReportScheduleInWeb.Models
         [DisplayName("Тип отчета")]
         public string Wish_report_type_name { get; set; }
 
+        [DisplayName("Имя отчета")]
         public string Report_type_id { get; set; }
 
         [DisplayName("Скрипт")]
@@ -73,6 +74,7 @@ namespace ReportScheduleInWeb.Models
         [DisplayName("Места")]
         public List<Place> Places { get; set; }
 
+        [DisplayName("Заказчик")]
         public string User_id { get; set; }
     }
 }

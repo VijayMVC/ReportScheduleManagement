@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 
 namespace ReportScheduleInWeb.Models
@@ -10,12 +9,12 @@ namespace ReportScheduleInWeb.Models
 
         public int Task_wish_id { get; set; }
 
-        public int Task_place_id { get; set; }
+        public string Task_place_id { get; set; }
 
         [DisplayName("Дата запуска")]
         public System.DateTime Task_startdate { get; set; }
 
-        [DisplayName("Количество попыток")]
+        [DisplayName("Попытки")]
         public Nullable<int> Task_number_attempts { get; set; }
 
         [DisplayName("Статус")]

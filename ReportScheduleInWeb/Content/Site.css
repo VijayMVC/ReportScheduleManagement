@@ -56,3 +56,14 @@ textarea {
     max-width: 602px;
 }
     
+.input-group {
+    flex-wrap:nowrap;
+}
+
+.input-group-text {
+    min-width: 112px;
+}
+
+.sidebar-sticky {
+    min-width: 185px;
+}

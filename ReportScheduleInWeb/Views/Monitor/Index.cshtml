@@ -1,8 +1,4 @@
-﻿@model ReportScheduleInWeb.Models.MonitorViewModel
-@{
-    ReportScheduleInWeb.Models.Place placeModel = null;
-}
-
+﻿@model ReportScheduleInWeb.Models.WishViewModel
 @{
     ViewBag.Title = "Мониторинг";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -15,31 +11,87 @@
     </div>
 </div>
 
-<nav class="navbar navbar-dark bg-dark card m-0 p-0">
-    <div class="container-fluid p-3">
-        <div class="row" style="width:100%">
-            <div class="col-4 m-0 p-0">
-                <div class="custom-control m-0">
-                    <label class="text-white" for="search_report_type_id" style="width:10%">Отчет:</label>
-                    @Html.DropDownList("search_report_type_id", new SelectList(db.Report_types.ToList(), "Report_type_id", "Report_type_name"), "Не выбрано", new { @style = "width:85%" })
+<nav class="navbar navbar-dark bg-dark card">
+    <form id="form" style="width:100%">
+        <fieldset id="SubmitForm">
+            <div class="row container-fluid">
+                <div class="col-xl-4 input-group mb-2">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text bg-dark text-white">Заказчик:</span>
+                    </div>
+                    @Html.DropDownList("search_user_id", (SelectList)ViewBag.Authors, "Не выбрано", new { @class = "custom-select" })
+                </div>
+                <div class="col-xl-4 input-group mb-2">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text bg-dark text-white">Отчет:</span>
+                    </div>
+                    @Html.DropDownList("search_report_type_id", new SelectList(db.Report_types.ToList(), "Report_type_id", "Report_type_name"), "Не выбрано", new { @class = "custom-select" })
+                </div>
+                <div class="col-xl-4 input-group mb-2">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text bg-dark text-white">Статус:</span>
+                    </div>
+                    @Html.DropDownList("search_status", new SelectList(ViewBag.Statuses, "Value", "Text"), "Не выбрано", new { @class = "custom-select" })
                 </div>
             </div>
-            <div class="col-4">
-                @Html.DropDownList("search_places", new SelectList(db.Places.ToList(), "place_id", "place_name"), new { @class = "chosen-select", @multiple = "true" })
+            <div class="row container-fluid">
+                <div class="col-12 input-group mb-2">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text bg-dark text-white">Места:</span>
+                    </div>
+                    @Html.DropDownList("search_places", new SelectList(db.Places.ToList(), "place_id", "place_name"), new { @class = "chosen-select", @multiple = "true" })
+                </div>
             </div>
-            <div class="col-4">
-                <input type="search" placeholder="Search" aria-label="Search">
-                <button class="btn btn-outline-success my-2 my-sm-0" type="button">Search</button>
+            <div class="row container-fluid">
+                <div class="col-xl-4 input-group mb-2">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text bg-dark text-white">Создано от:</span>
+                    </div>
+                    <input type="date" value="" id="search_startdate" name="search_startdate">
+                </div>
+                <div class="col-xl-4 input-group mb-2">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text bg-dark text-white">Создано до:</span>
+                    </div>
+                    <input type="date" value="" id="search_enddate" name="search_enddate">
+                </div>
+                <div class="col-xl-4 input-group mb-2">
+                    <button class="btn btn-outline-success my-2 my-sm-0 container-fluid mr-1" type="submit" onclick="ClickSearch()">Искать</button>
+                    <button class="btn btn-outline-danger my-2 my-sm-0 container-fluid ml-1" type="button" onclick="ClearSearch()">Очистить</button>
+                </div>
             </div>
-            </div>
-    </div>
+        </fieldset>
+    </form>
 </nav>
+
+<div class="card mt-3 bg-dark p-3" id="found_field">
+    <p class="h4 text-white pb-2">Найденные задания</p>
+    <div class="pb-3">
+        <table class="table table-bordered table-hover table-striped table-light">
+            <tr class="bg-secondary" style="text-align:center">
+                <th scope="col">
+                    @Html.DisplayNameFor(m => Model.Wish_createdate).ToString()
+                </th>
+                <th scope="col">
+                    @Html.DisplayNameFor(m => Model.Wish_report_type_name).ToString()
+                </th>
+                <th scope="col">
+                    @Html.DisplayNameFor(m => Model.User_id).ToString()
+                </th>
+                <th scope="col">
+                    @Html.DisplayNameFor(m => Model.Wish_status).ToString()
+                </th>
+            </tr>
+            <tbody id="FoundWishesList"></tbody>
+        </table>
+    </div>
+</div>
 
 @section scripts {
     <script>
-		$(".chosen-select").chosen({
+        $(".chosen-select").chosen({
             width: '100%',
-            placeholder_text_multiple: "Любое место",
+            placeholder_text_multiple: "Не выбрано",
             no_results_text: "Ничего не найдено",
             search_contains: true,
             display_disabled_options: false,
@@ -47,6 +99,60 @@
             max_shown_results: Infinity
         });
 
-        $(".chosen-choices").css('font-size', '1rem');
+        $(".chosen-choices").css('font-size', '16px');
+        $(".chosen-choices").css('min-height', '38px');
+
+        function ClickSearch() {
+            var data = $("#SubmitForm").serialize();
+            localStorage.setItem("search_user_id", $("#search_user_id").val());
+            localStorage.setItem("search_report_type_id", $("#search_report_type_id").val());
+            localStorage.setItem("search_status", $("#search_status").val());
+            localStorage.setItem("search_startdate", $("#search_startdate").val());
+            localStorage.setItem("search_enddate", $("#search_enddate").val());
+            localStorage.setItem("search_places", $("#search_places").val());
+
+            $.ajax({
+                type: "Post",
+                data: data,
+                url: mainURL + "/Monitor/SearchWishes",
+                success: function (result) {
+                    window.location.href = mainURL + "/Users/Index";
+                    $("#MyModal").modal("hide");
+                }
+            })
+            return false;
+    }
+
+    function ClearSearch() {
+            localStorage.setItem("search_user_id", "");
+            localStorage.setItem("search_report_type_id", "");
+            localStorage.setItem("search_status", "");
+            localStorage.setItem("search_startdate", "");
+            localStorage.setItem("search_enddate", "");
+            localStorage.setItem("search_places", "");
+        $('#search_user_id').val("");
+        $('#search_report_type_id').val("");
+        $('#search_status').val("");
+        $('#search_startdate').val(""); 
+        $('#search_enddate').val("");
+        $(".chosen-select").val("").trigger('chosen:updated');
+        ClickSearch();
+    }
+
+    window.onload = function () {
+        var search_user_id = localStorage.getItem("search_user_id");
+        var search_report_type_id = localStorage.getItem("search_report_type_id");
+        var search_status = localStorage.getItem("search_status");
+        var search_startdate = localStorage.getItem("search_startdate");
+        var search_enddate = localStorage.getItem("search_enddate");
+        var search_places = localStorage.getItem("search_places");
+
+        if (search_user_id !== null) $('#search_user_id').val(search_user_id);
+        if (search_report_type_id !== null) $('#search_report_type_id').val(search_report_type_id);
+        if (search_status !== null) $('#search_status').val(search_status);
+        if (search_startdate !== null) $('#search_startdate').val(search_startdate);
+        if (search_enddate !== null) $('#search_enddate').val(search_enddate);
+        if (search_places !== null) $(".chosen-select").val(search_places.split(',')).trigger('chosen:updated');
+    }
     </script>
 }
