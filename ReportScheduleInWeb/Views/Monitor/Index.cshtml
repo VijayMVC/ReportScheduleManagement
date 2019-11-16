@@ -1,5 +1,9 @@
 ﻿@model ReportScheduleInWeb.Models.WishViewModel
 @{
+    ReportScheduleInWeb.Models.TaskViewModel taskModel = null;
+}
+
+@{
     ViewBag.Title = "Мониторинг";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var db = new ReportScheduleInWeb.Models.ReportScheduleEntities();
@@ -11,7 +15,7 @@
     </div>
 </div>
 
-<nav class="navbar navbar-dark bg-dark card">
+<nav class="navbar navbar-dark bg-dark card" style="min-width:645px">
     <form id="form" style="width:100%">
         <fieldset id="SubmitForm">
             <div class="row container-fluid">
@@ -64,122 +68,270 @@
     </form>
 </nav>
 
-<div class="card mt-3 bg-dark p-3" id="found_field">
+<div class="card mt-3 bg-dark p-3" id="found_field" style="min-width:645px">
     <p class="h4 text-white pb-2">Найденные задания</p>
     <div class="pb-3">
         <table class="table table-bordered table-hover table-striped table-light">
             <tr class="bg-secondary" style="text-align:center">
-                <th scope="col">
+                <th scope="col" style="width:150px; min-width:150px">
                     @Html.DisplayNameFor(m => Model.Wish_createdate).ToString()
                 </th>
                 <th scope="col">
                     @Html.DisplayNameFor(m => Model.Wish_report_type_name).ToString()
                 </th>
-                <th scope="col">
+                <th scope="col" style="width:150px; min-width:150px">
                     @Html.DisplayNameFor(m => Model.User_id).ToString()
                 </th>
-                <th scope="col">
+                <th scope="col" style="width:150px; min-width:160px">
                     @Html.DisplayNameFor(m => Model.Wish_status).ToString()
                 </th>
             </tr>
-            <tbody id="FoundWishesList"></tbody>
+            <tbody class="table-wish" id="FoundWishesList"></tbody>
         </table>
     </div>
 </div>
 
-@section scripts {
-    <script>
-        $(".chosen-select").chosen({
-            width: '100%',
-            placeholder_text_multiple: "Не выбрано",
-            no_results_text: "Ничего не найдено",
-            search_contains: true,
-            display_disabled_options: false,
-            display_selected_options: false,
-            max_shown_results: Infinity
-        });
+<div class="modal fade" id="found_tasks" tabindex="-1" role="dialog" data-backdrop="static">
+    <div class="vertical-alignment-helper">
+        <div class="modal-dialog vertical-align-top modal-lg">
+            <div class="modal-content bg-dark" id="mainContent" style="min-width:800px;">
+                <div class="modal-header">
+                    <h4 class="modal-title text-white" id="ModalTitle">Задачи</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row pb-3">
+                        <div class="col-3">
+                            <label class="text-warning h6">Дедлайн:</label>
+                        </div>
+                        <div class="col-9">
+                            <label class="text-light" id="labelDeadlineReport"></label>
+                        </div>
+                    </div>
+                    <div class="row pb-3">
+                        <div class="col-3">
+                            <label class="text-warning h6">Максимум попыток:</label>
+                        </div>
+                        <div class="col-9">
+                            <label class="text-light" id="labelAttemptsReport"></label>
+                        </div>
+                    </div>
+                    <div class="row pb-3">
+                        <div class="col-3">
+                            <label class="text-warning h6">Параметры:</label>
+                        </div>
+                        <div class="col-9">
+                            <label class="text-light" id="labelParameterReport"></label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <table class="table table-bordered table-hover table-striped table-light">
+                        <tr class="bg-secondary" style="text-align:center">
+                            <th scope="col" style="width:150px; min-width:150px">
+                                @Html.DisplayNameFor(t => taskModel.Task_place_name).ToString()
+                            </th>
+                            <th scope="col" style="width:150px; min-width:150px">
+                                @Html.DisplayNameFor(t => taskModel.Task_startdate).ToString()
+                            </th>
+                            <th scope="col" style="width:150px; min-width:150px">
+                                @Html.DisplayNameFor(t => taskModel.Task_number_attempts).ToString()
+                            </th>
+                            <th scope="col" style="width:150px; min-width:150px">
+                                @Html.DisplayNameFor(t => taskModel.Task_status).ToString()
+                            </th>
+                            <th scope="col" style="width:150px; min-width:150px">
+                                @Html.DisplayNameFor(t => taskModel.Task_last_error_text).ToString()
+                            </th>
+                        </tr>
+                        <tbody class="table-task" id="FoundTasksList"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-        $(".chosen-choices").css('font-size', '16px');
-        $(".chosen-choices").css('min-height', '38px');
+    @section scripts {
+        <script>
+            $(".chosen-select").chosen({
+                width: '100%',
+                placeholder_text_multiple: "Не выбрано",
+                no_results_text: "Ничего не найдено",
+                search_contains: true,
+                display_disabled_options: false,
+                display_selected_options: false,
+                max_shown_results: Infinity
+            });
 
-        function ClickSearch() {
-            var data = $("#SubmitForm").serialize();
-            localStorage.setItem("search_user_id", $("#search_user_id").val());
-            localStorage.setItem("search_report_type_id", $("#search_report_type_id").val());
-            localStorage.setItem("search_status", $("#search_status").val());
-            localStorage.setItem("search_startdate", $("#search_startdate").val());
-            localStorage.setItem("search_enddate", $("#search_enddate").val());
-            localStorage.setItem("search_places", $("#search_places").val());
+            $(".chosen-choices").css('font-size', '16px');
+            $(".chosen-choices").css('min-height', '38px');
 
-            data += "&search_places=0";
+            function ClickSearch() {
+                var data = $("#SubmitForm").serialize();
+                localStorage.setItem("search_user_id", $("#search_user_id").val());
+                localStorage.setItem("search_report_type_id", $("#search_report_type_id").val());
+                localStorage.setItem("search_status", $("#search_status").val());
+                localStorage.setItem("search_startdate", $("#search_startdate").val());
+                localStorage.setItem("search_enddate", $("#search_enddate").val());
+                localStorage.setItem("search_places", $("#search_places").val());
 
-            $.ajax({
-                type: "Post",
-                data: data,
-                url: mainURL + "/Monitor/SearchWishes",
-                success: function (WishList) {
-                    var SetData = $("#FoundWishesList");
-					SetData.empty();
-					if (WishList.length == 0) {
-						var Data = "<tr class='row_0'> <td colspan='4'>Ничего не найдено</td></tr>";
-						SetData.append(Data);
-					}
-					else {
-						for (var i = 0; i < WishList.length; i++) {
-                            var Data = "<tr class='row_" + WishList[i].Wish_id + "'>" +
-                                "<td>" + timeConverter(WishList[i].Wish_createdate) + "</td>" +
-                                "<td>" + WishList[i].Wish_report_type_name + "</td>" +
-                                "<td></td>" + "<td></td>";
-									
-							Data += "</tr>";
-							SetData.append(Data);
-						}
-					}
-                }
-            })
-        }
+                data += "&search_places=0";
 
-        function timeConverter(UNIX_timestamp) {
-            var a = new Date(UNIX_timestamp.replace(/\D+/g, '')*1);
-            var year = a.getFullYear();
-            var month = a.getMonth();
-            var date = a.getDate();
-            var hour = a.getHours();
-            var min = a.getMinutes();
-            var time = date + '.' + month + '.' + year + ' ' + hour + ':' + min;
-            return time;
-        }
+                $.ajax({
+                    type: "Post",
+                    data: data,
+                    url: mainURL + "/Monitor/SearchWishes",
+                    success: function (WishList) {
+                        var SetData = $("#FoundWishesList");
+                        SetData.empty();
+                        if (WishList.length == 0) {
+                            var Data = "<tr class='font-italic font-weight-light'> <td colspan='4'>Ничего не найдено</td></tr>";
+                            SetData.append(Data);
+                        }
+                        else {
+                            for (var i = 0; i < WishList.length; i++) {
+                                var Data = "<tr onclick='GetTasks(" + WishList[i].Wish_id + ")'>" +
+                                    "<td style='text-align: center;'>" + timeConverter(WishList[i].Wish_createdate) + "</td>" +
+                                    "<td>" + WishList[i].Wish_report_type_name + "</td>" +
+                                    "<td style='text-align: center;'>" + WishList[i].User_name + "</td>" +
+                                    "<td style='text-align: center;'>" + WishList[i].Wish_status + "</td>";
 
-        function ClearSearch() {
-            localStorage.setItem("search_user_id", "");
-            localStorage.setItem("search_report_type_id", "");
-            localStorage.setItem("search_status", "");
-            localStorage.setItem("search_startdate", "");
-            localStorage.setItem("search_enddate", "");
-            localStorage.setItem("search_places", "");
-            $('#search_user_id').val("");
-            $('#search_report_type_id').val("");
-            $('#search_status').val("");
-            $('#search_startdate').val("");
-            $('#search_enddate').val("");
-            $(".chosen-select").val("").trigger('chosen:updated');
-            ClickSearch();
-        }
+                                Data += "</tr>";
+                                SetData.append(Data);
+                            }
+                        }
+                    }
+                })
+            }
 
-        window.onload = function () {
-            var search_user_id = localStorage.getItem("search_user_id");
-            var search_report_type_id = localStorage.getItem("search_report_type_id");
-            var search_status = localStorage.getItem("search_status");
-            var search_startdate = localStorage.getItem("search_startdate");
-            var search_enddate = localStorage.getItem("search_enddate");
-            var search_places = localStorage.getItem("search_places");
+            function GetParamValue(WishId) {
+                var url = mainURL + "/Monitor/GetParameters?WishId=" + WishId;
+                    $.ajax({
+                    type: "GET",
+                    url: url,
+                    success: function (ParamList) {
+                        var SetParam = $("#labelParameterReport");
+                        SetParam.empty();
 
-            if (search_user_id !== null) $('#search_user_id').val(search_user_id);
-            if (search_report_type_id !== null) $('#search_report_type_id').val(search_report_type_id);
-            if (search_status !== null) $('#search_status').val(search_status);
-            if (search_startdate !== null) $('#search_startdate').val(search_startdate);
-            if (search_enddate !== null) $('#search_enddate').val(search_enddate);
-            if (search_places !== null) $(".chosen-select").val(search_places.split(',')).trigger('chosen:updated');
-        }
-    </script>
-}
+                        $("#labelDeadlineReport").empty();
+                        $("#labelDeadlineReport").text("-");
+
+                        $("#labelAttemptsReport").empty();
+                        $("#labelAttemptsReport").text("-");
+
+                        var ParamData = "";
+
+                        if (ParamList.length != 0) {
+                            for (var i = 0; i < ParamList.length; i++) {
+                                switch (ParamList[i].Type) {
+                                    case "deadline":
+                                        $("#labelDeadlineReport").text(ParamList[i].Value);
+                                        break;
+                                    case "attempts":
+                                        if (ParamList[i].Value == '')
+                                            $("#labelAttemptsReport").text('-')
+                                        else
+                                            $("#labelAttemptsReport").text(ParamList[i].Value);
+                                        break;
+                                    default:
+                                        ParamData += ParamList[i].Alias + " = " + ParamList[i].Value + '<br>';;
+                                }
+                            }
+                        }
+                        SetParam.append(ParamData);
+                    }
+                })
+            }
+
+            function GetTasks(WishId) {
+                var url = mainURL + "/Monitor/GetTasks?WishId=" + WishId;
+                $("#found_tasks").modal();
+                $.ajax({
+                    type: "GET",
+                    url: url,
+                    success: function (TaskList) {
+                        GetParamValue(WishId);
+                        //Места
+                        var SetData = $("#FoundTasksList");
+                        SetData.empty();
+                        if (TaskList.length == 0) {
+                            var Data = "<tr class='font-italic font-weight-light'> <td colspan='5'>Ничего не найдено</td></tr>";
+                            SetData.append(Data);
+                        }
+                        else {
+                            for (var i = 0; i < TaskList.length; i++) {
+                                var Data = "<tr>" +
+                                    "<td>" + TaskList[i].Task_place_name + "</td>" +
+                                    "<td style='text-align: center;'>" + timeConverter(TaskList[i].Task_startdate) + "</td>";
+                                if (TaskList[i].Task_number_attempts != null) {
+                                    Data += "<td style='text-align: center;'>" + TaskList[i].Task_number_attempts + "</td>";
+                                }
+                                else {
+                                    Data += "<td style='text-align: center;'>-</td>";
+                                }
+
+                                Data += "<td style='text-align: center;'>" + TaskList[i].Task_status + "</td>";
+
+                                if (TaskList[i].Task_last_error_text != null) {
+                                    Data += "<td><a href='#' onclick='alert(&quot;" + TaskList[i].Task_last_error_text + "&quot;)'>"+ TaskList[i].Task_last_error_text_short + "</a></td>";
+                                }
+                                else {
+                                    Data += "<td style='text-align: justify;'>" + TaskList[i].Task_last_error_text_short + "</td>";
+                                }
+
+
+                                Data += "</tr>";
+                                SetData.append(Data);
+                            }
+                        }
+                    }
+                })
+            }
+
+            function timeConverter(UNIX_timestamp) {
+                var a = new Date(UNIX_timestamp.replace(/\D+/g, '') * 1);
+                var year = a.getFullYear();
+                var month = ('0' + a.getMonth()).slice(-2);
+                var date = ('0' + a.getDate()).slice(-2);
+                var hour = ('0' + a.getHours()).slice(-2);
+                var min = ('0' + a.getMinutes()).slice(-2);
+                var time = date + '.' + month + '.' + year + ' ' + hour + ':' + min;
+                return time;
+            }
+
+            function ClearSearch() {
+                localStorage.setItem("search_user_id", "");
+                localStorage.setItem("search_report_type_id", "");
+                localStorage.setItem("search_status", "");
+                localStorage.setItem("search_startdate", "");
+                localStorage.setItem("search_enddate", "");
+                localStorage.setItem("search_places", "");
+                $('#search_user_id').val("");
+                $('#search_report_type_id').val("");
+                $('#search_status').val("");
+                $('#search_startdate').val("");
+                $('#search_enddate').val("");
+                $(".chosen-select").val("").trigger('chosen:updated');
+                ClickSearch();
+            }
+
+            window.onload = function () {
+                var search_user_id = localStorage.getItem("search_user_id");
+                var search_report_type_id = localStorage.getItem("search_report_type_id");
+                var search_status = localStorage.getItem("search_status");
+                var search_startdate = localStorage.getItem("search_startdate");
+                var search_enddate = localStorage.getItem("search_enddate");
+                var search_places = localStorage.getItem("search_places");
+
+                if (search_user_id !== null) $('#search_user_id').val(search_user_id);
+                if (search_report_type_id !== null) $('#search_report_type_id').val(search_report_type_id);
+                if (search_status !== null) $('#search_status').val(search_status);
+                if (search_startdate !== null) $('#search_startdate').val(search_startdate);
+                if (search_enddate !== null) $('#search_enddate').val(search_enddate);
+                if (search_places !== null) $(".chosen-select").val(search_places.split(',')).trigger('chosen:updated');
+            }
+        </script>
+    }

@@ -108,6 +108,7 @@ namespace ReportScheduleInWeb.Controllers
                             ParameterList.Add(new ParameterType
                             {
                                 Name = p.ParameterName,
+                                Alias = p.ParameterAlias,
                                 Value = 
                                     (p.ParameterDataType == "startdate") || (p.ParameterDataType == "enddate")
                                     ? DateTime.ParseExact(ParamList.Where(x => x.name == p.ParameterName).SingleOrDefault().value, "yyyy-MM-ddTHH:mm", System.Globalization.CultureInfo.InvariantCulture).ToString("yyyy-MM-dd HH:mm:ss") 
@@ -125,7 +126,7 @@ namespace ReportScheduleInWeb.Controllers
                         {
                             foreach (var p in ParameterList)
                             {
-                                wish_report_type_xml += "<CommandParameter Name=\"" + p.Name + "\" Value=\"" + p.Value + "\" />";
+                                wish_report_type_xml += "<CommandParameter Name=\"" + p.Name + "\" Alias=\"" + p.Alias + "\" Value=\"" + p.Value + "\" />";
                             }
                         }
                         wish_report_type_xml += "</TableDataSource>";

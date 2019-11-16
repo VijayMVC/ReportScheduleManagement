@@ -67,3 +67,58 @@ textarea {
 .sidebar-sticky {
     min-width: 185px;
 }
+
+.close {
+    color: #fff;
+    opacity: 1;
+    text-shadow: none;
+    transition: 1s;
+}
+
+.close:hover {
+    color: #ff0000;
+}
+
+.table-wish tr {
+    cursor: pointer;
+}
+
+.table-wish td {
+    font-size: 14px;
+    padding: 5px 3px 5px 3px;
+}
+
+.table-task td {
+    font-size: 12px;
+    padding: 4px 2px 4px 2px;
+}
+
+.table-hover tbody tr:hover td {
+    background-color: #4691f6;
+    color: #ffffff;
+    transition: 0.3s;
+}
+
+.vertical-alignment-helper {
+    display: table;
+    height: 100%;
+    width: 100%;
+    pointer-events: none;
+}
+
+.vertical-align-top {
+    /* To center vertically */
+    display: table-cell;
+    vertical-align: top;
+    pointer-events: none;
+}
+
+.modal-content {
+    /* Bootstrap sets the size of the modal in the modal-dialog class, we need to inherit it */
+    width: inherit;
+    max-width: inherit; /* For Bootstrap 4 - to avoid the modal window stretching full width */
+    height: inherit;
+    /* To center horizontally */
+    margin: 0 auto;
+    pointer-events: all;
+}

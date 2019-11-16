@@ -76,5 +76,7 @@ namespace ReportScheduleInWeb.Models
 
         [DisplayName("Заказчик")]
         public int User_id { get; set; }
+
+        public string User_name { get; set; }
     }
 }

@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 
 namespace ReportScheduleInWeb.Models
 {
+
     public class TaskViewModel
     {
         public int Task_id { get; set; }
@@ -24,5 +26,11 @@ namespace ReportScheduleInWeb.Models
 
         [DisplayName("Последняя ошибка")]
         public string Task_last_error_text { get; set; }
+
+        [DisplayName("Последняя ошибка")]
+        public string Task_last_error_text_short { get; set; }
+
+        public List<ParameterType> Parameters { get; set; }
+
     }
 }
