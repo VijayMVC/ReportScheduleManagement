@@ -123,7 +123,7 @@ namespace ReportScheduleInWeb.Controllers
                             Name = p.ParameterName,
                             Alias = p.ParameterAlias,
                             Type = p.ParameterDataType,
-                            Value = p.ParameterValue
+                            Value = (p.ParameterDataType == "startdate") || (p.ParameterDataType == "enddate") || (p.ParameterDataType == "date") ? DateTime.ParseExact(p.ParameterValue, "yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture).ToString() : p.ParameterValue
                         });
                     }
 

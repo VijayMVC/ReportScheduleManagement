@@ -109,6 +109,7 @@ namespace ReportScheduleInWeb.Controllers
                             {
                                 Name = p.ParameterName,
                                 Alias = p.ParameterAlias,
+                                Type = p.ParameterDataType,
                                 Value = 
                                     (p.ParameterDataType == "startdate") || (p.ParameterDataType == "enddate")
                                     ? DateTime.ParseExact(ParamList.Where(x => x.name == p.ParameterName).SingleOrDefault().value, "yyyy-MM-ddTHH:mm", System.Globalization.CultureInfo.InvariantCulture).ToString("yyyy-MM-dd HH:mm:ss") 
