@@ -102,15 +102,18 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <div class="row pb-3">
+                    <div class="row">
                         <div class="col-3">
                             <label class="text-warning h6">Дедлайн:</label>
                         </div>
-                        <div class="col-9">
+                        <div class="col-6">
                             <label class="text-light" id="labelDeadlineReport"></label>
                         </div>
+                        <div class="col-3">
+                            <button class="btn btn-outline-success my-2 my-sm-0 container-fluid mr-1" type="button" onclick="GetExcel(0)" id="GetExcelButton">Скачать Excel</button>
+                        </div>
                     </div>
-                    <div class="row pb-3">
+                    <div class="row">
                         <div class="col-3">
                             <label class="text-warning h6">Максимум попыток:</label>
                         </div>
@@ -118,7 +121,7 @@
                             <label class="text-light" id="labelAttemptsReport"></label>
                         </div>
                     </div>
-                    <div class="row pb-3">
+                    <div class="row">
                         <div class="col-3">
                             <label class="text-warning h6">Параметры:</label>
                         </div>
@@ -168,6 +171,10 @@
 
             $(".chosen-choices").css('font-size', '16px');
             $(".chosen-choices").css('min-height', '38px');
+
+            function GetExcel(TaskId) {
+                return false;
+            }
 
             function ClickSearch() {
                 var data = $("#SubmitForm").serialize();
@@ -254,6 +261,14 @@
                     url: url,
                     success: function (TaskList) {
                         GetParamValue(WishId);
+                        var GetExcelButton = document.getElementById('GetExcelButton');
+                        if (TaskList.some(item => item.Task_status === 'завершено')) {
+                            GetExcelButton.style.display = '';
+                        }
+                        else {
+                            GetExcelButton.style.display = 'none';
+                        }
+
                         //Места
                         var SetData = $("#FoundTasksList");
                         SetData.empty();
@@ -273,7 +288,12 @@
                                     Data += "<td style='text-align: center;'>-</td>";
                                 }
 
-                                Data += "<td style='text-align: center;'>" + TaskList[i].Task_status + "</td>";
+                                if (TaskList[i].Task_status === "завершено") {
+                                    Data += "<td style='text-align: center;'><a href='#' onclick='GetExcel(" + TaskList[i].Task_id + ")'>" + TaskList[i].Task_status + "</a></td>";
+                                }
+                                else {
+                                    Data += "<td style='text-align: center;'>" + TaskList[i].Task_status + "</td>";
+                                }
 
                                 if (TaskList[i].Task_last_error_text != null) {
                                     Data += "<td><a href='#' onclick='alert(&quot;" + TaskList[i].Task_last_error_text + "&quot;)'>"+ TaskList[i].Task_last_error_text_short + "</a></td>";
