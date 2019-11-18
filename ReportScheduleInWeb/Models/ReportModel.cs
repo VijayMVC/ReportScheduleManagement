@@ -29,6 +29,9 @@ namespace ReportScheduleInWeb
 
         [XmlAttribute("Alias")]
         public string ColumnAlias { get; set; }
+
+        [XmlAttribute("Type")]
+        public string ColumnType { get; set; }
     }
 
     public class Parameter

@@ -1,26 +1,38 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Runtime.Serialization;
 
 namespace ReportScheduleInWeb.Models
 {
+    [DataContract]
     public class ColumnType
     {
+        [DataMember]
         public string Name { get; set; }
 
+        [DataMember]
+        public string Type { get; set; }
+
+        [DataMember]
         public string Alias { get; set; }
     }
 
+    [DataContract]
     public class ParameterType
     {
+        [DataMember]
         public string Name { get; set; }
 
+        [DataMember]
         [DisplayName("Параметр")]
         public string Alias { get; set; }
 
+        [DataMember]
         [DisplayName("Значение")]
         public string Value { get; set; }
 
+        [DataMember]
         [DisplayName("Тип")]
         public string Type { get; set; }
     }

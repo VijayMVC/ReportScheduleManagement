@@ -15,6 +15,8 @@
     </div>
 </div>
 
+<input type="hidden" id="busy_page" />
+
 <nav class="navbar navbar-dark bg-dark card" style="min-width:645px">
     <form id="form" style="width:100%">
         <fieldset id="SubmitForm">
@@ -102,6 +104,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
+                    <input type="hidden" id="wish_id" />
                     <div class="row">
                         <div class="col-3">
                             <label class="text-warning h6">Дедлайн:</label>
@@ -173,6 +176,45 @@
             $(".chosen-choices").css('min-height', '38px');
 
             function GetExcel(TaskId) {
+                if ($('#busy_page').val() == "false") {
+                    $('#busy_page').val("true");
+
+                    var wish_id = $("#wish_id").val();
+
+                    if ((wish_id == null) || (wish_id == 0)) {
+                        alert("Непредвиденная ошибка! Выгрузка файла невозможна.");
+                        return false;
+                    }
+
+                    var data = new FormData();
+
+                    data.append("wish_id", wish_id);
+                    data.append("task_id", TaskId);
+
+                    $.ajax({
+                        type: "Post",
+                        data: data,
+                        contentType: false,
+                        processData: false,
+                        url: mainURL + "/Monitor/CreateExcel",
+                        success: function (Guid) {
+                            $('#busy_page').val("false");
+
+                            var pattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+                            if (pattern.test(Guid) !== true) {
+                                alert("Непредвиденная ошибка! Выгрузка файла невозможна.");
+                                return false;
+                            }
+
+                            window.location.href = mainURL + "/Monitor/GetFile?path=" + Guid;
+                        },
+                        error: function (xhr, status, p3) {
+                            $('#busy_page').val("false");
+                            alert(xhr.responseText);
+                        }
+                    })
+                }
                 return false;
             }
 
@@ -269,6 +311,8 @@
                             GetExcelButton.style.display = 'none';
                         }
 
+                        $('#wish_id').val(WishId);
+
                         //Места
                         var SetData = $("#FoundTasksList");
                         SetData.empty();
@@ -339,6 +383,7 @@
             }
 
             window.onload = function () {
+                $('#busy_page').val("false");
                 var search_user_id = localStorage.getItem("search_user_id");
                 var search_report_type_id = localStorage.getItem("search_report_type_id");
                 var search_status = localStorage.getItem("search_status");

@@ -121,7 +121,7 @@ namespace ReportScheduleInWeb.Controllers
                         wish_report_type_xml += "<TableDataSource SelectCommand=\"" + SecurityElement.Escape(report.SelectCommand) + "\">";
                         foreach (var c in report.Columns)
                         {
-                            wish_report_type_xml += "<Column Name=\"" + c.ColumnName + "\" Alias=\"" + c.ColumnAlias + "\" />";
+                            wish_report_type_xml += "<Column Name=\"" + c.ColumnName + "\" Type=\"" + c.ColumnType + "\" Alias=\"" + c.ColumnAlias + "\" />";
                         }
                         if (ParamList.Count != 0)
                         {
