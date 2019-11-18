@@ -127,7 +127,7 @@ namespace ReportScheduleInWeb.Controllers
                         {
                             foreach (var p in ParameterList)
                             {
-                                wish_report_type_xml += "<CommandParameter Name=\"" + p.Name + "\" Alias=\"" + p.Alias + "\" Value=\"" + p.Value + "\" />";
+                                wish_report_type_xml += "<CommandParameter Name=\"" + p.Name + "\" Alias=\"" + p.Alias + "\" DataType=\"" + p.Type + "\" Value=\"" + p.Value + "\" />";
                             }
                         }
                         wish_report_type_xml += "</TableDataSource>";
