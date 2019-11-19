@@ -45,6 +45,29 @@
           <Property Name="report_data_createdate" Type="datetime" Nullable="false" />
           <Property Name="report_data_xml" Type="nvarchar(max)" Nullable="false" />
         </EntityType>
+        <EntityType Name="Report_group_relation">
+          <Key>
+            <PropertyRef Name="rgr_id" />
+          </Key>
+          <Property Name="rgr_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="rgr_report_id" Type="int" Nullable="false" />
+          <Property Name="rgr_report_group_id" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Report_groups">
+          <Key>
+            <PropertyRef Name="report_group_id" />
+          </Key>
+          <Property Name="report_group_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="report_group_name" Type="nvarchar(max)" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Report_place_relation">
+          <Key>
+            <PropertyRef Name="rpr_id" />
+          </Key>
+          <Property Name="rpr_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="rpr_report_type_id" Type="int" Nullable="false" />
+          <Property Name="rpr_place_id" Type="int" Nullable="false" />
+        </EntityType>
         <EntityType Name="Report_types">
           <Key>
             <PropertyRef Name="report_type_id" />
@@ -149,6 +172,54 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_Report_group_relation_Report_groups">
+          <End Role="Report_groups" Type="Self.Report_groups" Multiplicity="1" />
+          <End Role="Report_group_relation" Type="Self.Report_group_relation" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Report_groups">
+              <PropertyRef Name="report_group_id" />
+            </Principal>
+            <Dependent Role="Report_group_relation">
+              <PropertyRef Name="rgr_report_group_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Report_group_relation_Report_types">
+          <End Role="Report_types" Type="Self.Report_types" Multiplicity="1" />
+          <End Role="Report_group_relation" Type="Self.Report_group_relation" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Report_types">
+              <PropertyRef Name="report_type_id" />
+            </Principal>
+            <Dependent Role="Report_group_relation">
+              <PropertyRef Name="rgr_report_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Report_place_relation_Places">
+          <End Role="Places" Type="Self.Places" Multiplicity="1" />
+          <End Role="Report_place_relation" Type="Self.Report_place_relation" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Places">
+              <PropertyRef Name="place_id" />
+            </Principal>
+            <Dependent Role="Report_place_relation">
+              <PropertyRef Name="rpr_place_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Report_place_relation_Report_types">
+          <End Role="Report_types" Type="Self.Report_types" Multiplicity="1" />
+          <End Role="Report_place_relation" Type="Self.Report_place_relation" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Report_types">
+              <PropertyRef Name="report_type_id" />
+            </Principal>
+            <Dependent Role="Report_place_relation">
+              <PropertyRef Name="rpr_report_type_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK_Role_permissions_Permissions">
           <End Role="Permissions" Type="Self.Permissions" Multiplicity="1" />
           <End Role="Role_permissions" Type="Self.Role_permissions" Multiplicity="*" />
@@ -239,6 +310,9 @@
           <EntitySet Name="Place_types" EntityType="Self.Place_types" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Places" EntityType="Self.Places" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Report_data" EntityType="Self.Report_data" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Report_group_relation" EntityType="Self.Report_group_relation" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Report_groups" EntityType="Self.Report_groups" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Report_place_relation" EntityType="Self.Report_place_relation" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Report_types" EntityType="Self.Report_types" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Role_permissions" EntityType="Self.Role_permissions" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Roles" EntityType="Self.Roles" Schema="dbo" store:Type="Tables" />
@@ -257,6 +331,22 @@
           <AssociationSet Name="FK_Report_data_Tasks" Association="Self.FK_Report_data_Tasks">
             <End Role="Tasks" EntitySet="Tasks" />
             <End Role="Report_data" EntitySet="Report_data" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Report_group_relation_Report_groups" Association="Self.FK_Report_group_relation_Report_groups">
+            <End Role="Report_groups" EntitySet="Report_groups" />
+            <End Role="Report_group_relation" EntitySet="Report_group_relation" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Report_group_relation_Report_types" Association="Self.FK_Report_group_relation_Report_types">
+            <End Role="Report_types" EntitySet="Report_types" />
+            <End Role="Report_group_relation" EntitySet="Report_group_relation" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Report_place_relation_Places" Association="Self.FK_Report_place_relation_Places">
+            <End Role="Places" EntitySet="Places" />
+            <End Role="Report_place_relation" EntitySet="Report_place_relation" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Report_place_relation_Report_types" Association="Self.FK_Report_place_relation_Report_types">
+            <End Role="Report_types" EntitySet="Report_types" />
+            <End Role="Report_place_relation" EntitySet="Report_place_relation" />
           </AssociationSet>
           <AssociationSet Name="FK_Role_permissions_Permissions" Association="Self.FK_Role_permissions_Permissions">
             <End Role="Permissions" EntitySet="Permissions" />
@@ -309,6 +399,7 @@
           <Property Name="place_name_in_report" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
           <NavigationProperty Name="Tasks" Relationship="Self.FK_Tasks_Places" FromRole="Places" ToRole="Tasks" />
           <NavigationProperty Name="Place_type_relation" Relationship="ReportScheduleModel.FK_Place_type_relation_Places" FromRole="Places" ToRole="Place_type_relation" />
+          <NavigationProperty Name="Report_place_relation" Relationship="ReportScheduleModel.FK_Report_place_relation_Places" FromRole="Places" ToRole="Report_place_relation" />
         </EntityType>
         <EntityType Name="Report_data">
           <Key>
@@ -327,6 +418,8 @@
           <Property Name="report_type_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="report_type_name" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
           <Property Name="report_type_xml" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
+          <NavigationProperty Name="Report_group_relation" Relationship="ReportScheduleModel.FK_Report_group_relation_Report_types" FromRole="Report_types" ToRole="Report_group_relation" />
+          <NavigationProperty Name="Report_place_relation" Relationship="ReportScheduleModel.FK_Report_place_relation_Report_types" FromRole="Report_types" ToRole="Report_place_relation" />
         </EntityType>
         <EntityType Name="Role_permissions">
           <Key>
@@ -538,6 +631,25 @@
             <End Role="Users" EntitySet="Users" />
             <End Role="Wishes" EntitySet="Wishes" />
           </AssociationSet>
+          <EntitySet Name="Report_group_relation" EntityType="ReportScheduleModel.Report_group_relation" />
+          <EntitySet Name="Report_groups" EntityType="ReportScheduleModel.Report_groups" />
+          <AssociationSet Name="FK_Report_group_relation_Report_groups" Association="ReportScheduleModel.FK_Report_group_relation_Report_groups">
+            <End Role="Report_groups" EntitySet="Report_groups" />
+            <End Role="Report_group_relation" EntitySet="Report_group_relation" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Report_group_relation_Report_types" Association="ReportScheduleModel.FK_Report_group_relation_Report_types">
+            <End Role="Report_types" EntitySet="Report_types" />
+            <End Role="Report_group_relation" EntitySet="Report_group_relation" />
+          </AssociationSet>
+          <EntitySet Name="Report_place_relation" EntityType="ReportScheduleModel.Report_place_relation" />
+          <AssociationSet Name="FK_Report_place_relation_Places" Association="ReportScheduleModel.FK_Report_place_relation_Places">
+            <End Role="Places" EntitySet="Places" />
+            <End Role="Report_place_relation" EntitySet="Report_place_relation" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Report_place_relation_Report_types" Association="ReportScheduleModel.FK_Report_place_relation_Report_types">
+            <End Role="Report_types" EntitySet="Report_types" />
+            <End Role="Report_place_relation" EntitySet="Report_place_relation" />
+          </AssociationSet>
         </EntityContainer>
         <EntityType Name="Place_type_relation">
           <Key>
@@ -590,6 +702,82 @@
             </Principal>
             <Dependent Role="Wishes">
               <PropertyRef Name="wish_user_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="Report_group_relation">
+          <Key>
+            <PropertyRef Name="rgr_id" />
+          </Key>
+          <Property Name="rgr_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="rgr_report_id" Type="Int32" Nullable="false" />
+          <Property Name="rgr_report_group_id" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Report_groups" Relationship="ReportScheduleModel.FK_Report_group_relation_Report_groups" FromRole="Report_group_relation" ToRole="Report_groups" />
+          <NavigationProperty Name="Report_types" Relationship="ReportScheduleModel.FK_Report_group_relation_Report_types" FromRole="Report_group_relation" ToRole="Report_types" />
+        </EntityType>
+        <EntityType Name="Report_groups">
+          <Key>
+            <PropertyRef Name="report_group_id" />
+          </Key>
+          <Property Name="report_group_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="report_group_name" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Report_group_relation" Relationship="ReportScheduleModel.FK_Report_group_relation_Report_groups" FromRole="Report_groups" ToRole="Report_group_relation" />
+        </EntityType>
+        <Association Name="FK_Report_group_relation_Report_groups">
+          <End Type="ReportScheduleModel.Report_groups" Role="Report_groups" Multiplicity="1" />
+          <End Type="ReportScheduleModel.Report_group_relation" Role="Report_group_relation" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Report_groups">
+              <PropertyRef Name="report_group_id" />
+            </Principal>
+            <Dependent Role="Report_group_relation">
+              <PropertyRef Name="rgr_report_group_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Report_group_relation_Report_types">
+          <End Type="ReportScheduleModel.Report_types" Role="Report_types" Multiplicity="1" />
+          <End Type="ReportScheduleModel.Report_group_relation" Role="Report_group_relation" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Report_types">
+              <PropertyRef Name="report_type_id" />
+            </Principal>
+            <Dependent Role="Report_group_relation">
+              <PropertyRef Name="rgr_report_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="Report_place_relation">
+          <Key>
+            <PropertyRef Name="rpr_id" />
+          </Key>
+          <Property Name="rpr_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="rpr_report_type_id" Type="Int32" Nullable="false" />
+          <Property Name="rpr_place_id" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Places" Relationship="ReportScheduleModel.FK_Report_place_relation_Places" FromRole="Report_place_relation" ToRole="Places" />
+          <NavigationProperty Name="Report_types" Relationship="ReportScheduleModel.FK_Report_place_relation_Report_types" FromRole="Report_place_relation" ToRole="Report_types" />
+        </EntityType>
+        <Association Name="FK_Report_place_relation_Places">
+          <End Type="ReportScheduleModel.Places" Role="Places" Multiplicity="1" />
+          <End Type="ReportScheduleModel.Report_place_relation" Role="Report_place_relation" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Places">
+              <PropertyRef Name="place_id" />
+            </Principal>
+            <Dependent Role="Report_place_relation">
+              <PropertyRef Name="rpr_place_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Report_place_relation_Report_types">
+          <End Type="ReportScheduleModel.Report_types" Role="Report_types" Multiplicity="1" />
+          <End Type="ReportScheduleModel.Report_place_relation" Role="Report_place_relation" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Report_types">
+              <PropertyRef Name="report_type_id" />
+            </Principal>
+            <Dependent Role="Report_place_relation">
+              <PropertyRef Name="rpr_report_type_id" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -716,6 +904,32 @@
               <MappingFragment StoreEntitySet="Place_types">
                 <ScalarProperty Name="placetype_name" ColumnName="placetype_name" />
                 <ScalarProperty Name="placetype_id" ColumnName="placetype_id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Report_group_relation">
+            <EntityTypeMapping TypeName="ReportScheduleModel.Report_group_relation">
+              <MappingFragment StoreEntitySet="Report_group_relation">
+                <ScalarProperty Name="rgr_report_group_id" ColumnName="rgr_report_group_id" />
+                <ScalarProperty Name="rgr_report_id" ColumnName="rgr_report_id" />
+                <ScalarProperty Name="rgr_id" ColumnName="rgr_id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Report_groups">
+            <EntityTypeMapping TypeName="ReportScheduleModel.Report_groups">
+              <MappingFragment StoreEntitySet="Report_groups">
+                <ScalarProperty Name="report_group_name" ColumnName="report_group_name" />
+                <ScalarProperty Name="report_group_id" ColumnName="report_group_id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Report_place_relation">
+            <EntityTypeMapping TypeName="ReportScheduleModel.Report_place_relation">
+              <MappingFragment StoreEntitySet="Report_place_relation">
+                <ScalarProperty Name="rpr_place_id" ColumnName="rpr_place_id" />
+                <ScalarProperty Name="rpr_report_type_id" ColumnName="rpr_report_type_id" />
+                <ScalarProperty Name="rpr_id" ColumnName="rpr_id" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

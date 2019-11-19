@@ -27,6 +27,13 @@
         <AssociationConnector Association="ReportScheduleModel.FK_Place_type_relation_Place_types" />
         <AssociationConnector Association="ReportScheduleModel.FK_Place_type_relation_Places" />
         <AssociationConnector Association="ReportScheduleModel.FK_Wishes_Users" />
+        <EntityTypeShape EntityType="ReportScheduleModel.Report_group_relation" Width="1.5" PointX="10" PointY="0.75" />
+        <EntityTypeShape EntityType="ReportScheduleModel.Report_groups" Width="1.5" PointX="7.75" PointY="4" />
+        <AssociationConnector Association="ReportScheduleModel.FK_Report_group_relation_Report_groups" />
+        <AssociationConnector Association="ReportScheduleModel.FK_Report_group_relation_Report_types" />
+        <EntityTypeShape EntityType="ReportScheduleModel.Report_place_relation" Width="1.5" PointX="10" PointY="4.375" />
+        <AssociationConnector Association="ReportScheduleModel.FK_Report_place_relation_Places" />
+        <AssociationConnector Association="ReportScheduleModel.FK_Report_place_relation_Report_types" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

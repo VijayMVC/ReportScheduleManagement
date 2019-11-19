@@ -1,58 +1,61 @@
 ﻿@model ReportScheduleInWeb.Models.WishViewModel
-@{ 
-	ReportScheduleInWeb.Models.ParameterType parameterModel = null;
+@{
+    ReportScheduleInWeb.Models.ParameterType parameterModel = null;
 }
 
 @{
-	ViewBag.Title = "Создать задание";
-	Layout = "~/Views/Shared/_Layout.cshtml";
-	var db = new ReportScheduleInWeb.Models.ReportScheduleEntities();
+    ViewBag.Title = "Создать задание";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var db = new ReportScheduleInWeb.Models.ReportScheduleEntities();
 }
 
 <div class="row align-items-center">
-	<div class="col-12">
-		<p class="display-4" style="color: #663333 !important">Новое задание</p>
-	</div>
+    <div class="col-12">
+        <p class="display-4" style="color: #663333 !important">Новое задание</p>
+    </div>
 </div>
+
+<input type="hidden" id="busy_page" />
+
 <div class="row">
-	<div class="program-selection">
+    <div class="program-selection">
 
-		<ul class="nav nav-tabs">
-			<li class="nav-item pr-1"><a class="nav-link text-dark bg-white active" href="#program-selection-step-1" data-toggle="tab">Тип отчета</a></li>
-			<li class="nav-item pr-1"><a class="nav-link text-white bg-dark disabled" href="#program-selection-step-2" data-toggle="tab">Параметры</a></li>
-			<li class="nav-item pr-1"><a class="nav-link text-white bg-dark disabled" href="#program-selection-step-3" data-toggle="tab">Места</a></li>
-			<li class="nav-item pr-1"><a class="nav-link text-white bg-dark disabled" href="#program-selection-step-4" data-toggle="tab">Расписание</a></li>
-			<li class="nav-item pr-1"><a class="nav-link text-white bg-dark disabled" href="#program-selection-step-5" data-toggle="tab">Подтверждение</a></li>
-		</ul>
+        <ul class="nav nav-tabs">
+            <li class="nav-item pr-1"><a class="nav-link text-dark bg-white active" href="#program-selection-step-1" data-toggle="tab">Тип отчета</a></li>
+            <li class="nav-item pr-1"><a class="nav-link text-white bg-dark disabled" href="#program-selection-step-2" data-toggle="tab">Параметры</a></li>
+            <li class="nav-item pr-1"><a class="nav-link text-white bg-dark disabled" href="#program-selection-step-3" data-toggle="tab">Места</a></li>
+            <li class="nav-item pr-1"><a class="nav-link text-white bg-dark disabled" href="#program-selection-step-4" data-toggle="tab">Расписание</a></li>
+            <li class="nav-item pr-1"><a class="nav-link text-white bg-dark disabled" href="#program-selection-step-5" data-toggle="tab">Подтверждение</a></li>
+        </ul>
 
-		<div class="tab-content bg-dark mr-1 mt-1">
-			<div class="tab-pane fade in active show p-3" id="program-selection-step-1">
-				<p class="h4 text-white pb-2">Выберите тип отчета</p>
-				<div class="pb-3">
-					@Html.DropDownListFor(m => m.Report_type_id, new SelectList(db.Report_types.ToList(), "Report_type_id", "Report_type_name"), "Не выбрано", new { @class = "custom-select form-control", @style = "width:100%" })
-				</div>
+        <div class="tab-content bg-dark mr-1 mt-1">
+            <div class="tab-pane fade in active show p-3" id="program-selection-step-1">
+                <p class="h4 text-white pb-2">Выберите тип отчета</p>
+                <div class="pb-3">
+                    @*@Html.DropDownListFor(m => m.Report_type_id, new SelectList(db.Report_types.Join(db.rep).ToList(), "Report_type_id", "Report_type_name", ), "Не выбрано", new { @class = "custom-select form-control", @style = "width:100%" })*@
+                    @Html.DropDownListFor(m => m.Report_type_id, new SelectList(from rt in db.Report_types join rgr in db.Report_group_relation on rt.report_type_id equals rgr.rgr_report_id join rg in db.Report_groups on rgr.rgr_report_group_id equals rg.report_group_id select new { Report_type_id = rt.report_type_id, Report_type_name = rt.report_type_name, Report_group_name = rg.report_group_name }, "Report_type_id", "Report_type_name", "Report_group_name", 1), "Не выбрано", new { @class = "custom-select form-control", @style = "width:100%" })
+                </div>
                 <input value="Далее" class="btn btn-primary program-selection__button one-next" type="button" data-href="#program-selection-step-2">
-			</div><!-- tab-pane -->
-			<div class="tab-pane fade p-3" id="program-selection-step-2">
-				<p class="h4 text-white bg-dark pb-2">Значения параметров</p>
-				<table class="table table-bordered table-hover table-striped table-light">
-					<tr class="bg-secondary" style="text-align:center">
-						<th scope="col">
-							@Html.DisplayNameFor(p => parameterModel.Alias).ToString()
-						</th>
-						<th scope="col">
-							@Html.DisplayNameFor(p => parameterModel.Type).ToString()
-						</th>
-						<th scope="col">
-							@Html.DisplayNameFor(p => parameterModel.Value).ToString()
-						</th>
-					</tr>
-					<tbody id="SetParameterList">
-					</tbody>
-				</table>
-				<input value="Назад" class="btn btn-danger program-selection__button" type="button" data-href="#program-selection-step-1">
-				<input value="Далее" class="btn btn-primary program-selection__button two-next" type="button" data-href="#program-selection-step-3">
-			</div><!-- tab-pane -->
+            </div><!-- tab-pane -->
+            <div class="tab-pane fade p-3" id="program-selection-step-2">
+                <p class="h4 text-white bg-dark pb-2">Значения параметров</p>
+                <table class="table table-bordered table-hover table-striped table-light">
+                    <tr class="bg-secondary" style="text-align:center">
+                        <th scope="col">
+                            @Html.DisplayNameFor(p => parameterModel.Alias).ToString()
+                        </th>
+                        <th scope="col">
+                            @Html.DisplayNameFor(p => parameterModel.Type).ToString()
+                        </th>
+                        <th scope="col">
+                            @Html.DisplayNameFor(p => parameterModel.Value).ToString()
+                        </th>
+                    </tr>
+                    <tbody id="SetParameterList"></tbody>
+                </table>
+                <input value="Назад" class="btn btn-danger program-selection__button" type="button" data-href="#program-selection-step-1">
+                <input value="Далее" class="btn btn-primary program-selection__button two-next" type="button" data-href="#program-selection-step-3">
+            </div><!-- tab-pane -->
             <div class="tab-pane fade p-3" id="program-selection-step-3">
                 <p class="h4 text-white bg-dark pb-2">Выберите места запуска отчета</p>
                 <div class="row align-items-center pb-2">
@@ -68,7 +71,8 @@
                 </div>
                 <div class="row pb-3">
                     <div class="col-9 mr-0 pr-0">
-                        @Html.DropDownList("wish_places", new SelectList(db.Places.ToList(), "place_id", "place_name"), new { @class = "form-control chosen-select", @multiple = "true" })
+                        @*@Html.DropDownList("wish_places", new SelectList(db.Places.ToList(), "place_id", "place_name"), new { @class = "form-control chosen-select", @multiple = "true" })*@
+                        @Html.DropDownList("wish_places", new SelectList(from p in db.Places join ptr in db.Place_type_relation on p.place_id equals ptr.ptr_place_id join pt in db.Place_types on ptr.ptr_place_type_id equals pt.placetype_id select new { place_id = p.place_id, place_name = p.place_name, placetype_name = pt.placetype_name }, "place_id", "place_name", "placetype_name", 0), new { @class = "form-control chosen-select", @multiple = "true" })
                     </div>
                     <div class="col-3" style="text-align:right">
                         <input value="Очистить" class="btn btn-info" type="button" onclick="AddPlacesInSelect(0)">
@@ -182,14 +186,14 @@
                 <input value="Назад" class="btn btn-danger program-selection__button" type="button" data-href="#program-selection-step-4">
                 <input value="Заказать отчет" class="btn btn-success" type="submit" onclick="InsertNewWish()">
             </div><!-- tab-pane -->
-		</div><!-- tab-content -->
+        </div><!-- tab-content -->
 
-	</div><!-- program-selection -->
+    </div><!-- program-selection -->
 </div>
 
 @section scripts {
-	<script>
-		$(".chosen-select").chosen({
+    <script>
+        $(".chosen-select").chosen({
             width: "100%",
             no_results_text: "Ничего не найдено",
             placeholder_text_multiple: "Выберите места",
@@ -199,110 +203,132 @@
             max_shown_results: Infinity
         });
 
-        $(".chosen-choices").css('font-size','1rem');
+        $(".chosen-choices").css('font-size', '1rem');
 
-		function fillParameterList(report_type_id) {
-			var url = mainURL + "/Wish/GetParameters?ReportTypeId=" + report_type_id;
+        function fillParameterList(report_type_id) {
+            var url = mainURL + "/Wish/GetParameters?ReportTypeId=" + report_type_id;
 
-			$.ajax({
-				type: "GET",
-				url: url,
-				success: function (ParameterList) {
-					var SetData = $("#SetParameterList");
-					SetData.empty();
-					if (ParameterList.length == 0) {
-						var Data = "<tr class='row_0'> <td colspan='3'>Параметров нет.</td></tr>";
-						SetData.append(Data);
-					}
-					else {
-						for (var i = 0; i < ParameterList.length; i++) {
-							var Data = "<tr class='row_" + ParameterList[i].Name + "'>" +
-								"<td>" + ParameterList[i].Alias + "</td>" +
-								"<td>" + ParameterList[i].Type + "</td>";
-							switch (ParameterList[i].Type) {
-								case 'string':
-									Data += "<td><input type='text' class='parameterValue' placeholder='Введите значение' required></td>";
-									break;
-								case 'startdate':
-									var now = new Date();
-									Data += "<td><input type='datetime-local' class='parameterValue' value='" + now.getFullYear() + "-" + ("0" + (now.getMonth() + 1)).slice(-2) + "-" + ("0" + now.getDate()).slice(-2) + "T00:00' required></td>";
-									break;
-								case 'enddate':
-									var now = new Date();
-									Data += "<td><input type='datetime-local' class='parameterValue' value='" + now.getFullYear() + "-" + ("0" + (now.getMonth() + 1)).slice(-2) + "-" + ("0" + now.getDate()).slice(-2) + "T23:59' required></td>";
-									break;
-							}
-									
-							Data += "</tr>";
-							SetData.append(Data);
-						}
-					}
-				}
-			})
-		}
-		
-		function checkReportType() {
-			var $program_selection = $('div.program-selection');
-			var report_type_id = $('#Report_type_id').val();
+            $.ajax({
+                type: "GET",
+                url: url,
+                success: function (ParameterList) {
+                    var SetData = $("#SetParameterList");
+                    SetData.empty();
+                    if (ParameterList.length == 0) {
+                        var Data = "<tr class='row_0'> <td colspan='3'>Параметров нет.</td></tr>";
+                        SetData.append(Data);
+                    }
+                    else {
+                        for (var i = 0; i < ParameterList.length; i++) {
+                            var Data = "<tr class='row_" + ParameterList[i].Name + "'>" +
+                                "<td>" + ParameterList[i].Alias + "</td>" +
+                                "<td>" + ParameterList[i].Type + "</td>";
+                            switch (ParameterList[i].Type) {
+                                case 'string':
+                                    Data += "<td><input type='text' class='parameterValue' placeholder='Введите значение' required></td>";
+                                    break;
+                                case 'startdate':
+                                    var now = new Date();
+                                    Data += "<td><input type='datetime-local' class='parameterValue' value='" + now.getFullYear() + "-" + ("0" + (now.getMonth() + 1)).slice(-2) + "-" + ("0" + now.getDate()).slice(-2) + "T00:00' required></td>";
+                                    break;
+                                case 'enddate':
+                                    var now = new Date();
+                                    Data += "<td><input type='datetime-local' class='parameterValue' value='" + now.getFullYear() + "-" + ("0" + (now.getMonth() + 1)).slice(-2) + "-" + ("0" + now.getDate()).slice(-2) + "T23:59' required></td>";
+                                    break;
+                            }
 
-			//Выбрали отчет
-			if (report_type_id.length != 0) {
-				$('input.one-next', $program_selection).removeAttr('disabled');
-
-				//Подгрузка параметров отчета
-				fillParameterList(report_type_id);
-			}
-			else {
-				$('input.one-next', $program_selection).attr('disabled', 'disabled');
-			}
-		}
-
-		function checkParameters() {
-			var $program_selection = $('div.program-selection');
-			var no_param = $('#row_0');
-
-			//Есть параметры
-			if (no_param.length == 0) {
-				var flag = true;
-				$('input.parameterValue', $program_selection).each(function () {
-					switch ($(this).attr('type')) {
-						case 'text':
-							var value = $(this).val().replace(/ +/g, '');
-							if (value.length === 0) {
-								flag = false;
-							}
-							break;
-						case 'datetime-local':
-							var value = $(this).val();
-							if ((this.validity.badInput) || (value.length === 0)) {
-								flag = false;
-							}
-							break;
-					}
-					if (!flag)
-						return false;
-				});
-
-				if (!flag) {
-					alert("Ошибка! Проверьте введенные значения параметров.");
-					return false;
-				}
-			}
-			return true;
+                            Data += "</tr>";
+                            SetData.append(Data);
+                        }
+                    }
+                }
+            })
         }
 
-		function EnableAddPlaceType() {
-			var $program_selection = $('div.program-selection');
-			var place_types = $('#place_types').val();
+        function fillPlaceList(report_type_id) {
+            var url = mainURL + "/Wish/GetPlaces?ReportTypeId=" + report_type_id;
 
-			//Выбрали тип места
-			if (place_types.length != 0) {
-				$('input.add-place-type', $program_selection).removeAttr('disabled');
-			}
-			else {
-				$('input.add-place-type', $program_selection).attr('disabled', 'disabled');
-			}
-		}
+            $.ajax({
+                type: "GET",
+                url: url,
+                success: function (PlaceList) {
+                    var SetData = $("#wish_places");
+                    SetData.val("").trigger("chosen:updated");
+                    SetData.empty();
+                    for (var i = 0; i < PlaceList.length; i++) {
+                        var newPlace = $("<option value='" + PlaceList[i].Place_id + "'>" + PlaceList[i].Place_name + "</option>");
+                        SetData.append(newPlace);
+                    }
+                    SetData.trigger("chosen:updated");
+                }
+            })
+        }
+
+        function checkReportType() {
+            var $program_selection = $('div.program-selection');
+            var report_type_id = $('#Report_type_id').val();
+
+            //Выбрали отчет
+            if (report_type_id.length != 0) {
+                $('input.one-next', $program_selection).removeAttr('disabled');
+
+                //Подгрузка параметров отчета
+                fillParameterList(report_type_id);
+
+                //Подгрузка параметров отчета
+                fillPlaceList(report_type_id);
+            }
+            else {
+                $('input.one-next', $program_selection).attr('disabled', 'disabled');
+            }
+        }
+
+        function checkParameters() {
+            var $program_selection = $('div.program-selection');
+            var no_param = $('#row_0');
+
+            //Есть параметры
+            if (no_param.length == 0) {
+                var flag = true;
+                $('input.parameterValue', $program_selection).each(function () {
+                    switch ($(this).attr('type')) {
+                        case 'text':
+                            var value = $(this).val().replace(/ +/g, '');
+                            if (value.length === 0) {
+                                flag = false;
+                            }
+                            break;
+                        case 'datetime-local':
+                            var value = $(this).val();
+                            if ((this.validity.badInput) || (value.length === 0)) {
+                                flag = false;
+                            }
+                            break;
+                    }
+                    if (!flag)
+                        return false;
+                });
+
+                if (!flag) {
+                    alert("Ошибка! Проверьте введенные значения параметров.");
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function EnableAddPlaceType() {
+            var $program_selection = $('div.program-selection');
+            var place_types = $('#place_types').val();
+
+            //Выбрали тип места
+            if (place_types.length != 0) {
+                $('input.add-place-type', $program_selection).removeAttr('disabled');
+            }
+            else {
+                $('input.add-place-type', $program_selection).attr('disabled', 'disabled');
+            }
+        }
 
         function checkPlaces() {
             var places = $('#wish_places').val();
@@ -312,7 +338,7 @@
                 return false;
             }
 
-			return true;
+            return true;
         }
 
         function AddPlacesInSelect(PlaceTypeId) {
@@ -352,7 +378,7 @@
                 if ((this.validity.badInput) || (value.length === 0)) {
                     flag = false;
                 }
-                if (!flag) 
+                if (!flag)
                     return false;
             });
 
@@ -361,7 +387,7 @@
                 return false;
             }
 
-			return true;
+            return true;
         }
 
         function CheckDeadline() {
@@ -489,7 +515,7 @@
             });
 
             var SetData = $("#SetScheduleList");
-			SetData.empty();
+            SetData.empty();
             for (var i = 0; i < arr1.length; i++) {
                 var Data = "<tr><td>" + arr1[i].id + "</td><td>" + arr1[i].name + "</td>";
                 Data += "<td><input type='datetime-local' class='startDatePlace' value='" + arr1[i].startDate + "' required></td></tr>";
@@ -519,7 +545,7 @@
                     }
                     else {
                         if ($(this).hasClass("btn btn-primary program-selection__button three-next"))
-                        fillscheduleTable()
+                            fillscheduleTable()
                     }
 
 
@@ -545,24 +571,24 @@
                     fillInfoReport();
                 }
 
-				$('ul.nav-tabs a', $program_selection).removeClass('text-dark');
-				$('ul.nav-tabs a', $program_selection).removeClass('bg-white');
-				$('ul.nav-tabs a', $program_selection).addClass('text-white');
-				$('ul.nav-tabs a', $program_selection).addClass('bg-dark');
-				$('ul.nav-tabs a', $program_selection).addClass('disabled');
+                $('ul.nav-tabs a', $program_selection).removeClass('text-dark');
+                $('ul.nav-tabs a', $program_selection).removeClass('bg-white');
+                $('ul.nav-tabs a', $program_selection).addClass('text-white');
+                $('ul.nav-tabs a', $program_selection).addClass('bg-dark');
+                $('ul.nav-tabs a', $program_selection).addClass('disabled');
 
-				$('a[href="' + id + '"]', $program_selection).removeClass('text-white');
-				$('a[href="' + id + '"]', $program_selection).removeClass('bg-dark');
-				$('a[href="' + id + '"]', $program_selection).addClass('text-dark');
-				$('a[href="' + id + '"]', $program_selection).addClass('bg-white');
+                $('a[href="' + id + '"]', $program_selection).removeClass('text-white');
+                $('a[href="' + id + '"]', $program_selection).removeClass('bg-dark');
+                $('a[href="' + id + '"]', $program_selection).addClass('text-dark');
+                $('a[href="' + id + '"]', $program_selection).addClass('bg-white');
 
-				$('a[href="' + id + '"]', $program_selection).removeClass('disabled');
-				$('a[href="' + id + '"]', $program_selection).tab('show');
-			});
+                $('a[href="' + id + '"]', $program_selection).removeClass('disabled');
+                $('a[href="' + id + '"]', $program_selection).tab('show');
+            });
         }
 
-		$(function () {
-			checkReportType();
+        $(function () {
+            checkReportType();
             initProgramSelection();
             EnableAddPlaceType();
             fillstartdateValue();
@@ -578,12 +604,12 @@
             deadlineDate.value = now.getFullYear() + "-" + ("0" + (now.getMonth() + 1)).slice(-2) + "-" + ("0" + now.getDate()).slice(-2) + "T00:00";
         }
 
-		$("#Report_type_id").change(function () {
-			checkReportType();
+        $("#Report_type_id").change(function () {
+            checkReportType();
         });
 
-		$("#place_types").change(function () {
-			EnableAddPlaceType();
+        $("#place_types").change(function () {
+            EnableAddPlaceType();
         });
 
         $("#customSwitch").change(function () {
@@ -614,11 +640,14 @@
                 $('input.btn-success', $program_selection).removeAttr('disabled');
             }
             else {
-				$('input.btn-success', $program_selection).attr('disabled', 'disabled');
+                $('input.btn-success', $program_selection).attr('disabled', 'disabled');
             }
         }
 
-        function InsertNewWish() {
+    function InsertNewWish() {
+        if ($('#busy_page').val() == "false") {
+            $('#busy_page').val("true");
+
             //Проверка всех данных перед отправкой
             var deadlineValue;
             var attemptsCount;
@@ -651,7 +680,7 @@
                 if (ParamTable.rows[0].cells.length > 1) {
                     parameters = $('#SetParameterList tr').map(function (i, row) {
                         return {
-                            'name': row.className.replace('row_',''),
+                            'name': row.className.replace('row_', ''),
                             'value': row.cells[2].childNodes[0].value
                         }
                     }).get();
@@ -685,6 +714,7 @@
             }
             catch
             {
+                $('#busy_page').val("false");
                 alert("Ошибка при проверке данных! Проверьте данные по вкладкам.");
                 return false;
             }
@@ -702,17 +732,26 @@
 
             data += '&parameters=' + JSON.stringify(parameters)
 
-            data += '&places=' +  JSON.stringify(places)
+            data += '&places=' + JSON.stringify(places)
 
             $.ajax({
                 type: "Post",
                 data: data,
                 url: mainURL + "/Wish/AddWish",
                 success: function (result) {
+                    $('#busy_page').val("false");
                     alert("Новое задание добавлено");
                     window.location.href = mainURL + "/Home/Index";
+                },
+                error: function (xhr, status, p3) {
+                    $('#busy_page').val("false");
+                    alert(xhr.responseText);
                 }
             })
         }
-	</script>
+    }
+            window.onload = function () {
+                $('#busy_page').val("false");
+            }
+    </script>
 }

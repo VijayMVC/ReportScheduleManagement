@@ -37,5 +37,8 @@ namespace ReportScheduleInWeb.Models
         public virtual DbSet<Wishes> Wishes { get; set; }
         public virtual DbSet<Place_type_relation> Place_type_relation { get; set; }
         public virtual DbSet<Place_types> Place_types { get; set; }
+        public virtual DbSet<Report_group_relation> Report_group_relation { get; set; }
+        public virtual DbSet<Report_groups> Report_groups { get; set; }
+        public virtual DbSet<Report_place_relation> Report_place_relation { get; set; }
     }
 }

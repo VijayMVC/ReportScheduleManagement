@@ -31,7 +31,7 @@
                     <div class="input-group-prepend">
                         <span class="input-group-text bg-dark text-white">Отчет:</span>
                     </div>
-                    @Html.DropDownList("search_report_type_id", new SelectList(db.Report_types.ToList(), "Report_type_id", "Report_type_name"), "Не выбрано", new { @class = "custom-select" })
+                    @Html.DropDownList("search_report_type_id", new SelectList(from rt in db.Report_types join rgr in db.Report_group_relation on rt.report_type_id equals rgr.rgr_report_id join rg in db.Report_groups on rgr.rgr_report_group_id equals rg.report_group_id select new { Report_type_id = rt.report_type_id, Report_type_name = rt.report_type_name, Report_group_name = rg.report_group_name }, "Report_type_id", "Report_type_name", "Report_group_name", 1), "Не выбрано", new { @class = "custom-select form-control" })
                 </div>
                 <div class="col-xl-4 input-group mb-2">
                     <div class="input-group-prepend">
@@ -45,7 +45,7 @@
                     <div class="input-group-prepend">
                         <span class="input-group-text bg-dark text-white">Места:</span>
                     </div>
-                    @Html.DropDownList("search_places", new SelectList(db.Places.ToList(), "place_id", "place_name"), new { @class = "chosen-select", @multiple = "true" })
+                    @Html.DropDownList("search_places", new SelectList(from p in db.Places join ptr in db.Place_type_relation on p.place_id equals ptr.ptr_place_id join pt in db.Place_types on ptr.ptr_place_type_id equals pt.placetype_id select new { place_id = p.place_id, place_name = p.place_name, placetype_name = pt.placetype_name }, "place_id", "place_name", "placetype_name", 0), new { @class = "form-control chosen-select", @multiple = "true" })
                 </div>
             </div>
             <div class="row container-fluid">

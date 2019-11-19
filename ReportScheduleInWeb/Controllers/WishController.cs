@@ -62,6 +62,20 @@ namespace ReportScheduleInWeb.Controllers
             return Json(PlaceList, JsonRequestBehavior.AllowGet);
         }
 
+        public JsonResult GetPlaces(int ReportTypeId)
+        {
+            List<Place> PlaceList = (from p in db.Places
+                                    join rpr in db.Report_place_relation on p.place_id equals rpr.rpr_place_id
+                                    where rpr.rpr_report_type_id == ReportTypeId
+                                    select new Place
+                                    {
+                                        Place_id = p.place_id.ToString(),
+                                        Place_name = p.place_name
+                                    }).ToList();
+
+            return Json(PlaceList, JsonRequestBehavior.AllowGet);
+        }
+
         public class parameters
         {
             public string name { get; set; }

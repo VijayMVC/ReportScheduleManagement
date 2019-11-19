@@ -19,6 +19,7 @@ namespace ReportScheduleInWeb.Models
         {
             this.Tasks = new HashSet<Tasks>();
             this.Place_type_relation = new HashSet<Place_type_relation>();
+            this.Report_place_relation = new HashSet<Report_place_relation>();
         }
     
         public int place_id { get; set; }
@@ -30,5 +31,7 @@ namespace ReportScheduleInWeb.Models
         public virtual ICollection<Tasks> Tasks { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Place_type_relation> Place_type_relation { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Report_place_relation> Report_place_relation { get; set; }
     }
 }

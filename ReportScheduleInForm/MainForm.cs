@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Xml.Serialization;
 using EncryptStringSample;
 using System.Configuration;
+using System.Windows.Forms;
 
 namespace ReportScheduleInForm
 {

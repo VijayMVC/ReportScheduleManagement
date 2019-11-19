@@ -14,8 +14,20 @@ namespace ReportScheduleInWeb.Models
     
     public partial class Report_types
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
+        public Report_types()
+        {
+            this.Report_group_relation = new HashSet<Report_group_relation>();
+            this.Report_place_relation = new HashSet<Report_place_relation>();
+        }
+    
         public int report_type_id { get; set; }
         public string report_type_name { get; set; }
         public string report_type_xml { get; set; }
+    
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Report_group_relation> Report_group_relation { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Report_place_relation> Report_place_relation { get; set; }
     }
 }
