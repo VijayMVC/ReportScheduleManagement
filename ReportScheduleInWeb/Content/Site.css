@@ -64,6 +64,10 @@ textarea {
     min-width: 112px;
 }
 
+.input-group-text-wide {
+    min-width: 140px;
+}
+
 .sidebar-sticky {
     min-width: 185px;
 }

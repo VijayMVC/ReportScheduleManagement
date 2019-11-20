@@ -187,6 +187,9 @@
     <Compile Include="Models\Report_types.cs">
       <DependentUpon>ReportScheduleModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\Report_user_relation.cs">
+      <DependentUpon>ReportScheduleModel.tt</DependentUpon>
+    </Compile>
     <Compile Include="Models\Roles.cs">
       <DependentUpon>ReportScheduleModel.tt</DependentUpon>
     </Compile>

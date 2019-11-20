@@ -19,6 +19,7 @@ namespace ReportScheduleInWeb.Models
         {
             this.Report_group_relation = new HashSet<Report_group_relation>();
             this.Report_place_relation = new HashSet<Report_place_relation>();
+            this.Report_user_relation = new HashSet<Report_user_relation>();
         }
     
         public int report_type_id { get; set; }
@@ -29,5 +30,7 @@ namespace ReportScheduleInWeb.Models
         public virtual ICollection<Report_group_relation> Report_group_relation { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Report_place_relation> Report_place_relation { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Report_user_relation> Report_user_relation { get; set; }
     }
 }

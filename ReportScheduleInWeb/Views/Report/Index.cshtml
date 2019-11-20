@@ -1,12 +1,176 @@
 ﻿@{
-	ViewBag.Title = "Отчеты";
-	Layout = "~/Views/Shared/_Layout.cshtml";
-	var db = new ReportScheduleInWeb.Models.ReportScheduleEntities();
+    ViewBag.Title = "Доступы к отчетам";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var db = new ReportScheduleInWeb.Models.ReportScheduleEntities();
 }
 
 <div class="row align-items-center">
     <div class="col-12">
-        <p class="display-4" style="color: #663333 !important">Отчеты</p>
+        <p class="display-4" style="color: #663333 !important">Доступы к отчетам</p>
     </div>
 </div>
 
+<input type="hidden" id="busy_page" />
+
+<nav class="navbar navbar-dark bg-dark card" style="min-width:645px">
+    <form id="form" style="width:100%">
+        <fieldset id="SubmitForm">
+            <div class="row container-fluid">
+                <div class="col-12 input-group mb-2">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text input-group-text-wide bg-dark text-white">Отчет:</span>
+                    </div>
+                    @Html.DropDownList("search_report_type_id", new SelectList(from rt in db.Report_types join rgr in db.Report_group_relation on rt.report_type_id equals rgr.rgr_report_id join rg in db.Report_groups on rgr.rgr_report_group_id equals rg.report_group_id select new { Report_type_id = rt.report_type_id, Report_type_name = rt.report_type_name, Report_group_name = rg.report_group_name }, "Report_type_id", "Report_type_name", "Report_group_name", 1), "Не выбрано", new { @class = "custom-select form-control" })
+                </div>
+            </div>
+        </fieldset>
+    </form>
+</nav>
+
+<div class="card mt-3 bg-dark p-3" id="report_view" style="min-width:645px">
+    <div class="row container-fluid">
+        <div class="col-12 input-group mb-2">
+            <div class="input-group-prepend">
+                <span class="input-group-text input-group-text-wide bg-dark text-white">Группы:</span>
+            </div>
+            @Html.DropDownList("search_groups", new SelectList(db.Report_groups.ToList(), "report_group_id", "report_group_name"), new { @class = "form-control chosen-select chosen-select-groups", @multiple = "true" })
+            <input value="Все" class="btn btn-outline-info add-place-type mx-2" type="button" onclick="AddGroupsInSelect(0)">
+            <input value="Очистить" class="btn btn-outline-danger add-place-type" type="button" onclick="AddGroupsInSelect(-1)">
+        </div>
+    </div>
+    <div class="row container-fluid">
+        <div class="col-12 input-group mb-2">
+            <div class="input-group-prepend">
+                <span class="input-group-text input-group-text-wide bg-dark text-white">Места:</span>
+            </div>
+            @Html.DropDownList("search_places", new SelectList(from p in db.Places join ptr in db.Place_type_relation on p.place_id equals ptr.ptr_place_id join pt in db.Place_types on ptr.ptr_place_type_id equals pt.placetype_id select new { place_id = p.place_id, place_name = p.place_name, placetype_name = pt.placetype_name }, "place_id", "place_name", "placetype_name", 0), new { @class = "form-control chosen-select chosen-select-places", @multiple = "true" })
+            <input value="Все" class="btn btn-outline-info add-place-type mx-2" type="button" onclick="AddPlacesInSelect(0)">
+            <input value="Очистить" class="btn btn-outline-danger add-place-type" type="button" onclick="AddPlacesInSelect(-1)">
+        </div>
+    </div>
+    <div class="row container-fluid">
+        <div class="col-12 input-group mb-2">
+            <div class="input-group-prepend">
+                <span class="input-group-text input-group-text-wide bg-dark text-white">Пользователи:</span>
+            </div>
+            @Html.DropDownList("search_users", (SelectList)ViewBag.Authors, new { @class = "form-control chosen-select chosen-select-users", @multiple = "true" })
+            <input value="Все" class="btn btn-outline-info add-place-type mx-2" type="button" onclick="AddUsersInSelect(0)">
+            <input value="Очистить" class="btn btn-outline-danger add-place-type" type="button" onclick="AddUsersInSelect(-1)">
+        </div>
+    </div>
+    <div class="row container-fluid">
+        <div class="col-12 input-group">
+            <button class="btn btn-outline-success container-fluid" type="button" onclick="SaveReport()" id="SaveReport">Сохранить</button>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        $(".chosen-select").chosen({
+            width: "100%",
+            no_results_text: "Ничего не найдено",
+            placeholder_text_multiple: "Не выбрано",
+            search_contains: true,
+            display_disabled_options: false,
+            display_selected_options: false,
+            max_shown_results: Infinity
+        });
+
+        $(".chosen-choices").css('font-size', '1rem');
+        $(".chosen-choices").css('min-height', '38px');
+
+    function AddGroupsInSelect(ReportTypeId) {
+        switch (ReportTypeId) {
+            case -1:
+                var url = mainURL + "/Report/GetGroupsByReportTypeId?ReportTypeId=-1";
+                break;
+            case 0:
+                var url = mainURL + "/Report/GetGroupsByReportTypeId?ReportTypeId=0";
+                break;
+            default:
+                var url = mainURL + "/Report/GetGroupsByReportTypeId?ReportTypeId=" + $('#search_report_type_id').val();
+                break;
+        }
+            $.ajax({
+                type: "GET",
+                url: url,
+                success: function (GroupList) {
+                    $(".chosen-select-groups").val(GroupList).trigger('chosen:updated');
+                }
+            });
+        }
+
+    function AddPlacesInSelect(ReportTypeId) {
+        switch (ReportTypeId) {
+            case -1:
+                var url = mainURL + "/Report/GetPlacesByReportTypeId?ReportTypeId=-1";
+                break;
+            case 0:
+                var url = mainURL + "/Report/GetPlacesByReportTypeId?ReportTypeId=0";
+                break;
+            default:
+                var url = mainURL + "/Report/GetPlacesByReportTypeId?ReportTypeId=" + $('#search_report_type_id').val();
+                break;
+        }
+
+            $.ajax({
+                type: "GET",
+                url: url,
+                success: function (PlaceList) {
+                    $(".chosen-select-places").val(PlaceList).trigger('chosen:updated');
+                }
+            });
+        }
+
+    function AddUsersInSelect(ReportTypeId) {
+        switch (ReportTypeId) {
+            case -1:
+                var url = mainURL + "/Report/GetUsersByReportTypeId?ReportTypeId=-1";
+                break;
+            case 0:
+                var url = mainURL + "/Report/GetUsersByReportTypeId?ReportTypeId=0";
+                break;
+            default:
+                var url = mainURL + "/Report/GetUsersByReportTypeId?ReportTypeId=" + $('#search_report_type_id').val();
+                break;
+        }
+
+            $.ajax({
+                type: "GET",
+                url: url,
+                success: function (UserList) {
+                    $(".chosen-select-users").val(UserList).trigger('chosen:updated');
+                }
+            });
+        }
+
+            $("#search_report_type_id").change(function () {
+            checkReportType();
+            });
+
+        function checkReportType() {
+            var report_type_id = $('#search_report_type_id').val();
+
+            //Выбрали отчет
+            if (report_type_id.length != 0) {
+                $('input.add-place-type').removeAttr('disabled');
+                $('#SaveReport').removeAttr('disabled');
+                AddGroupsInSelect(report_type_id);
+                AddPlacesInSelect(report_type_id);
+                AddUsersInSelect(report_type_id);
+            }
+            else {
+                AddGroupsInSelect(-1);
+                AddPlacesInSelect(-1);
+                AddUsersInSelect(-1);
+                $('input.add-place-type').attr('disabled', 'disabled');
+                $('#SaveReport').attr('disabled', 'disabled');
+            }
+            }
+
+        $(function () {
+            checkReportType();
+        });
+    </script>
+}
