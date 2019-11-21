@@ -17,15 +17,12 @@ namespace ReportScheduleInWeb.Models
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public Roles()
         {
-            this.Role_permissions = new HashSet<Role_permissions>();
             this.User_roles = new HashSet<User_roles>();
         }
     
         public int role_id { get; set; }
         public string role_name { get; set; }
     
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Role_permissions> Role_permissions { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<User_roles> User_roles { get; set; }
     }

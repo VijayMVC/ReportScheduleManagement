@@ -12,13 +12,5 @@ namespace ReportScheduleInWeb.Models
 
         [DisplayName("Роль*")]
         public string role_name { get; set; }
-
-        [DisplayName("Разрешения")]
-        public List<Permissions> permissions { get; set; }
-
-        public RoleViewModel()
-        {
-            permissions = new List<Permissions>();
-        }
     }
 }

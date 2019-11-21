@@ -34,9 +34,6 @@ namespace ReportScheduleInWeb.Models
         [DisplayName("Роли")]
         public List<Roles> roles { get; set; }
 
-        [DisplayName("Разрешения")]
-        public List<Permissions> permissions { get; set; }
-
         public string UserErrorMessage { get; set; }
 
         public int changeable { get; set; }
@@ -44,7 +41,6 @@ namespace ReportScheduleInWeb.Models
         public UserViewModel()
         {
             roles = new List<Roles>();
-            permissions = new List<Permissions>();
             changeable = 1;
         }
     }

@@ -5,13 +5,6 @@
     <!-- SSDL content -->
     <edmx:StorageModels>
     <Schema Namespace="ReportScheduleModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
-        <EntityType Name="Permissions">
-          <Key>
-            <PropertyRef Name="permission_id" />
-          </Key>
-          <Property Name="permission_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="permission_name" Type="nvarchar(max)" Nullable="false" />
-        </EntityType>
         <EntityType Name="Place_type_relation">
           <Key>
             <PropertyRef Name="ptr_id" />
@@ -84,14 +77,6 @@
           <Property Name="rur_report_type_id" Type="int" Nullable="false" />
           <Property Name="rur_user_id" Type="int" Nullable="false" />
         </EntityType>
-        <EntityType Name="Role_permissions">
-          <Key>
-            <PropertyRef Name="rp_id" />
-          </Key>
-          <Property Name="rp_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="rp_role_id" Type="int" Nullable="false" />
-          <Property Name="rp_permission_id" Type="int" Nullable="false" />
-        </EntityType>
         <EntityType Name="Roles">
           <Key>
             <PropertyRef Name="role_id" />
@@ -130,6 +115,7 @@
           <Property Name="user_surname" Type="nvarchar" MaxLength="100" Nullable="false" />
           <Property Name="user_name" Type="nvarchar" MaxLength="100" Nullable="false" />
           <Property Name="user_patronymic" Type="nvarchar" MaxLength="100" />
+          <Property Name="user_email" Type="nvarchar" MaxLength="100" />
         </EntityType>
         <EntityType Name="Wishes">
           <Key>
@@ -252,30 +238,6 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK_Role_permissions_Permissions">
-          <End Role="Permissions" Type="Self.Permissions" Multiplicity="1" />
-          <End Role="Role_permissions" Type="Self.Role_permissions" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Permissions">
-              <PropertyRef Name="permission_id" />
-            </Principal>
-            <Dependent Role="Role_permissions">
-              <PropertyRef Name="rp_permission_id" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_Role_permissions_Roles">
-          <End Role="Roles" Type="Self.Roles" Multiplicity="1" />
-          <End Role="Role_permissions" Type="Self.Role_permissions" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Roles">
-              <PropertyRef Name="role_id" />
-            </Principal>
-            <Dependent Role="Role_permissions">
-              <PropertyRef Name="rp_role_id" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="FK_Tasks_Places">
           <End Role="Places" Type="Self.Places" Multiplicity="1" />
           <End Role="Tasks" Type="Self.Tasks" Multiplicity="*" />
@@ -337,7 +299,6 @@
           </ReferentialConstraint>
         </Association>
         <EntityContainer Name="ReportScheduleModelStoreContainer">
-          <EntitySet Name="Permissions" EntityType="Self.Permissions" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Place_type_relation" EntityType="Self.Place_type_relation" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Place_types" EntityType="Self.Place_types" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Places" EntityType="Self.Places" Schema="dbo" store:Type="Tables" />
@@ -347,7 +308,6 @@
           <EntitySet Name="Report_place_relation" EntityType="Self.Report_place_relation" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Report_types" EntityType="Self.Report_types" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Report_user_relation" EntityType="Self.Report_user_relation" Schema="dbo" store:Type="Tables" />
-          <EntitySet Name="Role_permissions" EntityType="Self.Role_permissions" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Roles" EntityType="Self.Roles" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Tasks" EntityType="Self.Tasks" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="User_roles" EntityType="Self.User_roles" Schema="dbo" store:Type="Tables" />
@@ -389,14 +349,6 @@
             <End Role="Users" EntitySet="Users" />
             <End Role="Report_user_relation" EntitySet="Report_user_relation" />
           </AssociationSet>
-          <AssociationSet Name="FK_Role_permissions_Permissions" Association="Self.FK_Role_permissions_Permissions">
-            <End Role="Permissions" EntitySet="Permissions" />
-            <End Role="Role_permissions" EntitySet="Role_permissions" />
-          </AssociationSet>
-          <AssociationSet Name="FK_Role_permissions_Roles" Association="Self.FK_Role_permissions_Roles">
-            <End Role="Roles" EntitySet="Roles" />
-            <End Role="Role_permissions" EntitySet="Role_permissions" />
-          </AssociationSet>
           <AssociationSet Name="FK_Tasks_Places" Association="Self.FK_Tasks_Places">
             <End Role="Places" EntitySet="Places" />
             <End Role="Tasks" EntitySet="Tasks" />
@@ -422,14 +374,6 @@
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="ReportScheduleModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
-        <EntityType Name="Permissions">
-          <Key>
-            <PropertyRef Name="permission_id" />
-          </Key>
-          <Property Name="permission_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="permission_name" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
-          <NavigationProperty Name="Role_permissions" Relationship="Self.FK_Role_permissions_Permissions" FromRole="Permissions" ToRole="Role_permissions" />
-        </EntityType>
         <EntityType Name="Places">
           <Key>
             <PropertyRef Name="place_id" />
@@ -463,23 +407,12 @@
           <NavigationProperty Name="Report_place_relation" Relationship="ReportScheduleModel.FK_Report_place_relation_Report_types" FromRole="Report_types" ToRole="Report_place_relation" />
           <NavigationProperty Name="Report_user_relation" Relationship="ReportScheduleModel.FK_Report_user_relation_Report_types" FromRole="Report_types" ToRole="Report_user_relation" />
         </EntityType>
-        <EntityType Name="Role_permissions">
-          <Key>
-            <PropertyRef Name="rp_id" />
-          </Key>
-          <Property Name="rp_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="rp_role_id" Type="Int32" Nullable="false" />
-          <Property Name="rp_permission_id" Type="Int32" Nullable="false" />
-          <NavigationProperty Name="Permissions" Relationship="Self.FK_Role_permissions_Permissions" FromRole="Role_permissions" ToRole="Permissions" />
-          <NavigationProperty Name="Roles" Relationship="Self.FK_Role_permissions_Roles" FromRole="Role_permissions" ToRole="Roles" />
-        </EntityType>
         <EntityType Name="Roles">
           <Key>
             <PropertyRef Name="role_id" />
           </Key>
           <Property Name="role_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="role_name" Type="String" MaxLength="255" FixedLength="false" Unicode="true" Nullable="false" />
-          <NavigationProperty Name="Role_permissions" Relationship="Self.FK_Role_permissions_Roles" FromRole="Roles" ToRole="Role_permissions" />
           <NavigationProperty Name="User_roles" Relationship="Self.FK_User_roles_Roles" FromRole="Roles" ToRole="User_roles" />
         </EntityType>
         <EntityType Name="Tasks">
@@ -521,6 +454,7 @@
           <NavigationProperty Name="User_roles" Relationship="Self.FK_User_roles_Users" FromRole="Users" ToRole="User_roles" />
           <NavigationProperty Name="Wishes" Relationship="ReportScheduleModel.FK_Wishes_Users" FromRole="Users" ToRole="Wishes" />
           <NavigationProperty Name="Report_user_relation" Relationship="ReportScheduleModel.FK_Report_user_relation_Users" FromRole="Users" ToRole="Report_user_relation" />
+          <Property Name="user_email" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
         </EntityType>
         <EntityType Name="Wishes">
           <Key>
@@ -537,18 +471,6 @@
           <Property Name="wish_user_id" Type="Int32" Nullable="false" />
           <NavigationProperty Name="Users" Relationship="ReportScheduleModel.FK_Wishes_Users" FromRole="Wishes" ToRole="Users" />
         </EntityType>
-        <Association Name="FK_Role_permissions_Permissions">
-          <End Role="Permissions" Type="Self.Permissions" Multiplicity="1" />
-          <End Role="Role_permissions" Type="Self.Role_permissions" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Permissions">
-              <PropertyRef Name="permission_id" />
-            </Principal>
-            <Dependent Role="Role_permissions">
-              <PropertyRef Name="rp_permission_id" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="FK_Tasks_Places">
           <End Role="Places" Type="Self.Places" Multiplicity="1" />
           <End Role="Tasks" Type="Self.Tasks" Multiplicity="*" />
@@ -570,18 +492,6 @@
             </Principal>
             <Dependent Role="Report_data">
               <PropertyRef Name="report_data_task_id" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_Role_permissions_Roles">
-          <End Role="Roles" Type="Self.Roles" Multiplicity="1" />
-          <End Role="Role_permissions" Type="Self.Role_permissions" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Roles">
-              <PropertyRef Name="role_id" />
-            </Principal>
-            <Dependent Role="Role_permissions">
-              <PropertyRef Name="rp_role_id" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -622,20 +532,14 @@
           </ReferentialConstraint>
         </Association>
         <EntityContainer Name="ReportScheduleEntities" annotation:LazyLoadingEnabled="true">
-          <EntitySet Name="Permissions" EntityType="Self.Permissions" />
           <EntitySet Name="Places" EntityType="Self.Places" />
           <EntitySet Name="Report_data" EntityType="Self.Report_data" />
           <EntitySet Name="Report_types" EntityType="Self.Report_types" />
-          <EntitySet Name="Role_permissions" EntityType="Self.Role_permissions" />
           <EntitySet Name="Roles" EntityType="Self.Roles" />
           <EntitySet Name="Tasks" EntityType="Self.Tasks" />
           <EntitySet Name="User_roles" EntityType="Self.User_roles" />
           <EntitySet Name="Users" EntityType="Self.Users" />
           <EntitySet Name="Wishes" EntityType="Self.Wishes" />
-          <AssociationSet Name="FK_Role_permissions_Permissions" Association="Self.FK_Role_permissions_Permissions">
-            <End Role="Permissions" EntitySet="Permissions" />
-            <End Role="Role_permissions" EntitySet="Role_permissions" />
-          </AssociationSet>
           <AssociationSet Name="FK_Tasks_Places" Association="Self.FK_Tasks_Places">
             <End Role="Places" EntitySet="Places" />
             <End Role="Tasks" EntitySet="Tasks" />
@@ -643,10 +547,6 @@
           <AssociationSet Name="FK_Report_data_Tasks" Association="Self.FK_Report_data_Tasks">
             <End Role="Tasks" EntitySet="Tasks" />
             <End Role="Report_data" EntitySet="Report_data" />
-          </AssociationSet>
-          <AssociationSet Name="FK_Role_permissions_Roles" Association="Self.FK_Role_permissions_Roles">
-            <End Role="Roles" EntitySet="Roles" />
-            <End Role="Role_permissions" EntitySet="Role_permissions" />
           </AssociationSet>
           <AssociationSet Name="FK_User_roles_Roles" Association="Self.FK_User_roles_Roles">
             <End Role="Roles" EntitySet="Roles" />
@@ -873,14 +773,6 @@
     <edmx:Mappings>
       <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
         <EntityContainerMapping StorageEntityContainer="ReportScheduleModelStoreContainer" CdmEntityContainer="ReportScheduleEntities">
-          <EntitySetMapping Name="Permissions">
-            <EntityTypeMapping TypeName="ReportScheduleModel.Permissions">
-              <MappingFragment StoreEntitySet="Permissions">
-                <ScalarProperty Name="permission_id" ColumnName="permission_id" />
-                <ScalarProperty Name="permission_name" ColumnName="permission_name" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="Places">
             <EntityTypeMapping TypeName="ReportScheduleModel.Places">
               <MappingFragment StoreEntitySet="Places">
@@ -907,15 +799,6 @@
                 <ScalarProperty Name="report_type_id" ColumnName="report_type_id" />
                 <ScalarProperty Name="report_type_name" ColumnName="report_type_name" />
                 <ScalarProperty Name="report_type_xml" ColumnName="report_type_xml" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="Role_permissions">
-            <EntityTypeMapping TypeName="ReportScheduleModel.Role_permissions">
-              <MappingFragment StoreEntitySet="Role_permissions">
-                <ScalarProperty Name="rp_id" ColumnName="rp_id" />
-                <ScalarProperty Name="rp_role_id" ColumnName="rp_role_id" />
-                <ScalarProperty Name="rp_permission_id" ColumnName="rp_permission_id" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
@@ -952,6 +835,7 @@
           <EntitySetMapping Name="Users">
             <EntityTypeMapping TypeName="ReportScheduleModel.Users">
               <MappingFragment StoreEntitySet="Users">
+                <ScalarProperty Name="user_email" ColumnName="user_email" />
                 <ScalarProperty Name="user_id" ColumnName="user_id" />
                 <ScalarProperty Name="user_login" ColumnName="user_login" />
                 <ScalarProperty Name="user_password" ColumnName="user_password" />

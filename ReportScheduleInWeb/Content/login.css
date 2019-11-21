@@ -26,3 +26,13 @@ body {
     font-size: 14px;
     color: red;
 }
+
+.form .message {
+    color: #ffffff;
+    font-size: 12px;
+}
+
+.form .message a {
+    color: #4cff00;
+    text-decoration: none;
+}

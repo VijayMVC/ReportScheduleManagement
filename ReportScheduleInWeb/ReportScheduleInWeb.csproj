@@ -143,9 +143,6 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\LoginViewModel.cs" />
-    <Compile Include="Models\Permissions.cs">
-      <DependentUpon>ReportScheduleModel.tt</DependentUpon>
-    </Compile>
     <Compile Include="Models\PermissionViewModel.cs" />
     <Compile Include="Models\Places.cs">
       <DependentUpon>ReportScheduleModel.tt</DependentUpon>
@@ -194,9 +191,6 @@
       <DependentUpon>ReportScheduleModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\RoleViewModel.cs" />
-    <Compile Include="Models\Role_permissions.cs">
-      <DependentUpon>ReportScheduleModel.tt</DependentUpon>
-    </Compile>
     <Compile Include="Models\Tasks.cs">
       <DependentUpon>ReportScheduleModel.tt</DependentUpon>
     </Compile>

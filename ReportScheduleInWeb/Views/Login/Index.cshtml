@@ -2,6 +2,7 @@
 
 @{
     Layout = null;
+
 }
 
 <!DOCTYPE html>
@@ -15,6 +16,7 @@
     <link rel="icon" href="~/content/mfc_love.png">
 </head>
 <body>
+    @Html.Hidden("action", (String)ViewBag.Action)
     <div class="container login-page">
         <div class="row">
             <div class="col-12">
@@ -40,9 +42,84 @@
                         </div>
 
                         <button class="btn btn-success btn-lg btn-block" type="submit">Вход</button>
+                        <p class="message mt-3 mb-0">Не зарегистрированы? <a href="#">Создать новый аккаунт</a></p>
                     }
                 </div>
             </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="register_window" tabindex="-1" role="dialog" data-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark" id="mainContent">
+                <div class="modal-header">
+                    <h4 class="modal-title text-white" id="ModalTitle">Регистрация</h4>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                @using (Html.BeginForm("Register", "Login", FormMethod.Post, new { @class = "needs-validation", @novalidate = true }))
+                {
+            <div class="modal-body">
+                <div class="form-group" id="login_field">
+                    @Html.EditorFor(model => model.user_new_login, new { htmlAttributes = new { @class = "form-control", placeholder = "Логин", @required = true } })
+                    <div class="invalid-feedback field-validation-error">
+                        Введите логин
+                    </div>
+                </div>
+
+                <div class="form-group" id="password_field">
+                    @Html.EditorFor(model => model.user_new_password, new { htmlAttributes = new { @class = "form-control password", placeholder = "Пароль", @required = true } })
+                    <div class="invalid-feedback field-validation-error">
+                        Введите пароль
+                    </div>
+                </div>
+
+                <div class="form-group" id="password_confirm_field">
+                    @Html.EditorFor(model => model.user_confirm_password, new { htmlAttributes = new { @class = "form-control", placeholder = "Повтор пароля", @required = true } })
+                    <div class="invalid-feedback field-validation-error">
+                        Введите повтор пароля
+                    </div>
+                </div>
+
+                <div class="form-group" id="surname_field">
+                    @Html.EditorFor(model => model.user_surname, new { htmlAttributes = new { @class = "form-control", placeholder = "Фамилия", @required = true } })
+                    <div class="invalid-feedback field-validation-error">
+                        Введите фамилию
+                    </div>
+                </div>
+
+                <div class="form-group" id="name_field">
+                    @Html.EditorFor(model => model.user_name, new { htmlAttributes = new { @class = "form-control", placeholder = "Имя", @required = true } })
+                    <div class="invalid-feedback field-validation-error">
+                        Введите имя
+                    </div>
+                </div>
+
+                <div class="form-group" id="patronymic_field">
+                    @Html.EditorFor(model => model.user_patronymic, new { htmlAttributes = new { @class = "form-control", placeholder = "Отчество - необязательно" } })
+                    <div class="invalid-feedback field-validation-error">
+                        Введите отчество
+                    </div>
+                </div>
+
+                <div class="form-group" id="email_field">
+                    @Html.EditorFor(model => model.user_email, new { htmlAttributes = new { @class = "form-control", placeholder = "Email", @required = true } })
+                    <div class="invalid-feedback field-validation-error">
+                        Введите корректный адрес электронной почты
+                    </div>
+                </div>
+
+                <div class="form-group" id="validation_field">
+                    <label class="field-validation-error">@Html.DisplayFor(model => model.LoginErrorMessage)</label>
+                </div>
+
+            </div>
+                <div class="modal-footer">
+                    <button class="btn btn-success btn-lg btn-block" type="submit" name="commit">Зарегистрироваться</button>
+                </div>
+                    }
+</div>
         </div>
     </div>
     @Scripts.Render("~/bundles/jquery")
@@ -66,6 +143,26 @@
                 });
             }, false);
         })();
+
+        $('.message a').click(function () {
+            $("#register_window").modal();
+        });
+
+        window.onload = function () {
+            if ($("#action").val() == "Register") {
+                $("#register_window").modal();
+            }
+        }
+
+        function validatePassword() {
+            var password = document.getElementById("user_new_password").value;
+            var confirm_password = document.getElementById("user_confirm_password").value;
+
+            password != confirm_password ? document.getElementById("user_confirm_password").setCustomValidity("Пароли не совпадают") : document.getElementById("user_confirm_password").setCustomValidity("");
+        }
+
+        document.getElementsByName("commit")[0].onclick = validatePassword();
+
     </script>
 </body>
 </html>

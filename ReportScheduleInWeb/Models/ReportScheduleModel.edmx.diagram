@@ -5,20 +5,16 @@
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
       <Diagram DiagramId="59ce87b2766a478c92cac02edabfb920" Name="Diagram1">
-        <EntityTypeShape EntityType="ReportScheduleModel.Permissions" Width="1.5" PointX="2.75" PointY="9.625" IsExpanded="true" />
         <EntityTypeShape EntityType="ReportScheduleModel.Places" Width="1.5" PointX="0.75" PointY="1.5" IsExpanded="true" />
         <EntityTypeShape EntityType="ReportScheduleModel.Report_data" Width="1.5" PointX="5.25" PointY="1.5" IsExpanded="true" />
         <EntityTypeShape EntityType="ReportScheduleModel.Report_types" Width="1.5" PointX="7.75" PointY="0.75" IsExpanded="true" />
-        <EntityTypeShape EntityType="ReportScheduleModel.Role_permissions" Width="1.5" PointX="5" PointY="6.375" IsExpanded="true" />
         <EntityTypeShape EntityType="ReportScheduleModel.Roles" Width="1.5" PointX="2.75" PointY="6.5" IsExpanded="true" />
         <EntityTypeShape EntityType="ReportScheduleModel.Tasks" Width="1.5" PointX="3" PointY="1" IsExpanded="true" />
         <EntityTypeShape EntityType="ReportScheduleModel.User_roles" Width="1.5" PointX="5" PointY="9.375" IsExpanded="true" />
         <EntityTypeShape EntityType="ReportScheduleModel.Users" Width="1.5" PointX="2.75" PointY="12.125" IsExpanded="true" />
         <EntityTypeShape EntityType="ReportScheduleModel.Wishes" Width="1.5" PointX="0.75" PointY="5.125" IsExpanded="true" />
-        <AssociationConnector Association="ReportScheduleModel.FK_Role_permissions_Permissions" ManuallyRouted="false" />
         <AssociationConnector Association="ReportScheduleModel.FK_Tasks_Places" ManuallyRouted="false" />
         <AssociationConnector Association="ReportScheduleModel.FK_Report_data_Tasks" ManuallyRouted="false" />
-        <AssociationConnector Association="ReportScheduleModel.FK_Role_permissions_Roles" ManuallyRouted="false" />
         <AssociationConnector Association="ReportScheduleModel.FK_User_roles_Roles" ManuallyRouted="false" />
         <AssociationConnector Association="ReportScheduleModel.FK_Tasks_Wishes" ManuallyRouted="false" />
         <AssociationConnector Association="ReportScheduleModel.FK_User_roles_Users" ManuallyRouted="false" />

@@ -29,6 +29,7 @@ namespace ReportScheduleInWeb.Models
         public string user_surname { get; set; }
         public string user_name { get; set; }
         public string user_patronymic { get; set; }
+        public string user_email { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<User_roles> User_roles { get; set; }
