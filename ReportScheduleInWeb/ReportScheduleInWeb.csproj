@@ -130,6 +130,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="App\Helper\MailHelper.cs" />
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
@@ -151,6 +152,9 @@
       <DependentUpon>ReportScheduleModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\Place_type_relation.cs">
+      <DependentUpon>ReportScheduleModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Registered.cs">
       <DependentUpon>ReportScheduleModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\ReportModel.cs" />

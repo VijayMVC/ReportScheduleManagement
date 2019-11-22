@@ -29,6 +29,18 @@
           <Property Name="place_connection" Type="nvarchar(max)" Nullable="false" />
           <Property Name="place_name_in_report" Type="nvarchar(max)" Nullable="false" />
         </EntityType>
+        <EntityType Name="Registered">
+          <Key>
+            <PropertyRef Name="reg_guid" />
+          </Key>
+          <Property Name="reg_guid" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="reg_login" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="reg_password" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="reg_surname" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="reg_name" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="reg_patronymic" Type="nvarchar" MaxLength="100" />
+          <Property Name="reg_email" Type="nvarchar" MaxLength="100" Nullable="false" />
+        </EntityType>
         <EntityType Name="Report_data">
           <Key>
             <PropertyRef Name="report_data_id" />
@@ -110,12 +122,12 @@
           </Key>
           <Property Name="user_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="user_login" Type="nvarchar" MaxLength="50" Nullable="false" />
-          <Property Name="user_password" Type="nvarchar" MaxLength="1000" />
+          <Property Name="user_password" Type="nvarchar" MaxLength="1000" Nullable="false" />
           <Property Name="user_isdeleted" Type="bit" Nullable="false" />
           <Property Name="user_surname" Type="nvarchar" MaxLength="100" Nullable="false" />
           <Property Name="user_name" Type="nvarchar" MaxLength="100" Nullable="false" />
           <Property Name="user_patronymic" Type="nvarchar" MaxLength="100" />
-          <Property Name="user_email" Type="nvarchar" MaxLength="100" />
+          <Property Name="user_email" Type="nvarchar" MaxLength="100" Nullable="false" />
         </EntityType>
         <EntityType Name="Wishes">
           <Key>
@@ -302,6 +314,7 @@
           <EntitySet Name="Place_type_relation" EntityType="Self.Place_type_relation" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Place_types" EntityType="Self.Place_types" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Places" EntityType="Self.Places" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Registered" EntityType="Self.Registered" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Report_data" EntityType="Self.Report_data" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Report_group_relation" EntityType="Self.Report_group_relation" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Report_groups" EntityType="Self.Report_groups" Schema="dbo" store:Type="Tables" />
@@ -446,7 +459,7 @@
           </Key>
           <Property Name="user_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="user_login" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
-          <Property Name="user_password" Type="String" MaxLength="1000" FixedLength="false" Unicode="true" />
+          <Property Name="user_password" Type="String" MaxLength="1000" FixedLength="false" Unicode="true" Nullable="false" />
           <Property Name="user_isdeleted" Type="Boolean" Nullable="false" />
           <Property Name="user_surname" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
           <Property Name="user_name" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
@@ -454,7 +467,7 @@
           <NavigationProperty Name="User_roles" Relationship="Self.FK_User_roles_Users" FromRole="Users" ToRole="User_roles" />
           <NavigationProperty Name="Wishes" Relationship="ReportScheduleModel.FK_Wishes_Users" FromRole="Users" ToRole="Wishes" />
           <NavigationProperty Name="Report_user_relation" Relationship="ReportScheduleModel.FK_Report_user_relation_Users" FromRole="Users" ToRole="Report_user_relation" />
-          <Property Name="user_email" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="user_email" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
         </EntityType>
         <EntityType Name="Wishes">
           <Key>
@@ -602,6 +615,7 @@
             <End Role="Users" EntitySet="Users" />
             <End Role="Report_user_relation" EntitySet="Report_user_relation" />
           </AssociationSet>
+          <EntitySet Name="Registered" EntityType="ReportScheduleModel.Registered" />
         </EntityContainer>
         <EntityType Name="Place_type_relation">
           <Key>
@@ -767,6 +781,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <EntityType Name="Registered">
+          <Key>
+            <PropertyRef Name="reg_guid" />
+          </Key>
+          <Property Name="reg_guid" Type="Guid" Nullable="false" />
+          <Property Name="reg_login" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="reg_password" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="reg_surname" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="reg_name" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="reg_patronymic" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="reg_email" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+        </EntityType>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -909,6 +935,19 @@
                 <ScalarProperty Name="rur_user_id" ColumnName="rur_user_id" />
                 <ScalarProperty Name="rur_report_type_id" ColumnName="rur_report_type_id" />
                 <ScalarProperty Name="rur_id" ColumnName="rur_id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Registered">
+            <EntityTypeMapping TypeName="ReportScheduleModel.Registered">
+              <MappingFragment StoreEntitySet="Registered">
+                <ScalarProperty Name="reg_email" ColumnName="reg_email" />
+                <ScalarProperty Name="reg_patronymic" ColumnName="reg_patronymic" />
+                <ScalarProperty Name="reg_name" ColumnName="reg_name" />
+                <ScalarProperty Name="reg_surname" ColumnName="reg_surname" />
+                <ScalarProperty Name="reg_password" ColumnName="reg_password" />
+                <ScalarProperty Name="reg_login" ColumnName="reg_login" />
+                <ScalarProperty Name="reg_guid" ColumnName="reg_guid" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

@@ -36,3 +36,26 @@ body {
     color: #4cff00;
     text-decoration: none;
 }
+
+.svg-icon,
+.svg-icon-white {
+    width: 24px;
+    height: 24px;
+}
+
+.svg-icon path,
+.svg-icon polygon,
+.svg-icon rect {
+    fill: #4691f6;
+}
+
+.svg-icon-white path,
+.svg-icon-white polygon,
+.svg-icon-white rect {
+    fill: #ffffff;
+}
+
+.svg-icon circle {
+    stroke: #4691f6;
+    stroke-width: 1;
+}
