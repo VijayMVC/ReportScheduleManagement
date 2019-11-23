@@ -66,7 +66,7 @@ namespace ReportScheduleInWeb.Controllers
                     Session["userSurname"] = userDetails.user_surname;
                     Session["userName"] = userDetails.user_name;
 
-                    return RedirectToAction("Index", "Home");
+                    return RedirectToAction("Index", "Home", userModel);
                 }
             }
         }

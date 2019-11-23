@@ -138,6 +138,7 @@
     <Compile Include="Controllers\LoginController.cs" />
     <Compile Include="Controllers\MonitorController.cs" />
     <Compile Include="Controllers\ReportController.cs" />
+    <Compile Include="Controllers\UserController.cs" />
     <Compile Include="Controllers\WishController.cs" />
     <Compile Include="EncryptStringSample.cs" />
     <Compile Include="Global.asax.cs">
@@ -320,6 +321,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Temp\" />
+    <Folder Include="Views\User\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
