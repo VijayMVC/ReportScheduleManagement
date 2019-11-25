@@ -266,7 +266,7 @@ namespace ReportScheduleInWeb.Controllers
 
         public ActionResult LogOut()
         {
-            int userId = (int)Session["userID"];
+            int userId = Session["userID"] == null ? 0 : (int)Session["userID"];
             Session.Abandon();
             return RedirectToAction("Index", "Login");
         }

@@ -24,6 +24,10 @@ textarea {
     max-width: 280px;
 }
 
+input.password {
+    max-width: 100%;
+}
+
 .svg-icon,
 .svg-icon-white {
     width: 24px;

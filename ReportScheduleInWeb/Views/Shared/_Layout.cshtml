@@ -147,7 +147,7 @@
                 @RenderBody()
                 <div class="modal fade" id="MyModalChangePassword" tabindex="-1" role="dialog" data-backdrop="static">
                     <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content bg-dark">
+                        <div class="modal-content bg-dark" style="width:100%">
                             <div class="modal-header">
                                 <h4 class="modal-title text-white">Изменить пароль</h4>
                                 <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
@@ -155,41 +155,22 @@
                                 </button>
                             </div>
                             <div class="modal-body">
-                                <div class="row" id="message4" style="margin-left: 17px">
-                                    <div class="alert alert-danger">
-                                        <span class="oi oi-ban"><strong>Пароли не совпадают!</strong></span>
-                                    </div>
-                                </div>
-                                <div class="row" id="message5" style="margin-left: 17px">
-                                    <div class="alert alert-danger">
-                                        <span class="oi oi-ban"><strong>Введите пароль!</strong></span>
-                                    </div>
-                                </div>
-                                <div class="row" id="message6" style="margin-left: 17px">
-                                    <div class="alert alert-danger">
-                                        <span class="oi oi-ban"><strong>Введите старый пароль!</strong></span>
-                                    </div>
-                                </div>
-                                <div class="row" id="message7" style="margin-left: 17px">
-                                    <div class="alert alert-danger">
-                                        <span class="oi oi-ban"><strong>Старый пароль неправильный!</strong></span>
-                                    </div>
-                                </div>
                                 <form id="form2" style="width:auto">
+                                    @Html.HiddenFor(m => m.user_id, new { @id = "UseChangePasswordId" })
                                     <div class="form-group" id="change_old_password">
-                                        @Html.EditorFor(m => m.user_password_old, new { htmlAttributes = new { id = "UseOldPassword", placeholder = "Введите старый пароль", @required = true } })
+                                        @Html.EditorFor(m => m.user_password_old, new { htmlAttributes = new { @class = "form-control password", id = "UseOldPassword", placeholder = "Введите старый пароль", @required = true } })
                                         <div class="invalid-feedback field-validation-error">
                                             Введите старый пароль
                                         </div>
                                     </div>
                                     <div class="form-group" id="change_password">
-                                        @Html.EditorFor(m => m.user_password, new { htmlAttributes = new { id = "UseChangePassword", placeholder = "Введите пароль", @required = true } })
+                                        @Html.EditorFor(m => m.user_password, new { htmlAttributes = new { @class = "form-control", id = "UseChangePassword", placeholder = "Введите пароль", @required = true } })
                                         <div class="invalid-feedback field-validation-error">
                                             Введите пароль
                                         </div>
                                     </div>
                                     <div class="form-group" id="change_confirm_password">
-                                        @Html.EditorFor(m => m.user_password_confirm, new { htmlAttributes = new { id = "UseChangeConfirmPassword", placeholder = "Повторите пароль", @required = true } })
+                                        @Html.EditorFor(m => m.user_password_confirm, new { htmlAttributes = new { @class = "form-control", id = "UseChangeConfirmPassword", placeholder = "Повторите пароль", @required = true } })
                                         <div class="invalid-feedback field-validation-error">
                                             Пароли не совпадают
                                         </div>
@@ -221,55 +202,36 @@
 	        var url = mainURL + "/User/GetUserById?UserId=" + UserId;
 	        $("#form2")[0].reset();
 	        $("#MyModalChangePassword").modal();
-	        $("#message4").hide();
-	        $("#message5").hide();
-	        $("#message6").hide();
-	        $("#message7").hide();
 	        $.ajax({
 		        type: "GET",
 		        url: url,
 		        success: function (data) {
 			        var obj = JSON.parse(data);
-			        if ((obj.changeable == 2) || (obj.changeable == 4) || (obj.changeable == 7) || (obj.changeable == 10)) {
-				        $("#change_old_password").show();
-			        }
-			        else {
-				        $("#change_old_password").hide();
-
-			        }
 			        $("#UseChangePasswordId").val(obj.user_id);
 		        }
 	        })
         }
 
         $("#SaveChangePassword").click(function () {
+
+            var form = document.getElementById('form2');
+            var isValidForm = form.checkValidity();
+
 	        var data = $("#SubmitForm2").serialize();
 
 	        var pass = $("#UseChangePassword").val();
 	        var oldpass = $("#UseOldPassword").val();
 	        var confpass = $("#UseChangeConfirmPassword").val();
 
-	        if ((oldpass.trim() == "") && $("#change_old_password").is(":visible")) {
-		        $("#message4").hide();
-		        $("#message5").hide();
-		        $("#message6").show();
-		        $("#message7").hide();
+	        if (oldpass.trim() == "") {
 		        return false;
 	        }
 
 	        if (pass.trim() == "") {
-		        $("#message4").hide();
-		        $("#message5").show();
-		        $("#message6").hide();
-		        $("#message7").hide();
 		        return false;
 	        }
 
 	        if (pass.trim() != confpass.trim()) {
-		        $("#message4").show();
-		        $("#message5").hide();
-		        $("#message6").hide();
-		        $("#message7").hide();
 		        return false;
 	        }
 
@@ -279,17 +241,9 @@
 		        data: data,
 		        success: function (result) {
 			        if (result == 0) {
-				        $("#message4").hide();
-				        $("#message5").hide();
-				        $("#message6").hide();
-				        $("#message7").show();
 				        return false;
 			        }
 			        alert("Пароль изменен!");
-			        $("#message4").hide();
-			        $("#message5").hide();
-			        $("#message6").hide();
-			        $("#message7").hide();
 			        $("#MyModalChangePassword").modal("hide");
 		        }
 	        })
