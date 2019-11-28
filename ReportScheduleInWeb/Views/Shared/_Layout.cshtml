@@ -91,7 +91,8 @@
                                 </a>
                             }
                         </li>
-                        <li class="nav-item">
+                        <!--
+                            <li class="nav-item">
                             <a class="nav-link" href="#">
                                 <svg class="svg-icon" viewBox="0 0 24 24">
                                     <path d="M10,1.375c-3.17,0-5.75,2.548-5.75,5.682c0,6.685,5.259,11.276,5.483,11.469c0.152,0.132,0.382,0.132,0.534,0c0.224-0.193,5.481-4.784,5.483-11.469C15.75,3.923,13.171,1.375,10,1.375 M10,17.653c-1.064-1.024-4.929-5.127-4.929-10.596c0-2.68,2.212-4.861,4.929-4.861s4.929,2.181,4.929,4.861C14.927,12.518,11.063,16.627,10,17.653 M10,3.839c-1.815,0-3.286,1.47-3.286,3.286s1.47,3.286,3.286,3.286s3.286-1.47,3.286-3.286S11.815,3.839,10,3.839 M10,9.589c-1.359,0-2.464-1.105-2.464-2.464S8.641,4.661,10,4.661s2.464,1.105,2.464,2.464S11.359,9.589,10,9.589"></path>
@@ -131,6 +132,7 @@
                                 <i>Разрешения</i>
                             </a>
                         </li>
+                            -->
                         <li class="nav-item">
                             <a class="nav-link" href="#" id="linkchangeMypassword" onclick="ChangePassword(@Convert.ToInt32(Session["userID"]))">
                                 <svg class="svg-icon" viewBox="0 0 24 24">
@@ -155,30 +157,19 @@
                                 </button>
                             </div>
                             <div class="modal-body">
-                                <form id="form2" style="width:auto">
+                                <form id="ChangePasswordForm" style="width:auto" oninput="validateChangePasswordForm()">
                                     @Html.HiddenFor(m => m.user_id, new { @id = "UseChangePasswordId" })
                                     <div class="form-group" id="change_old_password">
-                                        @Html.EditorFor(m => m.user_password_old, new { htmlAttributes = new { @class = "form-control password", id = "UseOldPassword", placeholder = "Введите старый пароль", @required = true } })
-                                        <div class="invalid-feedback field-validation-error">
-                                            Введите старый пароль
-                                        </div>
+                                        @Html.EditorFor(m => m.user_password_old, new { htmlAttributes = new { @class = "form-control", id = "UseOldPassword", placeholder = "Введите старый пароль" } })
+                                        <span id="error-old-password" class="field-validation-error"></span>
                                     </div>
                                     <div class="form-group" id="change_password">
-                                        @Html.EditorFor(m => m.user_password, new { htmlAttributes = new { @class = "form-control", id = "UseChangePassword", placeholder = "Введите пароль", @required = true } })
-                                        <div class="invalid-feedback field-validation-error">
-                                            Введите пароль
-                                        </div>
+                                        @Html.EditorFor(m => m.user_password, new { htmlAttributes = new { @class = "form-control", id = "UseChangePassword", placeholder = "Введите новый пароль" } })
+                                        <span id="error-new-password" class="field-validation-error"></span>
                                     </div>
                                     <div class="form-group" id="change_confirm_password">
-                                        @Html.EditorFor(m => m.user_password_confirm, new { htmlAttributes = new { @class = "form-control", id = "UseChangeConfirmPassword", placeholder = "Повторите пароль", @required = true } })
-                                        <div class="invalid-feedback field-validation-error">
-                                            Пароли не совпадают
-                                        </div>
-                                    </div>
-                                    <div class="form-group" id="error_message">
-                                        <div class="field-validation-error">
-                                            <span class="oi oi-ban"></span>
-                                        </div>
+                                        @Html.EditorFor(m => m.user_password_confirm, new { htmlAttributes = new { @class = "form-control", id = "UseChangeConfirmPassword", placeholder = "Повторите новый пароль" } })
+                                        <span id="error-confirm-password" class="field-validation-error">&nbsp;</span>
                                     </div>
                                 </form>
                             </div>
@@ -200,7 +191,7 @@
     <script>
         function ChangePassword(UserId) {
 	        var url = mainURL + "/User/GetUserById?UserId=" + UserId;
-	        $("#form2")[0].reset();
+	        $("#ChangePasswordForm")[0].reset();
 	        $("#MyModalChangePassword").modal();
 	        $.ajax({
 		        type: "GET",
@@ -212,37 +203,44 @@
 	        })
         }
 
-        $("#SaveChangePassword").click(function () {
-
-            var form = document.getElementById('form2');
-            var isValidForm = form.checkValidity();
-
-	        var data = $("#SubmitForm2").serialize();
-
+        function validateChangePasswordForm() {
 	        var pass = $("#UseChangePassword").val();
 	        var oldpass = $("#UseOldPassword").val();
 	        var confpass = $("#UseChangeConfirmPassword").val();
 
-	        if (oldpass.trim() == "") {
-		        return false;
-	        }
+            oldpass.trim() == "" ? document.getElementById('error-old-password').innerHTML = "Введите старый пароль" : document.getElementById('error-old-password').innerHTML = "";
 
-	        if (pass.trim() == "") {
-		        return false;
-	        }
+            pass.trim() == "" ? document.getElementById('error-new-password').innerHTML = "Введите новый пароль" : document.getElementById('error-new-password').innerHTML = "";
 
-	        if (pass.trim() != confpass.trim()) {
-		        return false;
-	        }
+            pass.trim() != confpass.trim() ? document.getElementById('error-confirm-password').innerHTML = "Пароли не совпадают" : document.getElementById('error-confirm-password').innerHTML = "&nbsp";
 
-	        $.ajax({
+
+            if ((oldpass.trim() == "") || (pass.trim() == "") || (pass.trim() != confpass.trim()))
+                return false;
+
+            return true;
+        }
+
+        $("#SaveChangePassword").click(function () {
+
+            if (!validateChangePasswordForm())
+                return false;
+
+            var data = $("#ChangePasswordForm").serialize();
+            $.ajax({
 		        type: "Post",
 		        url: mainURL + "/User/ChangePassword",
 		        data: data,
 		        success: function (result) {
-			        if (result == 0) {
+                    if (result == 1) {
+                        document.getElementById('error-old-password').innerHTML = "Старый пароль не совпадает";
+				        return false;
+                    }
+                    if (result == 2) {
+    			        alert("Ошибка при изменении пароля, попробуйте обновить страницу!");
 				        return false;
 			        }
+
 			        alert("Пароль изменен!");
 			        $("#MyModalChangePassword").modal("hide");
 		        }

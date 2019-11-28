@@ -43,6 +43,19 @@
           <Property Name="task_status" Type="nvarchar" MaxLength="50" Nullable="false" />
           <Property Name="task_last_error_text" Type="nvarchar(max)" />
         </EntityType>
+        <EntityType Name="Users">
+          <Key>
+            <PropertyRef Name="user_id" />
+          </Key>
+          <Property Name="user_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="user_login" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="user_password" Type="nvarchar" MaxLength="1000" Nullable="false" />
+          <Property Name="user_isdeleted" Type="bit" Nullable="false" />
+          <Property Name="user_surname" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="user_name" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="user_patronymic" Type="nvarchar" MaxLength="100" />
+          <Property Name="user_email" Type="nvarchar" MaxLength="100" Nullable="false" />
+        </EntityType>
         <EntityType Name="Wishes">
           <Key>
             <PropertyRef Name="wish_id" />
@@ -54,6 +67,7 @@
           <Property Name="wish_report_type_name" Type="nvarchar(max)" Nullable="false" />
           <Property Name="wish_report_type_xml" Type="nvarchar(max)" Nullable="false" />
           <Property Name="wish_status" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="wish_user_id" Type="int" Nullable="false" />
         </EntityType>
         <Association Name="FK_Report_data_Tasks">
           <End Role="Tasks" Type="Self.Tasks" Multiplicity="1" />
@@ -91,11 +105,24 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_Wishes_Users">
+          <End Role="Users" Type="Self.Users" Multiplicity="1" />
+          <End Role="Wishes" Type="Self.Wishes" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="user_id" />
+            </Principal>
+            <Dependent Role="Wishes">
+              <PropertyRef Name="wish_user_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <EntityContainer Name="ReportScheduleModelStoreContainer">
           <EntitySet Name="Places" EntityType="Self.Places" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Report_data" EntityType="Self.Report_data" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Report_types" EntityType="Self.Report_types" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Tasks" EntityType="Self.Tasks" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Users" EntityType="Self.Users" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Wishes" EntityType="Self.Wishes" Schema="dbo" store:Type="Tables" />
           <AssociationSet Name="FK_Report_data_Tasks" Association="Self.FK_Report_data_Tasks">
             <End Role="Tasks" EntitySet="Tasks" />
@@ -108,6 +135,10 @@
           <AssociationSet Name="FK_Tasks_Wishes" Association="Self.FK_Tasks_Wishes">
             <End Role="Wishes" EntitySet="Wishes" />
             <End Role="Tasks" EntitySet="Tasks" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Wishes_Users" Association="Self.FK_Wishes_Users">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Wishes" EntitySet="Wishes" />
           </AssociationSet>
         </EntityContainer>
       </Schema></edmx:StorageModels>
@@ -169,6 +200,8 @@
           <Property Name="wish_report_type_xml" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
           <Property Name="wish_status" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
           <NavigationProperty Name="Tasks" Relationship="Self.FK_Tasks_Wishes" FromRole="Wishes" ToRole="Tasks" />
+          <Property Name="wish_user_id" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Users" Relationship="ReportScheduleModel.FK_Wishes_Users" FromRole="Wishes" ToRole="Users" />
         </EntityType>
         <Association Name="FK_Tasks_Places">
           <End Role="Places" Type="Self.Places" Multiplicity="1" />
@@ -224,7 +257,38 @@
             <End Role="Wishes" EntitySet="Wishes" />
             <End Role="Tasks" EntitySet="Tasks" />
           </AssociationSet>
+          <EntitySet Name="Users" EntityType="ReportScheduleModel.Users" />
+          <AssociationSet Name="FK_Wishes_Users" Association="ReportScheduleModel.FK_Wishes_Users">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Wishes" EntitySet="Wishes" />
+          </AssociationSet>
         </EntityContainer>
+        <EntityType Name="Users">
+          <Key>
+            <PropertyRef Name="user_id" />
+          </Key>
+          <Property Name="user_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="user_login" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="user_password" Type="String" Nullable="false" MaxLength="1000" FixedLength="false" Unicode="true" />
+          <Property Name="user_isdeleted" Type="Boolean" Nullable="false" />
+          <Property Name="user_surname" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="user_name" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="user_patronymic" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="user_email" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Wishes" Relationship="ReportScheduleModel.FK_Wishes_Users" FromRole="Users" ToRole="Wishes" />
+        </EntityType>
+        <Association Name="FK_Wishes_Users">
+          <End Type="ReportScheduleModel.Users" Role="Users" Multiplicity="1" />
+          <End Type="ReportScheduleModel.Wishes" Role="Wishes" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="user_id" />
+            </Principal>
+            <Dependent Role="Wishes">
+              <PropertyRef Name="wish_user_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -276,6 +340,7 @@
           <EntitySetMapping Name="Wishes">
             <EntityTypeMapping TypeName="ReportScheduleModel.Wishes">
               <MappingFragment StoreEntitySet="Wishes">
+                <ScalarProperty Name="wish_user_id" ColumnName="wish_user_id" />
                 <ScalarProperty Name="wish_id" ColumnName="wish_id" />
                 <ScalarProperty Name="wish_createdate" ColumnName="wish_createdate" />
                 <ScalarProperty Name="wish_deadline" ColumnName="wish_deadline" />
@@ -283,6 +348,20 @@
                 <ScalarProperty Name="wish_report_type_name" ColumnName="wish_report_type_name" />
                 <ScalarProperty Name="wish_report_type_xml" ColumnName="wish_report_type_xml" />
                 <ScalarProperty Name="wish_status" ColumnName="wish_status" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Users">
+            <EntityTypeMapping TypeName="ReportScheduleModel.Users">
+              <MappingFragment StoreEntitySet="Users">
+                <ScalarProperty Name="user_email" ColumnName="user_email" />
+                <ScalarProperty Name="user_patronymic" ColumnName="user_patronymic" />
+                <ScalarProperty Name="user_name" ColumnName="user_name" />
+                <ScalarProperty Name="user_surname" ColumnName="user_surname" />
+                <ScalarProperty Name="user_isdeleted" ColumnName="user_isdeleted" />
+                <ScalarProperty Name="user_password" ColumnName="user_password" />
+                <ScalarProperty Name="user_login" ColumnName="user_login" />
+                <ScalarProperty Name="user_id" ColumnName="user_id" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

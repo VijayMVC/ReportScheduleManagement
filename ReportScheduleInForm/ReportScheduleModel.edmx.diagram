@@ -13,6 +13,8 @@
         <AssociationConnector Association="ReportScheduleModel.FK_Tasks_Places" ManuallyRouted="false" />
         <AssociationConnector Association="ReportScheduleModel.FK_Report_data_Tasks" ManuallyRouted="false" />
         <AssociationConnector Association="ReportScheduleModel.FK_Tasks_Wishes" ManuallyRouted="false" />
+        <EntityTypeShape EntityType="ReportScheduleModel.Users" Width="1.5" PointX="0.75" PointY="9.25" />
+        <AssociationConnector Association="ReportScheduleModel.FK_Wishes_Users" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

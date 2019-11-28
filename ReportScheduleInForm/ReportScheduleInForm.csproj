@@ -74,6 +74,7 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Security" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -86,6 +87,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EncryptStringSample.cs" />
+    <Compile Include="MailHelper.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -120,6 +122,9 @@
       <DependentUpon>ReportScheduleModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Tasks.cs">
+      <DependentUpon>ReportScheduleModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Users.cs">
       <DependentUpon>ReportScheduleModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Wishes.cs">

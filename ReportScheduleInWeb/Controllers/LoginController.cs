@@ -66,7 +66,7 @@ namespace ReportScheduleInWeb.Controllers
                     Session["userSurname"] = userDetails.user_surname;
                     Session["userName"] = userDetails.user_name;
 
-                    return RedirectToAction("Index", "Home", userModel);
+                    return RedirectToAction("Index", "Home");
                 }
             }
         }
@@ -266,7 +266,6 @@ namespace ReportScheduleInWeb.Controllers
 
         public ActionResult LogOut()
         {
-            int userId = Session["userID"] == null ? 0 : (int)Session["userID"];
             Session.Abandon();
             return RedirectToAction("Index", "Login");
         }

@@ -12,25 +12,24 @@ namespace ReportScheduleInForm
     using System;
     using System.Collections.Generic;
     
-    public partial class Wishes
+    public partial class Users
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public Wishes()
+        public Users()
         {
-            this.Tasks = new HashSet<Tasks>();
+            this.Wishes = new HashSet<Wishes>();
         }
     
-        public int wish_id { get; set; }
-        public System.DateTime wish_createdate { get; set; }
-        public System.DateTime wish_deadline { get; set; }
-        public Nullable<int> wish_total_attempts { get; set; }
-        public string wish_report_type_name { get; set; }
-        public string wish_report_type_xml { get; set; }
-        public string wish_status { get; set; }
-        public int wish_user_id { get; set; }
+        public int user_id { get; set; }
+        public string user_login { get; set; }
+        public string user_password { get; set; }
+        public bool user_isdeleted { get; set; }
+        public string user_surname { get; set; }
+        public string user_name { get; set; }
+        public string user_patronymic { get; set; }
+        public string user_email { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Tasks> Tasks { get; set; }
-        public virtual Users Users { get; set; }
+        public virtual ICollection<Wishes> Wishes { get; set; }
     }
 }

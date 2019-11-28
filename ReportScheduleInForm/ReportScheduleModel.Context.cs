@@ -30,5 +30,6 @@ namespace ReportScheduleInForm
         public virtual DbSet<Report_types> Report_types { get; set; }
         public virtual DbSet<Tasks> Tasks { get; set; }
         public virtual DbSet<Wishes> Wishes { get; set; }
+        public virtual DbSet<Users> Users { get; set; }
     }
 }

@@ -128,8 +128,11 @@
                         <div class="col-3">
                             <label class="text-warning h6">Параметры:</label>
                         </div>
-                        <div class="col-9">
+                        <div class="col-6">
                             <label class="text-light" id="labelParameterReport"></label>
+                        </div>
+                        <div class="col-3">
+                            <button class="btn btn-outline-primary my-2 my-sm-0 container-fluid mr-1" type="button" onclick="UpdateInfo()" id="UpdateButton">Обновить</button>
                         </div>
                     </div>
                 </div>
@@ -174,6 +177,10 @@
 
             $(".chosen-choices").css('font-size', '16px');
             $(".chosen-choices").css('min-height', '38px');
+
+            function UpdateInfo() {
+                GetTasks($("#wish_id").val());
+            }
 
             function GetExcel(TaskId) {
                 if ($('#busy_page').val() == "false") {
@@ -296,63 +303,72 @@
             }
 
             function GetTasks(WishId) {
-                var url = mainURL + "/Monitor/GetTasks?WishId=" + WishId;
-                $("#found_tasks").modal();
-                $.ajax({
-                    type: "GET",
-                    url: url,
-                    success: function (TaskList) {
-                        GetParamValue(WishId);
-                        var GetExcelButton = document.getElementById('GetExcelButton');
-                        if (TaskList.some(item => item.Task_status === 'завершено')) {
-                            GetExcelButton.style.display = '';
-                        }
-                        else {
-                            GetExcelButton.style.display = 'none';
-                        }
+                if ($('#busy_page').val() == "false") {
+                    $('#busy_page').val("true");
 
-                        $('#wish_id').val(WishId);
+                    var url = mainURL + "/Monitor/GetTasks?WishId=" + WishId;
+                    $("#found_tasks").modal();
+                    $.ajax({
+                        type: "GET",
+                        url: url,
+                        success: function (TaskList) {
+                            $('#busy_page').val("false");
+                            GetParamValue(WishId);
+                            var GetExcelButton = document.getElementById('GetExcelButton');
+                            if (TaskList.some(item => item.Task_status === 'завершено')) {
+                                GetExcelButton.style.display = '';
+                            }
+                            else {
+                                GetExcelButton.style.display = 'none';
+                            }
 
-                        //Места
-                        var SetData = $("#FoundTasksList");
-                        SetData.empty();
-                        if (TaskList.length == 0) {
-                            var Data = "<tr class='font-italic font-weight-light'> <td colspan='5'>Ничего не найдено</td></tr>";
-                            SetData.append(Data);
-                        }
-                        else {
-                            for (var i = 0; i < TaskList.length; i++) {
-                                var Data = "<tr>" +
-                                    "<td>" + TaskList[i].Task_place_name + "</td>" +
-                                    "<td style='text-align: center;'>" + timeConverter(TaskList[i].Task_startdate) + "</td>";
-                                if (TaskList[i].Task_number_attempts != null) {
-                                    Data += "<td style='text-align: center;'>" + TaskList[i].Task_number_attempts + "</td>";
-                                }
-                                else {
-                                    Data += "<td style='text-align: center;'>-</td>";
-                                }
+                            $('#wish_id').val(WishId);
 
-                                if (TaskList[i].Task_status === "завершено") {
-                                    Data += "<td style='text-align: center;'><a href='#' onclick='GetExcel(" + TaskList[i].Task_id + ")'>" + TaskList[i].Task_status + "</a></td>";
-                                }
-                                else {
-                                    Data += "<td style='text-align: center;'>" + TaskList[i].Task_status + "</td>";
-                                }
-
-                                if (TaskList[i].Task_last_error_text != null) {
-                                    Data += "<td><a href='#' onclick='alert(&quot;" + TaskList[i].Task_last_error_text + "&quot;)'>"+ TaskList[i].Task_last_error_text_short + "</a></td>";
-                                }
-                                else {
-                                    Data += "<td style='text-align: justify;'>" + TaskList[i].Task_last_error_text_short + "</td>";
-                                }
-
-
-                                Data += "</tr>";
+                            //Места
+                            var SetData = $("#FoundTasksList");
+                            SetData.empty();
+                            if (TaskList.length == 0) {
+                                var Data = "<tr class='font-italic font-weight-light'> <td colspan='5'>Ничего не найдено</td></tr>";
                                 SetData.append(Data);
                             }
+                            else {
+                                for (var i = 0; i < TaskList.length; i++) {
+                                    var Data = "<tr>" +
+                                        "<td>" + TaskList[i].Task_place_name + "</td>" +
+                                        "<td style='text-align: center;'>" + timeConverter(TaskList[i].Task_startdate) + "</td>";
+                                    if (TaskList[i].Task_number_attempts != null) {
+                                        Data += "<td style='text-align: center;'>" + TaskList[i].Task_number_attempts + "</td>";
+                                    }
+                                    else {
+                                        Data += "<td style='text-align: center;'>-</td>";
+                                    }
+
+                                    if (TaskList[i].Task_status === "завершено") {
+                                        Data += "<td style='text-align: center;'><a href='#' onclick='GetExcel(" + TaskList[i].Task_id + ")'>" + TaskList[i].Task_status + "</a></td>";
+                                    }
+                                    else {
+                                        Data += "<td style='text-align: center;'>" + TaskList[i].Task_status + "</td>";
+                                    }
+
+                                    if (TaskList[i].Task_last_error_text != null) {
+                                        Data += "<td><a href='#' onclick='alert(&quot;" + TaskList[i].Task_last_error_text + "&quot;)'>" + TaskList[i].Task_last_error_text_short + "</a></td>";
+                                    }
+                                    else {
+                                        Data += "<td style='text-align: justify;'>" + TaskList[i].Task_last_error_text_short + "</td>";
+                                    }
+
+
+                                    Data += "</tr>";
+                                    SetData.append(Data);
+                                }
+                            }
+                        },
+                        error: function (xhr, status, p3) {
+                            $('#busy_page').val("false");
+                            alert(xhr.responseText);
                         }
-                    }
-                })
+                    })
+                }
             }
 
             function timeConverter(UNIX_timestamp) {

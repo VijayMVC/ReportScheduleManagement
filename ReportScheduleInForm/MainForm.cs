@@ -9,7 +9,9 @@ using System.Threading.Tasks;
 using System.Xml.Serialization;
 using EncryptStringSample;
 using System.Configuration;
-using System.Windows.Forms;
+using System.Text;
+using System.Net.Mail;
+using System.Globalization;
 
 namespace ReportScheduleInForm
 {
@@ -22,6 +24,8 @@ namespace ReportScheduleInForm
         }
 
         string password = ConfigurationManager.AppSettings.Get("password");
+
+        private readonly string smtpFrom = ConfigurationManager.AppSettings["smtp:from"];
 
         //Проверка задания на дедлайн
         private bool CheckDeadline(Wishes w)
@@ -57,11 +61,27 @@ namespace ReportScheduleInForm
                 if (db.Tasks.Where(x => x.task_wish_id == w.wish_id && x.task_status != "done" && x.task_status != "fail").Count() == 0)
                 {
                     WriteOnStory("Задание на выгрузку отчета \"" + w.wish_report_type_name + "\" завершено.");
+
+                    SendNotify(w.wish_id);
+
                     return true;
                 }
             }
 
             return false;
+        }
+
+        private bool CheckWishFail(Wishes w)
+        {
+            using (ReportScheduleEntities db = new ReportScheduleEntities())
+            {
+                if (db.Tasks.Where(x => x.task_wish_id == w.wish_id && x.task_status == "fail").Count() == 0)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         private void GetWishes()
@@ -161,7 +181,7 @@ namespace ReportScheduleInForm
                 catch { }
 
                 Wishes wish = db.Wishes.Where(x => x.wish_id == w.wish_id).FirstOrDefault();
-                wish.wish_status = CheckWishDone(wish) ? "done" : "wait";
+                wish.wish_status = CheckWishDone(wish) ? CheckWishFail(wish) ? "fail": "done" : "wait";
                 db.SaveChanges();
             }
         }
@@ -194,6 +214,7 @@ namespace ReportScheduleInForm
                         {
                             sqlConnection.Open();
                             SqlCommand sqlCmd = new SqlCommand(cmd_text, sqlConnection);
+                            sqlCmd.CommandTimeout = 1800;
                             foreach (var p in report.Parameters)
                             {
                                 sqlCmd.Parameters.AddWithValue(p.ParameterName, p.ParameterValue);
@@ -308,6 +329,77 @@ namespace ReportScheduleInForm
                 {
                     ThreadGrid.DataSource = data;
                 }
+            }
+        }
+
+        public void SendNotify(int wish_id)
+        {
+            using (ReportScheduleEntities db = new ReportScheduleEntities())
+            {
+                Wishes w = db.Wishes.Where(x => x.wish_id == wish_id).SingleOrDefault();
+
+                string email = db.Users.Where(x => x.user_id == w.wish_user_id).SingleOrDefault().user_email;
+                string subject = "Заказ отчета выполнен";
+
+                StringBuilder param = new StringBuilder();
+
+                XmlSerializer serializer = new XmlSerializer(typeof(ReportModel));
+                using (TextReader reader = new StringReader(w.wish_report_type_xml))
+                {
+                    ReportModel report = (ReportModel)serializer.Deserialize(reader);
+
+                    if (report.Parameters.Count != 0)
+                    {
+                        foreach (var p in report.Parameters)
+                        {
+                            param.AppendLine("\t" + p.ParameterAlias + " : " + p.ParameterValue);
+                        }
+                    }
+                    else
+                    {
+                        param.AppendLine("\t нет");
+                    }
+                }
+
+                var ru = CultureInfo.GetCultureInfo("ru-RU");
+
+                var body = new StringBuilder();
+                body.AppendLine("Тук-тук!");
+                body.AppendLine().AppendLine("С пылу с жару готов отчет \"" + w.wish_report_type_name +"\" по заданию, созданному Вами " + w.wish_createdate.Day.ToString() + " " + ru.DateTimeFormat.MonthGenitiveNames[w.wish_createdate.Month - 1] + " " + w.wish_createdate.Year.ToString() + " году в " + w.wish_createdate.ToString("HH:mm"));
+                body.AppendLine().AppendLine("ИНФОРМАЦИЯ:");
+                body.AppendLine("Параметры:");
+                body.AppendLine(param.ToString());
+                body.AppendLine().AppendLine("С уважением, центр «Мои Документы».");
+                body.AppendLine().AppendLine("---");
+                body.AppendLine("Данное сообщение сформировано автоматически. Пожалуйста, не отвечайте на него.");
+                body.AppendLine("УВЕДОМЛЕНИЕ О КОНФИДЕНЦИАЛЬНОСТИ: Это электронное сообщение и любые документы, приложенные к нему, содержат конфиденциальную информацию. Настоящим уведомляем Вас о том, что если это сообщение не предназначено Вам, использование, копирование, распространение информации, содержащейся в настоящем сообщении, а также осуществление любых действий на основе этой информации, строго запрещено. Если Вы получили это сообщение по ошибке, пожалуйста, сообщите об этом отправителю по электронной почте и удалите это сообщение.");
+                body.AppendLine();
+
+                SendMail(email, subject, body);
+            }
+        }
+
+        public void SendMail(string email, string subject, StringBuilder text)
+        {
+            var mail = MailHelper.GetInstance();
+
+            var message = new MailMessage();
+            message.From = new MailAddress(smtpFrom);
+            message.ReplyToList.Add(new MailAddress("grizzled@mfcsakha.ru", "no-reply"));
+            message.Subject = subject;
+            message.Body = text.ToString();
+            message.BodyEncoding = System.Text.Encoding.UTF8;
+            message.IsBodyHtml = false;
+
+            message.To.Add(new MailAddress(email));
+
+            try
+            {
+                mail.Send(message);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
             }
         }
     }

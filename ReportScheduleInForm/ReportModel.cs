@@ -36,6 +36,9 @@ namespace ReportScheduleInForm
         [XmlAttribute("Name")]
         public string ParameterName { get; set; }
 
+        [XmlAttribute("Alias")]
+        public string ParameterAlias { get; set; }
+
         [XmlAttribute("Value")]
         public string ParameterValue { get; set; }
 

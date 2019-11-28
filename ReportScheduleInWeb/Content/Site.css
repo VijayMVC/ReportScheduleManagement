@@ -130,3 +130,9 @@ input.password {
     margin: 0 auto;
     pointer-events: all;
 }
+
+.field-validation-error {
+    font-style: italic;
+    font-size: 14px;
+    color: red;
+}

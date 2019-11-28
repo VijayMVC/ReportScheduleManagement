@@ -70,7 +70,7 @@ namespace ReportScheduleInWeb.Controllers
                     Users Use = db.Users.SingleOrDefault(x => x.user_id == model.user_id);
                     if (Use.user_password != encryption(model.user_password_old))
                     {
-                        result = 0;
+                        result = 1;
                         return Json(result, JsonRequestBehavior.AllowGet);
                     }
                 }
@@ -80,7 +80,10 @@ namespace ReportScheduleInWeb.Controllers
                     Users Use = db.Users.SingleOrDefault(x => x.user_id == model.user_id);
                     Use.user_password = encryption(model.user_password);
                     db.SaveChanges();
-                    result = 1;
+                }
+                else
+                {
+                    result = 2;
                 }
             }
             catch (Exception ex)
