@@ -12,6 +12,7 @@ using System.Configuration;
 using System.Text;
 using System.Net.Mail;
 using System.Globalization;
+using System.Net;
 
 namespace ReportScheduleInForm
 {
@@ -61,8 +62,6 @@ namespace ReportScheduleInForm
                 if (db.Tasks.Where(x => x.task_wish_id == w.wish_id && x.task_status != "done" && x.task_status != "fail").Count() == 0)
                 {
                     WriteOnStory("Задание на выгрузку отчета \"" + w.wish_report_type_name + "\" завершено.");
-
-                    SendNotify(w.wish_id);
 
                     return true;
                 }
@@ -183,9 +182,12 @@ namespace ReportScheduleInForm
                 Wishes wish = db.Wishes.Where(x => x.wish_id == w.wish_id).FirstOrDefault();
                 wish.wish_status = CheckWishDone(wish) ? CheckWishFail(wish) ? "fail": "done" : "wait";
                 db.SaveChanges();
+                if ((wish.wish_status == "done") || (wish.wish_status == "fail"))
+                {
+                    SendNotify(wish.wish_id);
+                }
             }
         }
-
 
         private void ReportRequest(int task_id, string report_xml)
         {
@@ -332,6 +334,27 @@ namespace ReportScheduleInForm
             }
         }
 
+        public string GetPathExcelFile(int wish_id)
+        {
+            string url = ConfigurationManager.AppSettings.Get("webservice");
+            WebRequest request = WebRequest.Create(url + wish_id.ToString());
+            request.Method = "GET";
+            WebResponse response = request.GetResponse();
+
+            string responseFromServer;
+            using (Stream dataStream = response.GetResponseStream())
+            {
+                // Open the stream using a StreamReader for easy access.  
+                StreamReader reader = new StreamReader(dataStream);
+                // Read the content.  
+                responseFromServer = reader.ReadToEnd();
+                // Display the content.  
+                Console.WriteLine(responseFromServer);
+            }
+
+            return responseFromServer;
+        }
+
         public void SendNotify(int wish_id)
         {
             using (ReportScheduleEntities db = new ReportScheduleEntities())
@@ -369,6 +392,7 @@ namespace ReportScheduleInForm
                 body.AppendLine().AppendLine("ИНФОРМАЦИЯ:");
                 body.AppendLine("Параметры:");
                 body.AppendLine(param.ToString());
+                body.AppendLine().AppendLine("Скачать отчет Вы можете по ссылке: " + GetPathExcelFile(wish_id));
                 body.AppendLine().AppendLine("С уважением, центр «Мои Документы».");
                 body.AppendLine().AppendLine("---");
                 body.AppendLine("Данное сообщение сформировано автоматически. Пожалуйста, не отвечайте на него.");
