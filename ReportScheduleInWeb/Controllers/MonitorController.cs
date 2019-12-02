@@ -455,5 +455,70 @@ namespace ReportScheduleInWeb.Controllers
             string file_name = "report.xlsx";
             return File(file_path, file_type, file_name);
         }
+
+        [HttpPost]
+        public JsonResult ForceTask()
+        {
+            int result = -1;
+
+            int task_id = (Request.Form["task_id"] == "") ? 0 : Convert.ToInt32(Request.Form["task_id"]);
+            int wish_id = (Request.Form["wish_id"] == "") ? 0 : Convert.ToInt32(Request.Form["wish_id"]);
+
+            if (wish_id == 0)
+            {
+                return Json(result, JsonRequestBehavior.AllowGet);
+            }
+
+            result = 0;
+
+            string wish_status = db.Wishes.Where(x => x.wish_id == wish_id).SingleOrDefault().wish_status;
+
+            if ((wish_status != "new") && (wish_status != "work") && (wish_status != "wait"))
+            {
+                return Json(result, JsonRequestBehavior.AllowGet);
+            }
+
+            Tasks task = db.Tasks.Where(x => x.task_id == task_id).SingleOrDefault();
+
+            if ((task.task_status == "fail") || (task.task_status == "wait"))
+            {
+                task.task_number_attempts = 0;
+                task.task_startdate = DateTime.Now;
+                db.SaveChanges();
+            }
+
+            return Json(task_id, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpPost]
+        public JsonResult EndWish()
+        {
+            int result = 0;
+
+            int wish_id = (Request.Form["wish_id"] == "") ? 0 : Convert.ToInt32(Request.Form["wish_id"]);
+
+            if (wish_id == 0)
+            {
+                return Json(result, JsonRequestBehavior.AllowGet);
+            }
+
+            Wishes wish = db.Wishes.Where(x => x.wish_id == wish_id).SingleOrDefault();
+
+            if ((wish.wish_status == "fail") || (wish.wish_status == "done"))
+            {
+                return Json(result, JsonRequestBehavior.AllowGet);
+            }
+
+            //Всем задачам в ожидании ставим дату и время запуска
+            foreach (var t in db.Tasks.Where(x => x.task_wish_id == wish_id && x.task_status != "done" && x.task_status != "fail"))
+            {
+                t.task_startdate = DateTime.Now;
+            }
+
+            wish.wish_deadline = DateTime.Now;
+            db.SaveChanges();
+
+            return Json(result, JsonRequestBehavior.AllowGet);
+        }
     }
 }

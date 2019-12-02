@@ -13,6 +13,7 @@ using System.Text;
 using System.Net.Mail;
 using System.Globalization;
 using System.Net;
+using System.Text.RegularExpressions;
 
 namespace ReportScheduleInForm
 {
@@ -89,51 +90,64 @@ namespace ReportScheduleInForm
 
             using (ReportScheduleEntities db = new ReportScheduleEntities())
             {
-                Wishes w = null;
-                foreach (Wishes item in db.Wishes.Where(x => x.wish_status != "not_ready" && x.wish_status != "done" && x.wish_status != "fail" && x.wish_status != "work"))
+                try
                 {
-                    //Задача в ожидании
-                    if (item.wish_status == "wait")
+                    Wishes w = null;
+                    foreach (Wishes item in db.Wishes.Where(x => x.wish_status != "not_ready" && x.wish_status != "done" && x.wish_status != "fail" && x.wish_status != "work"))
                     {
-                        //Проверка прошло ли время
-                        foreach (Tasks t in db.Tasks.Where(x => x.task_wish_id == item.wish_id && ((x.task_status == "wait") || (x.task_status == "new"))))
+                        //Задача в ожидании
+                        if (item.wish_status == "wait")
                         {
-                            if (System.DateTime.Compare(t.task_startdate, System.DateTime.Now) <= 0)
+                            //Проверка прошло ли время
+                            foreach (Tasks t in db.Tasks.Where(x => x.task_wish_id == item.wish_id && ((x.task_status == "wait") || (x.task_status == "new"))))
                             {
-                                w = item;
-                                break;
-                            }
-                            else
-                            {
-                                if (t.task_status == "new")
+                                if (System.DateTime.Compare(t.task_startdate, System.DateTime.Now) <= 0)
                                 {
-                                    t.task_status = "wait";
+                                    w = item;
+                                    break;
+                                }
+                                else
+                                {
+                                    if (t.task_status == "new")
+                                    {
+                                        t.task_status = "wait";
+                                    }
                                 }
                             }
                         }
+                        else
+                        {
+                            w = item;
+                        }
+                        if (w != null) break;
                     }
-                    else
-                    {
-                        w = item;
-                    }
-                    if (w != null) break;
-                }
-                db.SaveChanges();
-
-                if (w != null)
-                {
-                    if (w.wish_status != "wait")
-                    {
-                        WriteOnStory("Найдено задание на выгрузку отчета \"" + w.wish_report_type_name + "\".");
-                    }
-
-                    //Проверка задачи на дедлайн
-                    w.wish_status = CheckDeadline(w) ? "work" : "fail";
                     db.SaveChanges();
 
-                    if (w.wish_status == "fail") return;
+                    if (w != null)
+                    {
+                        if (w.wish_status != "wait")
+                        {
+                            WriteOnStory("Найдено задание на выгрузку отчета \"" + w.wish_report_type_name + "\".");
+                        }
 
-                    Task.Run(() => doWork(w));
+                        //Проверка задачи на дедлайн
+                        w.wish_status = CheckDeadline(w) ? "work" : "fail";
+                        db.SaveChanges();
+
+                        if (w.wish_status == "fail")
+                        {
+                            SendNotify(w.wish_id);
+                            return;
+                        }
+
+                        Task.Run(() => doWork(w));
+                    }
+                }
+                catch
+                {
+                    WriteOnStory("Не удалось подключиться к БД ReportSchedule. Попытка подключения через 1 минуту!");
+                    System.Threading.Thread.Sleep(60000);
+                    return;
                 }
             }
         }
@@ -306,31 +320,39 @@ namespace ReportScheduleInForm
 
         private void ShowThreadProgress()
         {
-            using (ReportScheduleEntities db = new ReportScheduleEntities())
+            try
             {
-                List<ThreadProgress> data = new List<ThreadProgress>();
-
-                foreach (var item in db.Wishes.Where(x => x.wish_status == "work" || x.wish_status == "wait"))
+                using (ReportScheduleEntities db = new ReportScheduleEntities())
                 {
-                    switch (item.wish_status)
+                    List<ThreadProgress> data = new List<ThreadProgress>();
+
+                    foreach (var item in db.Wishes.Where(x => x.wish_status == "work" || x.wish_status == "wait"))
                     {
-                        case "work":
-                            data.Add(new ThreadProgress(item.wish_createdate.ToString(), "Ведется работа по выгрузке отчета \"" + item.wish_report_type_name + "\""));
-                            break;
-                        case "wait":
-                            data.Add(new ThreadProgress(item.wish_createdate.ToString(), "Ожидается работа по выгрузке отчета \"" + item.wish_report_type_name + "\""));
-                            break;
+                        switch (item.wish_status)
+                        {
+                            case "work":
+                                data.Add(new ThreadProgress(item.wish_createdate.ToString(), "Ведется работа по выгрузке отчета \"" + item.wish_report_type_name + "\""));
+                                break;
+                            case "wait":
+                                data.Add(new ThreadProgress(item.wish_createdate.ToString(), "Ожидается работа по выгрузке отчета \"" + item.wish_report_type_name + "\""));
+                                break;
+                        }
+                    }
+
+                    if (ThreadGrid.InvokeRequired)
+                    {
+                        BeginInvoke(new Action(() => { ThreadGrid.DataSource = data; }));
+                    }
+                    else
+                    {
+                        ThreadGrid.DataSource = data;
                     }
                 }
-
-                if (ThreadGrid.InvokeRequired)
-                {
-                    BeginInvoke(new Action(() => { ThreadGrid.DataSource = data; }));
-                }
-                else
-                {
-                    ThreadGrid.DataSource = data;
-                }
+            }
+            catch
+            {
+                System.Threading.Thread.Sleep(60000);
+                return;
             }
         }
 
@@ -348,9 +370,10 @@ namespace ReportScheduleInForm
                 StreamReader reader = new StreamReader(dataStream);
                 // Read the content.  
                 responseFromServer = reader.ReadToEnd();
-                // Display the content.  
-                Console.WriteLine(responseFromServer);
             }
+
+            responseFromServer = responseFromServer.Substring(0, responseFromServer.LastIndexOf("</"));
+            responseFromServer = responseFromServer.Substring(responseFromServer.IndexOf(">") + 1);
 
             return responseFromServer;
         }
@@ -425,6 +448,11 @@ namespace ReportScheduleInForm
             {
                 throw ex;
             }
+        }
+
+        private void ClearButton_Click(object sender, EventArgs e)
+        {
+            StoryTextBox.Clear();
         }
     }
 

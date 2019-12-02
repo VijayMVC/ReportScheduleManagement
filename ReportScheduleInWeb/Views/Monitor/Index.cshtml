@@ -135,6 +135,11 @@
                             <button class="btn btn-outline-primary my-2 my-sm-0 container-fluid mr-1" type="button" onclick="UpdateInfo()" id="UpdateButton">Обновить</button>
                         </div>
                     </div>
+                    <div class="row">
+                        <div class="col-4">
+                            <button class="btn btn-outline-danger my-2 my-sm-0 container-fluid" type="button" onclick="EndWish()" id="EndButton">Завершить досрочно</button>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <table class="table table-bordered table-hover table-striped table-light">
@@ -215,6 +220,89 @@
                             }
 
                             window.location.href = mainURL + "/Monitor/GetFile?path=" + Guid;
+                        },
+                        error: function (xhr, status, p3) {
+                            $('#busy_page').val("false");
+                            alert(xhr.responseText);
+                        }
+                    })
+                }
+                return false;
+            }
+
+            function EndWish() {
+                if ($('#busy_page').val() == "false") {
+                    $('#busy_page').val("true");
+
+                    var wish_id = $("#wish_id").val();
+
+                    if ((wish_id == null) || (wish_id == 0)) {
+                        alert("Непредвиденная ошибка!");
+                        return false;
+                    }
+
+                    var data = new FormData();
+
+                    data.append("wish_id", wish_id);
+
+                    $.ajax({
+                        type: "Post",
+                        data: data,
+                        contentType: false,
+                        processData: false,
+                        url: mainURL + "/Monitor/EndWish",
+                        success: function (result) {
+                            $('#busy_page').val("false");
+                            UpdateInfo();
+                        },
+                        error: function (xhr, status, p3) {
+                            $('#busy_page').val("false");
+                            alert(xhr.responseText);
+                        }
+                    })
+                }
+                return false;
+            }
+
+            function ForceTask(TaskId) {
+                if ($('#busy_page').val() == "false") {
+                    $('#busy_page').val("true");
+
+                    var wish_id = $("#wish_id").val();
+
+                    if ((wish_id == null) || (wish_id == 0)) {
+                        alert("Непредвиденная ошибка!");
+                        return false;
+                    }
+
+                    var data = new FormData();
+
+                    data.append("wish_id", wish_id);
+                    data.append("task_id", TaskId);
+
+                    $.ajax({
+                        type: "Post",
+                        data: data,
+                        contentType: false,
+                        processData: false,
+                        url: mainURL + "/Monitor/ForceTask",
+                        success: function (result) {
+                            $('#busy_page').val("false");
+
+                            if (result == -1) {
+                                alert("Непредвиденная ошибка!");
+                                return false;
+                            }
+
+                            if (result != 0) {
+                                var oi;
+                                oi = document.getElementById('task' + result);
+                                oi.innerHTML = 'в работе';
+                            }
+                            else {
+                                alert("Задание уже завершилось!");
+                                return false;
+                            }
                         },
                         error: function (xhr, status, p3) {
                             $('#busy_page').val("false");
@@ -322,6 +410,14 @@
                                 GetExcelButton.style.display = 'none';
                             }
 
+                            var EndButton = document.getElementById('EndButton');
+                            if (TaskList.some(item => item.Task_status !== 'завершено' && item.Task_status !== 'завершено с ошибкой')) {
+                                EndButton.style.display = '';
+                            }
+                            else {
+                                EndButton.style.display = 'none';
+                            }
+
                             $('#wish_id').val(WishId);
 
                             //Места
@@ -344,10 +440,15 @@
                                     }
 
                                     if (TaskList[i].Task_status === "завершено") {
-                                        Data += "<td style='text-align: center;'><a href='#' onclick='GetExcel(" + TaskList[i].Task_id + ")'>" + TaskList[i].Task_status + "</a></td>";
+                                        Data += "<td id='task" + TaskList[i].Task_id + "' style='text-align: center;'><a href='#' onclick='GetExcel(" + TaskList[i].Task_id + ")'>" + TaskList[i].Task_status + "</a></td>";
                                     }
                                     else {
-                                        Data += "<td style='text-align: center;'>" + TaskList[i].Task_status + "</td>";
+                                        if ((TaskList[i].Task_status === "ожидание") || (TaskList[i].Task_status === "завершено с ошибкой")) {
+                                            Data += "<td id='task" + TaskList[i].Task_id + "' style='text-align: center;'>" + TaskList[i].Task_status + "<a href='#' onclick='ForceTask(" + TaskList[i].Task_id + ")'> (зафорсить) </a></td>";
+                                        }
+                                        else {
+                                            Data += "<td id='task" + TaskList[i].Task_id + "' style='text-align: center;'>" + TaskList[i].Task_status + "</td>";
+                                        }
                                     }
 
                                     if (TaskList[i].Task_last_error_text != null) {

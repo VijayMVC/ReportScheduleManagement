@@ -37,10 +37,11 @@
             this.StoryTextBox = new MetroFramework.Controls.MetroTextBox();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.ThreadGrid = new MetroFramework.Controls.MetroGrid();
-            this.metroButton1 = new MetroFramework.Controls.MetroButton();
-            this.metroButton2 = new MetroFramework.Controls.MetroButton();
             this.createdatetime = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.status = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.metroButton1 = new MetroFramework.Controls.MetroButton();
+            this.metroButton2 = new MetroFramework.Controls.MetroButton();
+            this.clearButton = new MetroFramework.Controls.MetroButton();
             ((System.ComponentModel.ISupportInitialize)(this.metroStyleManager1)).BeginInit();
             this.tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.ThreadGrid)).BeginInit();
@@ -92,6 +93,7 @@
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel1.Controls.Add(this.StoryTextBox, 0, 0);
             this.tableLayoutPanel1.Controls.Add(this.ThreadGrid, 1, 0);
+            this.tableLayoutPanel1.Controls.Add(this.clearButton, 0, 1);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(20, 60);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
@@ -152,6 +154,21 @@
             this.ThreadGrid.Size = new System.Drawing.Size(374, 314);
             this.ThreadGrid.TabIndex = 2;
             // 
+            // createdatetime
+            // 
+            this.createdatetime.DataPropertyName = "createdatetime";
+            this.createdatetime.HeaderText = "Start time";
+            this.createdatetime.Name = "createdatetime";
+            this.createdatetime.ReadOnly = true;
+            // 
+            // status
+            // 
+            this.status.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.status.DataPropertyName = "status";
+            this.status.HeaderText = "Progress status";
+            this.status.Name = "status";
+            this.status.ReadOnly = true;
+            // 
             // metroButton1
             // 
             this.metroButton1.Location = new System.Drawing.Point(255, 26);
@@ -174,20 +191,17 @@
             this.metroButton2.Visible = false;
             this.metroButton2.Click += new System.EventHandler(this.MetroButton2_Click);
             // 
-            // createdatetime
+            // clearButton
             // 
-            this.createdatetime.DataPropertyName = "createdatetime";
-            this.createdatetime.HeaderText = "Start time";
-            this.createdatetime.Name = "createdatetime";
-            this.createdatetime.ReadOnly = true;
-            // 
-            // status
-            // 
-            this.status.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.status.DataPropertyName = "status";
-            this.status.HeaderText = "Progress status";
-            this.status.Name = "status";
-            this.status.ReadOnly = true;
+            this.clearButton.FontSize = MetroFramework.MetroButtonSize.Medium;
+            this.clearButton.FontWeight = MetroFramework.MetroButtonWeight.Light;
+            this.clearButton.Location = new System.Drawing.Point(3, 323);
+            this.clearButton.Name = "clearButton";
+            this.clearButton.Size = new System.Drawing.Size(113, 23);
+            this.clearButton.TabIndex = 3;
+            this.clearButton.Text = "Очистить";
+            this.clearButton.UseSelectable = true;
+            this.clearButton.Click += new System.EventHandler(this.ClearButton_Click);
             // 
             // MainForm
             // 
@@ -217,6 +231,7 @@
         private MetroFramework.Controls.MetroButton metroButton2;
         private System.Windows.Forms.DataGridViewTextBoxColumn createdatetime;
         private System.Windows.Forms.DataGridViewTextBoxColumn status;
+        private MetroFramework.Controls.MetroButton clearButton;
     }
 }
 
