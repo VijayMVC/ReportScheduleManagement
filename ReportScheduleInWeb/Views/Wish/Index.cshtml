@@ -227,6 +227,9 @@
                                 case 'string':
                                     Data += "<td><input type='text' class='parameterValue' placeholder='Введите значение' required></td>";
                                     break;
+                                case 'integer':
+                                    Data += "<td><input type='number' class='parameterValue' required></td>";
+                                    break;
                                 case 'startdate':
                                     var now = new Date();
                                     Data += "<td><input type='datetime-local' class='parameterValue' value='" + now.getFullYear() + "-" + ("0" + (now.getMonth() + 1)).slice(-2) + "-" + ("0" + now.getDate()).slice(-2) + "T00:00' required></td>";
@@ -295,6 +298,12 @@
                         case 'text':
                             var value = $(this).val().replace(/ +/g, '');
                             if (value.length === 0) {
+                                flag = false;
+                            }
+                            break;
+                        case 'number':
+                            var value = $(this).val();
+                            if ((this.validity.badInput) || (value.length === 0)) {
                                 flag = false;
                             }
                             break;
