@@ -41,6 +41,13 @@
           <Property Name="reg_patronymic" Type="nvarchar" MaxLength="100" />
           <Property Name="reg_email" Type="nvarchar" MaxLength="100" Nullable="false" />
         </EntityType>
+        <EntityType Name="Reminded">
+          <Key>
+            <PropertyRef Name="remind_guid" />
+          </Key>
+          <Property Name="remind_guid" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="remind_user_id" Type="int" Nullable="false" />
+        </EntityType>
         <EntityType Name="Report_data">
           <Key>
             <PropertyRef Name="report_data_id" />
@@ -315,6 +322,7 @@
           <EntitySet Name="Place_types" EntityType="Self.Place_types" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Places" EntityType="Self.Places" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Registered" EntityType="Self.Registered" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Reminded" EntityType="Self.Reminded" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Report_data" EntityType="Self.Report_data" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Report_group_relation" EntityType="Self.Report_group_relation" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Report_groups" EntityType="Self.Report_groups" Schema="dbo" store:Type="Tables" />
@@ -616,6 +624,7 @@
             <End Role="Report_user_relation" EntitySet="Report_user_relation" />
           </AssociationSet>
           <EntitySet Name="Registered" EntityType="ReportScheduleModel.Registered" />
+          <EntitySet Name="Reminded" EntityType="ReportScheduleModel.Reminded" />
         </EntityContainer>
         <EntityType Name="Place_type_relation">
           <Key>
@@ -793,6 +802,13 @@
           <Property Name="reg_patronymic" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
           <Property Name="reg_email" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
         </EntityType>
+        <EntityType Name="Reminded">
+          <Key>
+            <PropertyRef Name="remind_guid" />
+          </Key>
+          <Property Name="remind_guid" Type="Guid" Nullable="false" />
+          <Property Name="remind_user_id" Type="Int32" Nullable="false" />
+        </EntityType>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -948,6 +964,14 @@
                 <ScalarProperty Name="reg_password" ColumnName="reg_password" />
                 <ScalarProperty Name="reg_login" ColumnName="reg_login" />
                 <ScalarProperty Name="reg_guid" ColumnName="reg_guid" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Reminded">
+            <EntityTypeMapping TypeName="ReportScheduleModel.Reminded">
+              <MappingFragment StoreEntitySet="Reminded">
+                <ScalarProperty Name="remind_user_id" ColumnName="remind_user_id" />
+                <ScalarProperty Name="remind_guid" ColumnName="remind_guid" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

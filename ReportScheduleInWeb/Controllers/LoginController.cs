@@ -7,7 +7,6 @@ using System.Web.Mvc;
 using System.Net.Mail;
 using System.Web.Configuration;
 using ReportScheduleInWeb.App.Tool;
-using System.Threading.Tasks;
 
 namespace ReportScheduleInWeb.Controllers
 {
@@ -198,6 +197,84 @@ namespace ReportScheduleInWeb.Controllers
             }
         }
 
+        [HttpPost]
+        public ActionResult Forgot(LoginViewModel userModel)
+        {
+            try
+            {
+                using (ReportScheduleEntities db = new ReportScheduleEntities())
+                {
+                    if (userModel.user_email.Trim() == "")
+                    {
+                        ViewBag.Action = "Forgot";
+                        return View("Index", userModel);
+                    }
+
+                    if (!CheckUserEmail(userModel.user_email.Trim(), userModel.user_id))
+                    {
+                        userModel.LoginErrorMessage = "Такой email в системе не зарегистрирован!";
+                        ViewBag.Action = "Forgot";
+                        return View("Index", userModel);
+                    }
+
+                    Users user = db.Users.Where(x => x.user_email == userModel.user_email.Trim()).SingleOrDefault();
+
+                    Guid guid = Guid.NewGuid();
+
+                    Reminded remind = new Reminded()
+                    {
+                        remind_guid = guid,
+                        remind_user_id = user.user_id
+                    };
+
+                    SendMailForgot(user.user_id, user.user_email, guid.ToString());
+
+                    db.Reminded.Add(remind);
+                    db.SaveChanges();
+
+                    ViewBag.Action = "Forgoted";
+                    return View("Index", userModel);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public ActionResult Remind(string user_guid)
+        {
+            try
+            {
+                using (ReportScheduleEntities db = new ReportScheduleEntities())
+                {
+                    Guid guid = Guid.Parse(user_guid);
+
+                    Reminded remind = db.Reminded.Where(x => x.remind_guid == guid).SingleOrDefault();
+
+                    if (remind == null)
+                    {
+                        ViewBag.Action = "Не найдено в таблице запроса на восстановление пароля.";
+                        return View("Index", null);
+                    }
+
+                    if (remind.remind_user_id == 0)
+                    {
+                        ViewBag.Action = "Неопознанная ошибка при восстановлении пароля. Сделайте запрос на восстановление еще раз";
+                        return View("Index", null);
+                    }
+
+                    ViewBag.Action = "Remind";
+                    ViewBag.RemindGUID = user_guid;
+                    return View("Index");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
         //Проверка на повтор логина
         public bool CheckUserLogin(string UserLogin, int UserId)
         {
@@ -301,6 +378,73 @@ namespace ReportScheduleInWeb.Controllers
             {
                 throw ex;
             }
+        }
+
+        public void SendMailForgot(int id, string email, string guid)
+        {
+            var mail = MailHelper.GetInstance();
+
+            var body = new StringBuilder();
+            body.AppendLine("Здравствуйте!");
+            body.AppendLine().AppendLine("Поступил запрос на восстановление пароля. Перейдите по ссылке http://" + Request.Url.Host + Url.Action("Remind", "Login", new { user_guid = guid }) + ", чтобы ввести новый пароль.");
+            body.AppendLine().AppendLine("С уважением, центр «Мои Документы».");
+            body.AppendLine().AppendLine("---");
+            body.AppendLine("Данное сообщение сформировано автоматически. Пожалуйста, не отвечайте на него.");
+            body.AppendLine("УВЕДОМЛЕНИЕ О КОНФИДЕНЦИАЛЬНОСТИ: Это электронное сообщение и любые документы, приложенные к нему, содержат конфиденциальную информацию. Настоящим уведомляем Вас о том, что если это сообщение не предназначено Вам, использование, копирование, распространение информации, содержащейся в настоящем сообщении, а также осуществление любых действий на основе этой информации, строго запрещено. Если Вы получили это сообщение по ошибке, пожалуйста, сообщите об этом отправителю по электронной почте и удалите это сообщение.");
+            body.AppendLine();
+
+            var message = new MailMessage();
+            message.From = new MailAddress(smtpFrom);
+            message.ReplyToList.Add(new MailAddress("grizzled@mfcsakha.ru", "no-reply"));
+            message.Subject = "Запрос на восстановление пароля в АИС \"Планировщик отчетов\"";
+            message.Body = body.ToString();
+            message.BodyEncoding = System.Text.Encoding.UTF8;
+            message.IsBodyHtml = false;
+
+            message.To.Add(new MailAddress(email));
+
+            try
+            {
+                mail.Send(message);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public JsonResult ChangePassword(UserViewModel model)
+        {
+            var result = 0;
+            try
+            {
+                using (ReportScheduleEntities db = new ReportScheduleEntities())
+                {
+                    Guid guid = Guid.Parse(Request.Form["guid"].ToString());
+
+                    Reminded remind = db.Reminded.Where(x => x.remind_guid == guid).SingleOrDefault();
+
+                    if ((remind.remind_user_id > 0) && (model.user_password != null) && (model.user_password.Trim() != ""))
+                    {
+                        Users Use = db.Users.SingleOrDefault(x => x.user_id == remind.remind_user_id);
+                        Use.user_password = encryption(model.user_password);
+                        db.SaveChanges();
+
+                        db.Reminded.Remove(remind);
+                        db.SaveChanges();
+                    }
+                    else
+                    {
+                        result = 1;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return Json(result, JsonRequestBehavior.AllowGet);
         }
     }
 }

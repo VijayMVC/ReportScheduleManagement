@@ -7,18 +7,14 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace ReportScheduleManagement
+namespace ReportScheduleInWeb.Models
 {
     using System;
     using System.Collections.Generic;
     
-    public partial class Report_data
+    public partial class Reminded
     {
-        public int report_data_id { get; set; }
-        public int report_data_task_id { get; set; }
-        public System.DateTime report_data_createdate { get; set; }
-        public string report_data_xml { get; set; }
-    
-        public virtual Tasks Tasks { get; set; }
+        public System.Guid remind_guid { get; set; }
+        public int remind_user_id { get; set; }
     }
 }

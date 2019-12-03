@@ -37,6 +37,17 @@ body {
     text-decoration: none;
 }
 
+.form .forgot {
+    color: #ffffff;
+    font-size: 12px;
+    text-align: left;
+}
+
+.form .forgot a {
+    color: red;
+    text-decoration: none;
+}
+
 .svg-icon,
 .svg-icon-white {
     width: 24px;

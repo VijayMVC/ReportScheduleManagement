@@ -158,6 +158,9 @@
     <Compile Include="Models\Registered.cs">
       <DependentUpon>ReportScheduleModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\Reminded.cs">
+      <DependentUpon>ReportScheduleModel.tt</DependentUpon>
+    </Compile>
     <Compile Include="Models\ReportModel.cs" />
     <Compile Include="Models\ReportScheduleModel.Context.cs">
       <AutoGen>True</AutoGen>
