@@ -260,7 +260,15 @@ namespace ReportScheduleService
                                         {
                                             case "integer":
                                                 //worksheet.Cells[row, col].Style.Numberformat.Format = "0";
-                                                worksheet.Cells[row, col].Value = Convert.ToInt32(childnode.InnerText);
+                                                int number;
+                                                if (Int32.TryParse(childnode.InnerText, out number))
+                                                {
+                                                    worksheet.Cells[row, col].Value = number;
+                                                }
+                                                else
+                                                {
+                                                    worksheet.Cells[row, col].Value = String.Empty;
+                                                }
                                                 break;
                                             default:
                                                 worksheet.Cells[row, col].Value = childnode.InnerText;

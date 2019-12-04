@@ -183,6 +183,30 @@
             $(".chosen-choices").css('font-size', '16px');
             $(".chosen-choices").css('min-height', '38px');
 
+            function fillReportTypeList(user_id) {
+                var url = mainURL + "/Wish/GetReportTypes?UserId=" + user_id;
+
+                $.ajax({
+                    type: "GET",
+                    url: url,
+                    success: function (ReportTypeList) {
+                        var SetData = $("#search_report_type_id");
+                        SetData.empty();
+                        var emptyReportType = $("<option value>Не выбрано</option>");
+                        SetData.append(emptyReportType);
+                        for (var i = 0; i < ReportTypeList.length; i++) {
+                            if ($("#search_report_type_id optgroup[label='" + ReportTypeList[i].report_group_name + "']").html() == null) {
+                                SetData.append("<optgroup label='" + ReportTypeList[i].report_group_name + "'></optgroup>");
+                            }
+
+                            var $optionGroup = SetData.find("optgroup[label='" + ReportTypeList[i].report_group_name + "']");
+
+                            $optionGroup.append("<option value='" + ReportTypeList[i].report_type_id + "'>" + ReportTypeList[i].report_type_name + "</option>");
+                        }
+                    }
+                })
+            }
+
             function UpdateInfo() {
                 GetTasks($("#wish_id").val());
             }
@@ -475,7 +499,7 @@
             function timeConverter(UNIX_timestamp) {
                 var a = new Date(UNIX_timestamp.replace(/\D+/g, '') * 1);
                 var year = a.getFullYear();
-                var month = ('0' + a.getMonth()).slice(-2);
+                var month = ('0' + (a.getMonth() + 1)).slice(-2);
                 var date = ('0' + a.getDate()).slice(-2);
                 var hour = ('0' + a.getHours()).slice(-2);
                 var min = ('0' + a.getMinutes()).slice(-2);
@@ -501,6 +525,10 @@
 
             window.onload = function () {
                 $('#busy_page').val("false");
+
+                var user_id = $('#current_user_id').val();
+                fillReportTypeList(user_id);
+
                 var search_user_id = localStorage.getItem("search_user_id");
                 var search_report_type_id = localStorage.getItem("search_report_type_id");
                 var search_status = localStorage.getItem("search_status");

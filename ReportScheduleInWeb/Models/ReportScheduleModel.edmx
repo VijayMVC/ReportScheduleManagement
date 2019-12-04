@@ -136,6 +136,14 @@
           <Property Name="user_patronymic" Type="nvarchar" MaxLength="100" />
           <Property Name="user_email" Type="nvarchar" MaxLength="100" Nullable="false" />
         </EntityType>
+        <EntityType Name="Wish_user_relation">
+          <Key>
+            <PropertyRef Name="wur_id" />
+          </Key>
+          <Property Name="wur_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="wur_wish_id" Type="int" Nullable="false" />
+          <Property Name="wur_user_id" Type="int" Nullable="false" />
+        </EntityType>
         <EntityType Name="Wishes">
           <Key>
             <PropertyRef Name="wish_id" />
@@ -305,6 +313,30 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_Wish_user_relation_Users">
+          <End Role="Users" Type="Self.Users" Multiplicity="1" />
+          <End Role="Wish_user_relation" Type="Self.Wish_user_relation" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="user_id" />
+            </Principal>
+            <Dependent Role="Wish_user_relation">
+              <PropertyRef Name="wur_user_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Wish_user_relation_Wishes">
+          <End Role="Wishes" Type="Self.Wishes" Multiplicity="1" />
+          <End Role="Wish_user_relation" Type="Self.Wish_user_relation" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Wishes">
+              <PropertyRef Name="wish_id" />
+            </Principal>
+            <Dependent Role="Wish_user_relation">
+              <PropertyRef Name="wur_wish_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK_Wishes_Users">
           <End Role="Users" Type="Self.Users" Multiplicity="1" />
           <End Role="Wishes" Type="Self.Wishes" Multiplicity="*" />
@@ -333,6 +365,7 @@
           <EntitySet Name="Tasks" EntityType="Self.Tasks" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="User_roles" EntityType="Self.User_roles" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Users" EntityType="Self.Users" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Wish_user_relation" EntityType="Self.Wish_user_relation" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Wishes" EntityType="Self.Wishes" Schema="dbo" store:Type="Tables" />
           <AssociationSet Name="FK_Place_type_relation_Place_types" Association="Self.FK_Place_type_relation_Place_types">
             <End Role="Place_types" EntitySet="Place_types" />
@@ -385,6 +418,14 @@
           <AssociationSet Name="FK_User_roles_Users" Association="Self.FK_User_roles_Users">
             <End Role="Users" EntitySet="Users" />
             <End Role="User_roles" EntitySet="User_roles" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Wish_user_relation_Users" Association="Self.FK_Wish_user_relation_Users">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Wish_user_relation" EntitySet="Wish_user_relation" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Wish_user_relation_Wishes" Association="Self.FK_Wish_user_relation_Wishes">
+            <End Role="Wishes" EntitySet="Wishes" />
+            <End Role="Wish_user_relation" EntitySet="Wish_user_relation" />
           </AssociationSet>
           <AssociationSet Name="FK_Wishes_Users" Association="Self.FK_Wishes_Users">
             <End Role="Users" EntitySet="Users" />
@@ -476,6 +517,7 @@
           <NavigationProperty Name="Wishes" Relationship="ReportScheduleModel.FK_Wishes_Users" FromRole="Users" ToRole="Wishes" />
           <NavigationProperty Name="Report_user_relation" Relationship="ReportScheduleModel.FK_Report_user_relation_Users" FromRole="Users" ToRole="Report_user_relation" />
           <Property Name="user_email" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
+          <NavigationProperty Name="Wish_user_relation" Relationship="ReportScheduleModel.FK_Wish_user_relation_Users" FromRole="Users" ToRole="Wish_user_relation" />
         </EntityType>
         <EntityType Name="Wishes">
           <Key>
@@ -491,6 +533,7 @@
           <NavigationProperty Name="Tasks" Relationship="Self.FK_Tasks_Wishes" FromRole="Wishes" ToRole="Tasks" />
           <Property Name="wish_user_id" Type="Int32" Nullable="false" />
           <NavigationProperty Name="Users" Relationship="ReportScheduleModel.FK_Wishes_Users" FromRole="Wishes" ToRole="Users" />
+          <NavigationProperty Name="Wish_user_relation" Relationship="ReportScheduleModel.FK_Wish_user_relation_Wishes" FromRole="Wishes" ToRole="Wish_user_relation" />
         </EntityType>
         <Association Name="FK_Tasks_Places">
           <End Role="Places" Type="Self.Places" Multiplicity="1" />
@@ -625,6 +668,15 @@
           </AssociationSet>
           <EntitySet Name="Registered" EntityType="ReportScheduleModel.Registered" />
           <EntitySet Name="Reminded" EntityType="ReportScheduleModel.Reminded" />
+          <EntitySet Name="Wish_user_relation" EntityType="ReportScheduleModel.Wish_user_relation" />
+          <AssociationSet Name="FK_Wish_user_relation_Users" Association="ReportScheduleModel.FK_Wish_user_relation_Users">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Wish_user_relation" EntitySet="Wish_user_relation" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Wish_user_relation_Wishes" Association="ReportScheduleModel.FK_Wish_user_relation_Wishes">
+            <End Role="Wishes" EntitySet="Wishes" />
+            <End Role="Wish_user_relation" EntitySet="Wish_user_relation" />
+          </AssociationSet>
         </EntityContainer>
         <EntityType Name="Place_type_relation">
           <Key>
@@ -809,6 +861,40 @@
           <Property Name="remind_guid" Type="Guid" Nullable="false" />
           <Property Name="remind_user_id" Type="Int32" Nullable="false" />
         </EntityType>
+        <EntityType Name="Wish_user_relation">
+          <Key>
+            <PropertyRef Name="wur_id" />
+          </Key>
+          <Property Name="wur_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="wur_wish_id" Type="Int32" Nullable="false" />
+          <Property Name="wur_user_id" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Users" Relationship="ReportScheduleModel.FK_Wish_user_relation_Users" FromRole="Wish_user_relation" ToRole="Users" />
+          <NavigationProperty Name="Wishes" Relationship="ReportScheduleModel.FK_Wish_user_relation_Wishes" FromRole="Wish_user_relation" ToRole="Wishes" />
+        </EntityType>
+        <Association Name="FK_Wish_user_relation_Users">
+          <End Type="ReportScheduleModel.Users" Role="Users" Multiplicity="1" />
+          <End Type="ReportScheduleModel.Wish_user_relation" Role="Wish_user_relation" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="user_id" />
+            </Principal>
+            <Dependent Role="Wish_user_relation">
+              <PropertyRef Name="wur_user_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Wish_user_relation_Wishes">
+          <End Type="ReportScheduleModel.Wishes" Role="Wishes" Multiplicity="1" />
+          <End Type="ReportScheduleModel.Wish_user_relation" Role="Wish_user_relation" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Wishes">
+              <PropertyRef Name="wish_id" />
+            </Principal>
+            <Dependent Role="Wish_user_relation">
+              <PropertyRef Name="wur_wish_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -972,6 +1058,15 @@
               <MappingFragment StoreEntitySet="Reminded">
                 <ScalarProperty Name="remind_user_id" ColumnName="remind_user_id" />
                 <ScalarProperty Name="remind_guid" ColumnName="remind_guid" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Wish_user_relation">
+            <EntityTypeMapping TypeName="ReportScheduleModel.Wish_user_relation">
+              <MappingFragment StoreEntitySet="Wish_user_relation">
+                <ScalarProperty Name="wur_user_id" ColumnName="wur_user_id" />
+                <ScalarProperty Name="wur_wish_id" ColumnName="wur_wish_id" />
+                <ScalarProperty Name="wur_id" ColumnName="wur_id" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

@@ -45,6 +45,15 @@ namespace ReportScheduleInWeb.Models
         public string Place_name { get; set; }
     }
 
+    public class ReportType
+    {
+        public string report_type_id { get; set; }
+
+        public string report_type_name { get; set; }
+
+        public string report_group_name { get; set; }
+    }
+
     public class WishViewModel
     {
         public WishViewModel()

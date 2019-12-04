@@ -19,6 +19,9 @@ namespace ReportScheduleInWeb.Controllers
         // GET: Wish
         public ActionResult Index()
         {
+            var users = db.Users.Select(x => new { Fullname = ((x.user_surname ?? "") + " " + (x.user_name ?? "") + " " + (x.user_patronymic ?? "")).Trim(), User_id = x.user_id }).ToList();
+
+            ViewBag.Wish_users = new SelectList(users, "User_id", "Fullname");
             return View();
         }
 
@@ -61,6 +64,25 @@ namespace ReportScheduleInWeb.Controllers
             }
             return Json(PlaceList, JsonRequestBehavior.AllowGet);
         }
+
+        public JsonResult GetReportTypes(int UserId)
+        {
+            List<ReportType> ReportTypeList =(from rt in db.Report_types
+                                              join rur in db.Report_user_relation on rt.report_type_id equals rur.rur_report_type_id
+                                              join rgr in db.Report_group_relation on rt.report_type_id equals rgr.rgr_report_id
+                                              join rg in db.Report_groups on rgr.rgr_report_group_id equals rg.report_group_id
+                                              where rur.rur_user_id == UserId
+                                              orderby rg.report_group_name, rt.report_type_name
+                                              select new ReportType
+                                              {
+                                                  report_type_id = rt.report_type_id.ToString(),
+                                                  report_type_name = rt.report_type_name,
+                                                  report_group_name = rg.report_group_name
+                                              }).ToList() ;
+
+            return Json(ReportTypeList, JsonRequestBehavior.AllowGet);
+        }
+
 
         public JsonResult GetPlaces(int ReportTypeId)
         {

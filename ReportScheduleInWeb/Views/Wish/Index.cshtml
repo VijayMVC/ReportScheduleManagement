@@ -25,7 +25,8 @@
             <li class="nav-item pr-1"><a class="nav-link text-white bg-dark disabled" href="#program-selection-step-2" data-toggle="tab">Параметры</a></li>
             <li class="nav-item pr-1"><a class="nav-link text-white bg-dark disabled" href="#program-selection-step-3" data-toggle="tab">Места</a></li>
             <li class="nav-item pr-1"><a class="nav-link text-white bg-dark disabled" href="#program-selection-step-4" data-toggle="tab">Расписание</a></li>
-            <li class="nav-item pr-1"><a class="nav-link text-white bg-dark disabled" href="#program-selection-step-5" data-toggle="tab">Подтверждение</a></li>
+            <li class="nav-item pr-1"><a class="nav-link text-white bg-dark disabled" href="#program-selection-step-5" data-toggle="tab">Доступы</a></li>
+            <li class="nav-item pr-1"><a class="nav-link text-white bg-dark disabled" href="#program-selection-step-6" data-toggle="tab">Подтверждение</a></li>
         </ul>
 
         <div class="tab-content bg-dark mr-1 mt-1">
@@ -33,7 +34,15 @@
                 <p class="h4 text-white pb-2">Выберите тип отчета</p>
                 <div class="pb-3">
                     @*@Html.DropDownListFor(m => m.Report_type_id, new SelectList(db.Report_types.Join(db.rep).ToList(), "Report_type_id", "Report_type_name", ), "Не выбрано", new { @class = "custom-select form-control", @style = "width:100%" })*@
-                    @Html.DropDownListFor(m => m.Report_type_id, new SelectList(from rt in db.Report_types join rgr in db.Report_group_relation on rt.report_type_id equals rgr.rgr_report_id join rg in db.Report_groups on rgr.rgr_report_group_id equals rg.report_group_id select new { Report_type_id = rt.report_type_id, Report_type_name = rt.report_type_name, Report_group_name = rg.report_group_name }, "Report_type_id", "Report_type_name", "Report_group_name", 1), "Не выбрано", new { @class = "custom-select form-control", @style = "width:100%" })
+                    @Html.DropDownList("Report_type_id", new SelectList(from rt in db.Report_types
+                                                                         join rgr in db.Report_group_relation on rt.report_type_id equals rgr.rgr_report_id
+                                                                         join rg in db.Report_groups on rgr.rgr_report_group_id equals rg.report_group_id
+                                                                         select new
+                                                                             {
+                                                                             Report_type_id = rt.report_type_id,
+                                                                             Report_type_name = rt.report_type_name,
+                                                                             Report_group_name = rg.report_group_name
+                                                                         }, "Report_type_id", "Report_type_name", "Report_group_name", 1), "Не выбрано", new { @class = "custom-select form-control", @style = "width:100%" })
                 </div>
                 <input value="Далее" class="btn btn-primary program-selection__button one-next" type="button" data-href="#program-selection-step-2">
             </div><!-- tab-pane -->
@@ -72,7 +81,15 @@
                 <div class="row pb-3">
                     <div class="col-9 mr-0 pr-0">
                         @*@Html.DropDownList("wish_places", new SelectList(db.Places.ToList(), "place_id", "place_name"), new { @class = "form-control chosen-select", @multiple = "true" })*@
-                        @Html.DropDownList("wish_places", new SelectList(from p in db.Places join ptr in db.Place_type_relation on p.place_id equals ptr.ptr_place_id join pt in db.Place_types on ptr.ptr_place_type_id equals pt.placetype_id select new { place_id = p.place_id, place_name = p.place_name, placetype_name = pt.placetype_name }, "place_id", "place_name", "placetype_name", 0), new { @class = "form-control chosen-select", @multiple = "true" })
+                        @Html.DropDownList("wish_places", new SelectList(from p in db.Places
+                                                                         join ptr in db.Place_type_relation on p.place_id equals ptr.ptr_place_id
+                                                                         join pt in db.Place_types on ptr.ptr_place_type_id equals pt.placetype_id
+                                                                         select new
+                                                                              {
+                                                                             place_id = p.place_id,
+                                                                             place_name = p.place_name,
+                                                                             placetype_name = pt.placetype_name
+                                                                         }, "place_id", "place_name", "placetype_name", 0), new { @class = "form-control chosen-select", @multiple = "true" })
                     </div>
                     <div class="col-3" style="text-align:right">
                         <input value="Очистить" class="btn btn-info" type="button" onclick="AddPlacesInSelect(0)">
@@ -137,6 +154,28 @@
                 <input value="Далее" class="btn btn-primary program-selection__button four-next" type="button" data-href="#program-selection-step-5">
             </div><!-- tab-pane -->
             <div class="tab-pane fade p-3" id="program-selection-step-5">
+                <p class="h4 text-white bg-dark pb-2">Выберите кому будет видно задание</p>
+                <div class="row align-items-center pb-2">
+                    <div class="col-12 input-group mb-2">
+                        <select class="custom-select form-control" id="access_type" name="access_type">
+                            <option value="0">Из настроек отчета</option>
+                            <option value="1">Никому кроме меня</option>
+                            <option value="2">Для всех</option>
+                            <option value="3">Выбранные пользователи</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row align-items-center pb-2" id="access_users_area" style="display:none">
+                    <div class="col-12 input-group mb-2">
+                        @Html.DropDownList("access_users", (SelectList)ViewBag.Wish_users, new { @class = "form-control chosen-select chosen-select-users", @multiple = "true" })
+                        <input value="Все" class="btn btn-outline-info mx-2" type="button" onclick="AddUsersInSelect(0)">
+                        <input value="Очистить" class="btn btn-outline-danger" type="button" onclick="AddUsersInSelect(-1)">
+                    </div>
+                </div>
+                <input value="Назад" class="btn btn-danger program-selection__button" type="button" data-href="#program-selection-step-4">
+                <input value="Далее" class="btn btn-primary program-selection__button five-next" type="button" data-href="#program-selection-step-6">
+            </div><!-- tab-pane -->
+            <div class="tab-pane fade p-3" id="program-selection-step-6">
                 <p class="h4 text-white bg-dark pb-2">Проверка и подтверждение</p>
                 <div class="row pb-3">
                     <div class="col-3">
@@ -178,12 +217,20 @@
                         <label class="text-light" id="labelPlacesReport"></label>
                     </div>
                 </div>
+                <div class="row pb-3">
+                    <div class="col-3">
+                        <label class="text-warning h6">Доступен:</label>
+                    </div>
+                    <div class="col-9">
+                        <label class="text-light" id="labelAccessReport"></label>
+                    </div>
+                </div>
                 <div class="custom-control custom-checkbox pb-3">
                     <input type="checkbox" class="custom-control-input" id="customCheck">
                     <label class="custom-control-label text-white" for="customCheck">- все верно</label>
                 </div>
 
-                <input value="Назад" class="btn btn-danger program-selection__button" type="button" data-href="#program-selection-step-4">
+                <input value="Назад" class="btn btn-danger program-selection__button" type="button" data-href="#program-selection-step-5">
                 <input value="Заказать отчет" class="btn btn-success" type="submit" onclick="InsertNewWish()">
             </div><!-- tab-pane -->
         </div><!-- tab-content -->
@@ -196,7 +243,7 @@
         $(".chosen-select").chosen({
             width: "100%",
             no_results_text: "Ничего не найдено",
-            placeholder_text_multiple: "Выберите места",
+            placeholder_text_multiple: "Сделайте выбор",
             search_contains: true,
             display_disabled_options: false,
             display_selected_options: false,
@@ -204,6 +251,28 @@
         });
 
         $(".chosen-choices").css('font-size', '1rem');
+
+        function AddUsersInSelect(ReportTypeId) {
+            switch (ReportTypeId) {
+                case -1:
+                    var url = mainURL + "/Report/GetUsersByReportTypeId?ReportTypeId=-1";
+                    break;
+                case 0:
+                    var url = mainURL + "/Report/GetUsersByReportTypeId?ReportTypeId=0";
+                    break;
+                default:
+                    var url = mainURL + "/Report/GetUsersByReportTypeId?ReportTypeId=" + ReportTypeId;
+                    break;
+            }
+
+            $.ajax({
+                type: "GET",
+                url: url,
+                success: function (UserList) {
+                    $("#access_users").val(UserList).trigger('chosen:updated');
+                }
+            });
+        }
 
         function fillParameterList(report_type_id) {
             var url = mainURL + "/Wish/GetParameters?ReportTypeId=" + report_type_id;
@@ -248,6 +317,30 @@
             })
         }
 
+        function fillReportTypeList(user_id) {
+            var url = mainURL + "/Wish/GetReportTypes?UserId=" + user_id;
+
+            $.ajax({
+                type: "GET",
+                url: url,
+                success: function (ReportTypeList) {
+                    var SetData = $("#Report_type_id");
+                    SetData.empty();
+                    var emptyReportType = $("<option value>Не выбрано</option>");
+                    SetData.append(emptyReportType);
+                    for (var i = 0; i < ReportTypeList.length; i++) {
+                        if ($("#Report_type_id optgroup[label='" + ReportTypeList[i].report_group_name + "']").html() == null) {
+                            SetData.append("<optgroup label='" + ReportTypeList[i].report_group_name + "'></optgroup>");
+                        }
+
+                        var $optionGroup = SetData.find("optgroup[label='" + ReportTypeList[i].report_group_name + "']");
+
+                        $optionGroup.append("<option value='" + ReportTypeList[i].report_type_id + "'>" + ReportTypeList[i].report_type_name + "</option>");
+                    }
+                }
+            })
+        }
+
         function fillPlaceList(report_type_id) {
             var url = mainURL + "/Wish/GetPlaces?ReportTypeId=" + report_type_id;
 
@@ -280,9 +373,13 @@
 
                 //Подгрузка параметров отчета
                 fillPlaceList(report_type_id);
+
+                //Подгрузка пользователей с доступами
+                AddUsersInSelect(report_type_id);
             }
             else {
                 $('input.one-next', $program_selection).attr('disabled', 'disabled');
+                AddUsersInSelect(-1);
             }
         }
 
@@ -362,7 +459,7 @@
                 type: "GET",
                 url: url,
                 success: function (PlaceList) {
-                    $(".chosen-select").val(PlaceList).trigger('chosen:updated');
+                    $("#wish_places").val(PlaceList).trigger('chosen:updated');
                 }
             });
         }
@@ -492,10 +589,18 @@
                 Data += arr2[i].name + ' (Запуск: ' + arr2[i].startDate + ')<br>';
             }
             SetData2.append(Data);
+
+            //Доступы
+            var SetData3 = $("#labelAccessReport");
+            SetData3.empty();
+            Data = "";
+            Data += $("#access_type option:selected").text();
+
+            SetData3.append(Data);
         }
 
         function fillscheduleTable() {
-            var arr1 = $('.chosen-select option:selected').map(function () {
+            var arr1 = $('#wish_places option:selected').map(function () {
                 return {
                     'id': $(this).val(),
                     'name': $(this).text(),
@@ -558,7 +663,7 @@
                     }
 
 
-                if (id == '#program-selection-step-5') {
+                if (id == '#program-selection-step-6') {
                     if (!CheckDeadline()) {
                         return false;
                     }
@@ -597,6 +702,8 @@
         }
 
         $(function () {
+            var user_id = $('#current_user_id').val();
+            fillReportTypeList(user_id);
             checkReportType();
             initProgramSelection();
             EnableAddPlaceType();
@@ -640,6 +747,16 @@
 
         $("#customCheck").change(function () {
             checkCustomCheck();
+        });
+
+        $("#access_type").change(function () {
+            var access_area = document.getElementById('access_users_area');
+            if ($("#access_type").val() != 3) {
+                access_area.style.display = 'none';
+            }
+            else {
+                access_area.style.display = '';
+            }
         });
 
         function checkCustomCheck() {
@@ -742,6 +859,27 @@
             data += '&parameters=' + JSON.stringify(parameters)
 
             data += '&places=' + JSON.stringify(places)
+
+            switch ($("#access_type option:selected").val()){
+                case 0:
+                    data += '&access_user=-1';
+                    break
+                case 1:
+                    data += '&access_user=' + $('#current_user_id').val();
+                    break;
+                case 2:
+                    data += '&access_user=0';
+                    break;
+                case 3:
+                    if ($("#access_users").prop("disabled") == true) {
+                        var user_id = $("#access_users").val();
+                        $.each(user_id, function (index, value) {
+                            data += '&access_user=' + value.toString();
+                        });
+                    }
+                    data += '&access_user=' + $('#current_user_id').val();
+                    break;
+            }
 
             $.ajax({
                 type: "Post",

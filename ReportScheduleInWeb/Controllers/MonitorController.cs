@@ -6,11 +6,9 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Json;
-using System.Web;
 using System.Web.Mvc;
 using System.Web.Script.Serialization;
 using System.Xml;
-using System.Xml.Linq;
 using System.Xml.Serialization;
 
 namespace ReportScheduleInWeb.Controllers
@@ -39,68 +37,76 @@ namespace ReportScheduleInWeb.Controllers
         [HttpPost]
         public JsonResult SearchWishes()
         {
-            int user_id = (Request.Form["search_user_id"] == "") ? 0 : Convert.ToInt32(Request.Form["search_user_id"]);
-            int report_type_id = (Request.Form["search_report_type_id"] == "") ? 0 : Convert.ToInt32(Request.Form["search_report_type_id"]);
-            string report_type_name = (report_type_id != 0) ? db.Report_types.Where(x => x.report_type_id == report_type_id).SingleOrDefault().report_type_name : String.Empty;
-            string status = Request.Form["search_status"].Trim();
-            DateTime? startdate = (Request.Form["search_startdate"] != "") ? DateTime.ParseExact(Request.Form["search_startdate"] + " 00:00:00", "yyyy-MM-dd hh:mm:ss", CultureInfo.InvariantCulture) : (DateTime?)null;
-            DateTime? enddate = (Request.Form["search_enddate"] != "") ? (DateTime.ParseExact(Request.Form["search_enddate"] + " 00:00:00", "yyyy-MM-dd hh:mm:ss", CultureInfo.InvariantCulture)).AddDays(1) : (DateTime?)null;
-            List<int> places = new List<int>(Request.Form["search_places"].Split(',').Select(Int32.Parse).ToList());
-
-            if ((user_id != 0) || (report_type_id != 0) || (!String.IsNullOrEmpty(status)) || (startdate != null) || (enddate != null) || (places[0] != 0))
+            try
             {
-                List<int> wish_places = new List<int>();
-                if (places[0] != 0)
-                {
-                    wish_places = db.Tasks.Where(x => places.Contains(x.task_place_id)).Select(x => x.task_wish_id).ToList();
-                }
+                int current_user_id = Convert.ToInt32(Session["userID"]);
+                int user_id = (Request.Form["search_user_id"] == "") ? 0 : Convert.ToInt32(Request.Form["search_user_id"]);
+                int report_type_id = (Request.Form["search_report_type_id"] == "") ? 0 : Convert.ToInt32(Request.Form["search_report_type_id"]);
+                string report_type_name = (report_type_id != 0) ? db.Report_types.Where(x => x.report_type_id == report_type_id).SingleOrDefault().report_type_name : String.Empty;
+                string status = Request.Form["search_status"].Trim();
+                DateTime? startdate = (Request.Form["search_startdate"] != "") ? DateTime.ParseExact(Request.Form["search_startdate"] + " 00:00:00", "yyyy-MM-dd hh:mm:ss", CultureInfo.InvariantCulture) : (DateTime?)null;
+                DateTime? enddate = (Request.Form["search_enddate"] != "") ? (DateTime.ParseExact(Request.Form["search_enddate"] + " 00:00:00", "yyyy-MM-dd hh:mm:ss", CultureInfo.InvariantCulture)).AddDays(1) : (DateTime?)null;
+                List<int> places = new List<int>(Request.Form["search_places"].Split(',').Select(Int32.Parse).ToList());
 
-                List<WishViewModel> WishList = db.Wishes.OrderByDescending(x => x.wish_createdate)
-                                                .Where(x => (user_id != 0) ? (x.wish_user_id == user_id) : (x.wish_user_id == x.wish_user_id))
-                                                .Where(x => (report_type_id != 0) ? (x.wish_report_type_name == report_type_name) : x.wish_report_type_name == x.wish_report_type_name)
-                                                .Where(x => (!String.IsNullOrEmpty(status)) ? (x.wish_status == status) : x.wish_status == x.wish_status)
-                                                .Where(x => (startdate != null) ? (x.wish_createdate >= startdate) : x.wish_createdate == x.wish_createdate)
-                                                .Where(x => (enddate != null) ? (x.wish_createdate <= enddate) : x.wish_createdate == x.wish_createdate)
-                                                .Where(x => (wish_places.Count != 0) ? (wish_places.Contains(x.wish_id)) : x.wish_id == x.wish_id)
-                                                .Select(x => new WishViewModel
-                                                {
-                                                    Wish_id = x.wish_id,
-                                                    Wish_createdate = x.wish_createdate,
-                                                    Wish_report_type_name = x.wish_report_type_name,
-                                                    User_id = x.wish_user_id,
-                                                    Wish_status = x.wish_status
-                                                }).ToList();
-
-                foreach (var w in WishList)
+                if ((user_id != 0) || (report_type_id != 0) || (!String.IsNullOrEmpty(status)) || (startdate != null) || (enddate != null) || (places[0] != 0))
                 {
-                    w.User_name = db.Users.Where(x => x.user_id == w.User_id).Select(x => ((x.user_surname ?? "") + " " + (x.user_name ?? "") + " " + (x.user_patronymic ?? "")).Trim()).SingleOrDefault();
-                    switch (w.Wish_status)
+                    List<int> wish_places = new List<int>();
+                    if (places[0] != 0)
                     {
-                        case "new":
-                            w.Wish_status = "новое";
-                            break;
-                        case "work":
-                            w.Wish_status = "в работе";
-                            break;
-                        case "wait":
-                            w.Wish_status = "ожидание";
-                            break;
-                        case "fail":
-                            w.Wish_status = "завершено с ошибкой";
-                            break;
-                        case "done":
-                            w.Wish_status = "завершено";
-                            break;
-                        default :
-                            w.Wish_status = "неизвестно";
-                            break;
+                        wish_places = db.Tasks.Where(x => places.Contains(x.task_place_id)).Select(x => x.task_wish_id).ToList();
                     }
+
+                    List<WishViewModel> WishList = db.Wishes.OrderByDescending(x => x.wish_createdate)
+                                                    .Where(x => (user_id != 0) ? (x.wish_user_id == user_id) : (x.wish_user_id == x.wish_user_id))
+                                                    .Where(x => (report_type_id != 0) ? (x.wish_report_type_name == report_type_name) : x.wish_report_type_name == x.wish_report_type_name)
+                                                    .Where(x => (!String.IsNullOrEmpty(status)) ? (x.wish_status == status) : x.wish_status == x.wish_status)
+                                                    .Where(x => (startdate != null) ? (x.wish_createdate >= startdate) : x.wish_createdate == x.wish_createdate)
+                                                    .Where(x => (enddate != null) ? (x.wish_createdate <= enddate) : x.wish_createdate == x.wish_createdate)
+                                                    .Where(x => (wish_places.Count != 0) ? (wish_places.Contains(x.wish_id)) : x.wish_id == x.wish_id)
+                                                    .Select(x => new WishViewModel
+                                                    {
+                                                        Wish_id = x.wish_id,
+                                                        Wish_createdate = x.wish_createdate,
+                                                        Wish_report_type_name = x.wish_report_type_name,
+                                                        User_id = x.wish_user_id,
+                                                        Wish_status = x.wish_status
+                                                    }).ToList();
+
+                    foreach (var w in WishList)
+                    {
+                        w.User_name = db.Users.Where(x => x.user_id == w.User_id).Select(x => ((x.user_surname ?? "") + " " + (x.user_name ?? "") + " " + (x.user_patronymic ?? "")).Trim()).SingleOrDefault();
+                        switch (w.Wish_status)
+                        {
+                            case "new":
+                                w.Wish_status = "новое";
+                                break;
+                            case "work":
+                                w.Wish_status = "в работе";
+                                break;
+                            case "wait":
+                                w.Wish_status = "ожидание";
+                                break;
+                            case "fail":
+                                w.Wish_status = "завершено с ошибкой";
+                                break;
+                            case "done":
+                                w.Wish_status = "завершено";
+                                break;
+                            default:
+                                w.Wish_status = "неизвестно";
+                                break;
+                        }
+                    }
+
+                    return Json(WishList, JsonRequestBehavior.AllowGet);
                 }
 
-                return Json(WishList, JsonRequestBehavior.AllowGet);
+                return Json(new List<WishViewModel>(), JsonRequestBehavior.AllowGet);
             }
-
-            return Json(new List<WishViewModel>(), JsonRequestBehavior.AllowGet);
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
 
         [HttpGet]
@@ -345,7 +351,15 @@ namespace ReportScheduleInWeb.Controllers
                                     {
                                         case "integer":
                                             //worksheet.Cells[row, col].Style.Numberformat.Format = "0";
-                                            worksheet.Cells[row, col].Value = Convert.ToInt32(childnode.InnerText);
+                                            int number;
+                                            if (Int32.TryParse(childnode.InnerText, out number))
+                                            {
+                                                worksheet.Cells[row, col].Value = number;
+                                            }
+                                            else
+                                            {
+                                                worksheet.Cells[row, col].Value = String.Empty;
+                                            }
                                             break;
                                         default:
                                             worksheet.Cells[row, col].Value = childnode.InnerText;

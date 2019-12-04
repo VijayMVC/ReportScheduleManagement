@@ -35,6 +35,9 @@
         <AssociationConnector Association="ReportScheduleModel.FK_Report_user_relation_Users" />
         <EntityTypeShape EntityType="ReportScheduleModel.Registered" Width="1.5" PointX="7.375" PointY="10.75" />
         <EntityTypeShape EntityType="ReportScheduleModel.Reminded" Width="1.5" PointX="5.375" PointY="6.75" />
+        <EntityTypeShape EntityType="ReportScheduleModel.Wish_user_relation" Width="1.5" PointX="5" PointY="12.25" />
+        <AssociationConnector Association="ReportScheduleModel.FK_Wish_user_relation_Users" />
+        <AssociationConnector Association="ReportScheduleModel.FK_Wish_user_relation_Wishes" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

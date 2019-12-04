@@ -18,6 +18,7 @@ namespace ReportScheduleInWeb.Models
         public Wishes()
         {
             this.Tasks = new HashSet<Tasks>();
+            this.Wish_user_relation = new HashSet<Wish_user_relation>();
         }
     
         public int wish_id { get; set; }
@@ -32,5 +33,7 @@ namespace ReportScheduleInWeb.Models
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Tasks> Tasks { get; set; }
         public virtual Users Users { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Wish_user_relation> Wish_user_relation { get; set; }
     }
 }

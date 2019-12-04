@@ -41,5 +41,6 @@ namespace ReportScheduleInWeb.Models
         public virtual DbSet<Report_user_relation> Report_user_relation { get; set; }
         public virtual DbSet<Registered> Registered { get; set; }
         public virtual DbSet<Reminded> Reminded { get; set; }
+        public virtual DbSet<Wish_user_relation> Wish_user_relation { get; set; }
     }
 }
