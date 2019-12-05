@@ -278,7 +278,7 @@
     <Content Include="Models\ReportScheduleModel.edmx.diagram">
       <DependentUpon>ReportScheduleModel.edmx</DependentUpon>
     </Content>
-    <Content Include="App_Data\ReportSchedule.bak" />
+    <Content Include="App_Data\ReportSchedule.zip" />
     <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
     <None Include="Scripts\jquery-3.4.1.intellisense.js" />
     <Content Include="Scripts\jquery-3.4.1.js" />
