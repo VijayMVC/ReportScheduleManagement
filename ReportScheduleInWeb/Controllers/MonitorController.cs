@@ -31,6 +31,8 @@ namespace ReportScheduleInWeb.Controllers
 
             ViewBag.Authors = new SelectList(users, "User_id", "Fullname");
             ViewBag.Statuses = new SelectList(statuses, "Value", "Text");
+            ViewBag.Wish_users = new SelectList(users, "User_id", "Fullname");
+
             return View();
         }
 
@@ -72,7 +74,40 @@ namespace ReportScheduleInWeb.Controllers
                                                         Wish_status = x.wish_status
                                                     }).ToList();
 
+                    List<WishViewModel> ResultList = new List<WishViewModel>();
+
+                    //Проверяем доступы
                     foreach (var w in WishList)
+                    {
+                        Wish_report_relation wrr = db.Wish_report_relation.Where(x => x.wrr_wish_id == w.Wish_id).SingleOrDefault();
+
+                        if (wrr != null)
+                        {
+                            switch (wrr.wrr_access_type)
+                            {
+                                //Задание видно для всех
+                                case 0:
+                                    ResultList.Add(w);
+                                    break;
+                                //Для пользователей отчета
+                                case 1:
+                                    if (db.Report_user_relation.Where(x => x.rur_report_type_id == wrr.wrr_report_type_id && x.rur_user_id == current_user_id).Count() != 0)
+                                        ResultList.Add(w);
+                                    break;
+                                //Для конкретных пользователей
+                                case 2:
+                                    if (db.Wish_user_relation.Where(x => x.wur_wish_id == w.Wish_id && x.wur_user_id == current_user_id).Count() != 0)
+                                        ResultList.Add(w);
+                                    break;
+                            }
+                        }
+                        else
+                        {
+                            ResultList.Add(w);
+                        }
+                    }
+
+                    foreach (var w in ResultList)
                     {
                         w.User_name = db.Users.Where(x => x.user_id == w.User_id).Select(x => ((x.user_surname ?? "") + " " + (x.user_name ?? "") + " " + (x.user_patronymic ?? "")).Trim()).SingleOrDefault();
                         switch (w.Wish_status)
@@ -98,7 +133,7 @@ namespace ReportScheduleInWeb.Controllers
                         }
                     }
 
-                    return Json(WishList, JsonRequestBehavior.AllowGet);
+                    return Json(ResultList, JsonRequestBehavior.AllowGet);
                 }
 
                 return Json(new List<WishViewModel>(), JsonRequestBehavior.AllowGet);
@@ -155,6 +190,31 @@ namespace ReportScheduleInWeb.Controllers
                 }
             }
             return Json(ParameterList, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpGet]
+        public JsonResult GetAccess(int WishId)
+        {
+            int result = 0;
+            try
+            {
+                short? wrr = db.Wish_report_relation.Where(x => x.wrr_wish_id == WishId).SingleOrDefault().wrr_access_type;
+
+                result = wrr ?? -1;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return Json(result, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpGet]
+        public JsonResult GetAccessUsers(int WishId)
+        {
+            List<int> UserList = db.Wish_user_relation.Where(x => x.wur_wish_id == WishId).Select(x => x.wur_user_id).ToList();
+            return Json(UserList, JsonRequestBehavior.AllowGet);
         }
 
         public JsonResult GetColumns(int WishId)
@@ -227,6 +287,66 @@ namespace ReportScheduleInWeb.Controllers
             }
 
             return Json(TaskList.OrderBy(x => x.Task_status).ThenBy(x => x.Task_place_name), JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpPost]
+        public JsonResult SetAccess()
+        {
+            int result = 0;
+
+            try
+            {
+                //Доступы к просмотру
+                int[] Access_users = Array.ConvertAll(Request.Form.GetValues("access_user"), s => int.Parse(s));
+                int wish_id = Convert.ToInt32(Request.Form["wish_id"]);
+                int access_type = Convert.ToInt32(Request.Form["access_type"]);
+
+                Wish_report_relation wrr = db.Wish_report_relation.Where(x => x.wrr_wish_id == wish_id).SingleOrDefault();
+
+                if (wrr == null)
+                {
+                    result = 1;
+                    return Json(result, JsonRequestBehavior.AllowGet);
+                }
+
+                wrr.wrr_access_type = (short)access_type;
+
+                //Выбранные пользователи
+                if (access_type == 2)
+                {
+                    List<Wish_user_relation> Wur = new List<Wish_user_relation>();
+
+                    foreach (Wish_user_relation wur in db.Wish_user_relation.Where(x => x.wur_wish_id == wish_id))
+                    {
+                        Wur.Add(wur);
+                    }
+
+                    foreach (Users user in db.Users)
+                    {
+                        if (Access_users.Contains(user.user_id))
+                        {
+                            if (Wur.Find(x => x.wur_user_id == user.user_id) == null)
+                            {
+                                db.Wish_user_relation.Add(new Wish_user_relation() { wur_user_id = user.user_id, wur_wish_id = wish_id });
+                            }
+                        }
+                        else
+                        {
+                            if (Wur.Find(x => x.wur_user_id == user.user_id) != null)
+                            {
+                                db.Wish_user_relation.Remove(Wur.Find(x => x.wur_user_id == user.user_id));
+                            }
+                        }
+                    }
+                }
+                db.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return Json(result, JsonRequestBehavior.AllowGet);
         }
 
         [HttpPost]

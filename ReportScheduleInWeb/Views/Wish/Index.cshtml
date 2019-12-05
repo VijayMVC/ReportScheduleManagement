@@ -860,23 +860,24 @@
 
             data += '&places=' + JSON.stringify(places)
 
-            switch ($("#access_type option:selected").val()){
-                case 0:
+            var access_type = document.getElementById('access_type');
+
+            switch (access_type.value) {
+                case '0':
                     data += '&access_user=-1';
                     break
-                case 1:
+                case '1':
                     data += '&access_user=' + $('#current_user_id').val();
                     break;
-                case 2:
+                case '2':
                     data += '&access_user=0';
                     break;
-                case 3:
-                    if ($("#access_users").prop("disabled") == true) {
-                        var user_id = $("#access_users").val();
-                        $.each(user_id, function (index, value) {
+                case '3':
+                    var user_id = $("#access_users").val();
+                    $.each(user_id, function (index, value) {
+                        if (value != $('#current_user_id').val())
                             data += '&access_user=' + value.toString();
-                        });
-                    }
+                    });
                     data += '&access_user=' + $('#current_user_id').val();
                     break;
             }

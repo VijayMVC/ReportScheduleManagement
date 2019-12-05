@@ -214,6 +214,9 @@
       <DependentUpon>ReportScheduleModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\WishViewModel.cs" />
+    <Compile Include="Models\Wish_report_relation.cs">
+      <DependentUpon>ReportScheduleModel.tt</DependentUpon>
+    </Compile>
     <Compile Include="Models\Wish_user_relation.cs">
       <DependentUpon>ReportScheduleModel.tt</DependentUpon>
     </Compile>

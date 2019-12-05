@@ -136,3 +136,8 @@ input.password {
     font-size: 14px;
     color: red;
 }
+
+.disabledaction {
+    pointer-events: none;
+    opacity: 0.4;
+}

@@ -135,7 +135,7 @@ namespace ReportScheduleInWeb.Controllers
                     }
                 }
 
-                //Отчет-места ДО редактирования
+                //Отчет-пользователи ДО редактирования
                 List<Report_user_relation> Rur = new List<Report_user_relation>();
                 foreach (Report_user_relation rur in db.Report_user_relation.Where(x => x.rur_report_type_id == report_type_id))
                 {

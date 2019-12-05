@@ -125,6 +125,9 @@ namespace ReportScheduleInWeb.Controllers
                 List<parameters> ParamList = JsonConvert.DeserializeObject<List<parameters>>(Request.Form["parameters"].ToString());
                 List<places> PlaceList = JsonConvert.DeserializeObject<List<places>>(Request.Form["places"].ToString());
 
+                //Доступы к просмотру
+                int[] Access_users = Array.ConvertAll(Request.Form.GetValues("access_user"), s => int.Parse(s));
+
                 string wish_report_type_xml = String.Empty;
 
                 string report_type_xml = db.Report_types.Where(x => x.report_type_id == report_type_id).SingleOrDefault().report_type_xml ?? "";
@@ -174,8 +177,7 @@ namespace ReportScheduleInWeb.Controllers
                     result = 1;
                 }
 
-
-
+                //Создаем задание
                 Wishes Wish = new Wishes();
                 Wish.wish_createdate = Convert.ToDateTime(DateTime.Now);
                 Wish.wish_deadline = deadlineValue;
@@ -187,19 +189,53 @@ namespace ReportScheduleInWeb.Controllers
                 db.Wishes.Add(Wish);
                 db.SaveChanges();
 
-                int wish_id = Wish.wish_id;
-
+                //Создаем задачи
                 foreach (var p in PlaceList)
                 {
                     Tasks Task = new Tasks();
                     Task.task_startdate = DateTime.ParseExact(p.startdate, "yyyy-MM-ddTHH:mm", System.Globalization.CultureInfo.InvariantCulture); ;
-                    Task.task_wish_id = wish_id;
+                    Task.task_wish_id = Wish.wish_id;
                     Task.task_place_id = p.id;
                     Task.task_number_attempts = null;
                     Task.task_status = "new";
                     Task.task_last_error_text = null;
                     db.Tasks.Add(Task);
                 }
+
+                //Создаем доступы
+                if (Access_users.Length != 0)
+                {
+                    Wish_report_relation wrr = new Wish_report_relation();
+                    wrr.wrr_wish_id = Wish.wish_id;
+                    wrr.wrr_report_type_id = report_type_id;
+                    wrr.wrr_access_type = (short)((Access_users[0] == -1) ? 1 : (Access_users[0] == 0) ? 0 : 2);
+                    db.Wish_report_relation.Add(wrr);
+                    db.SaveChanges();
+
+                    //Конкретные пользователи
+                    if (wrr.wrr_access_type == 2)
+                    {
+                        foreach (int item in Access_users)
+                        {
+                            Wish_user_relation wur = new Wish_user_relation();
+                            wur.wur_wish_id = Wish.wish_id;
+                            wur.wur_user_id = item;
+                            db.Wish_user_relation.Add(wur);
+                        }
+                        db.SaveChanges();
+                    }
+                }
+                //Доступ для всех
+                else
+                {
+                    Wish_report_relation wrr = new Wish_report_relation();
+                    wrr.wrr_wish_id = Wish.wish_id;
+                    wrr.wrr_report_type_id = report_type_id;
+                    wrr.wrr_access_type = 0;
+                    db.Wish_report_relation.Add(wrr);
+                    db.SaveChanges();
+                }
+
                 Wish.wish_status = "new";
                 db.SaveChanges();
             }

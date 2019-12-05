@@ -135,6 +135,33 @@
                             <button class="btn btn-outline-primary my-2 my-sm-0 container-fluid mr-1" type="button" onclick="UpdateInfo()" id="UpdateButton">Обновить</button>
                         </div>
                     </div>
+                    <div class="row access">
+                        <div class="col-3">
+                            <label class="text-warning h6">Доступы:</label>
+                        </div>
+                        <div class="col-6">
+                            <select class="custom-select form-control" id="access_type" name="access_type">
+                                <option value="0">Для всех</option>
+                                <option value="1">Из настроек отчета</option>
+                                <option value="2">Выбранные пользователи</option>
+                            </select>
+                        </div>
+                        <div class="col-3">
+                            <button class="btn btn-outline-warning my-2 my-sm-0 container-fluid mr-1" type="button" onclick="SetAccess()" id="SetAccessButton">Изменить доступ</button>
+                        </div>
+                    </div>
+                    <div class="row mt-2 access" id="access_area" style="display:none">
+                        <div class="col-3">
+                            <label class="text-warning h6">Пользователи:</label>
+                        </div>
+                        <div class="col-6">
+                            @Html.DropDownList("access_users", (SelectList)ViewBag.Wish_users, new { @class = "form-control chosen-select chosen-select-users", @multiple = "true" })
+                        </div>
+                        <div class="col-3 input-group">
+                            <input value="Все" class="btn btn-outline-info mr-4" type="button" onclick="AddUsersInSelect(0)">
+                            <input value="Очистить" class="btn btn-outline-danger" type="button" onclick="AddUsersInSelect(-1)">
+                        </div>
+                    </div>
                     <div class="row">
                         <div class="col-4">
                             <button class="btn btn-outline-danger my-2 my-sm-0 container-fluid" type="button" onclick="EndWish()" id="EndButton">Завершить досрочно</button>
@@ -207,8 +234,56 @@
                 })
             }
 
+            function SetAccess() {
+                if ($('#busy_page').val() == "false") {
+                    $('#busy_page').val("true");
+
+                    var access_type = $("#access_type").val();
+
+                    var wish_id = $("#wish_id").val();
+
+                    if ((wish_id == null) || (wish_id == 0) || (access_type == null)) {
+                        alert("Произошла ошибка при сохранении доступа к заданию");
+                        return false;
+                    }
+
+                    var user_id = $("#access_users").val();
+
+                    var data = "wish_id=" + wish_id;
+                    data += "&access_type=" + access_type;
+
+                    $.each(user_id, function (index, value) {
+                        data += '&access_user=' + value.toString();
+                    });
+
+                    data += '&access_user=' + $('#current_user_id').val();
+
+                    $.ajax({
+                        type: "Post",
+                        data: data,
+                        url: mainURL + "/Monitor/SetAccess",
+                        success: function (result) {
+                            $('#busy_page').val("false");
+
+                            if (result == 1) {
+                                alert("Ошибка! Не найдена связка задания с доступами");
+                                return false;
+                            }
+
+                            alert("Доступы успешно изменены");
+                            UpdateInfo();
+                        },
+                        error: function (xhr, status, p3) {
+                            $('#busy_page').val("false");
+                            alert(xhr.responseText);
+                        }
+                    })
+                }
+                return false;
+            }
+
             function UpdateInfo() {
-                GetTasks($("#wish_id").val());
+                GetTasks($("#wish_id").val(), 0);
             }
 
             function GetExcel(TaskId) {
@@ -361,7 +436,7 @@
                         }
                         else {
                             for (var i = 0; i < WishList.length; i++) {
-                                var Data = "<tr onclick='GetTasks(" + WishList[i].Wish_id + ")'>" +
+                                var Data = "<tr onclick='GetTasks(" + WishList[i].Wish_id + ", " + WishList[i].User_id + ")'>" +
                                     "<td style='text-align: center;'>" + timeConverter(WishList[i].Wish_createdate) + "</td>" +
                                     "<td>" + WishList[i].Wish_report_type_name + "</td>" +
                                     "<td style='text-align: center;'>" + WishList[i].User_name + "</td>" +
@@ -414,9 +489,103 @@
                 })
             }
 
-            function GetTasks(WishId) {
+            function GetAccess(WishId) {
+                var url = mainURL + "/Monitor/GetAccess?WishId=" + WishId;
+                $.ajax({
+                    type: "GET",
+                    url: url,
+                    success: function (result) {
+                        if (result == -1) {
+                            return false;
+                        }
+
+                        $("#access_type").val("");
+                        if (result != null) {
+                            $("#access_type").val(result);
+                            SelectAccessType();
+                            GetAccessUsers(WishId);
+                        }
+                    }
+                })
+            }
+
+            function GetWishUserId(WishId) {
+                var url = mainURL + "/Monitor/GetAccess?WishId=" + WishId;
+                $.ajax({
+                    type: "GET",
+                    url: url,
+                    success: function (result) {
+                        if (result == -1) {
+                            return false;
+                        }
+
+                        $("#access_type").val("");
+                        if (result != null) {
+                            $("#access_type").val(result);
+                            SelectAccessType();
+                            GetAccessUsers(WishId);
+                        }
+                    }
+                })
+            }
+
+            $("#access_type").change(function () {
+                SelectAccessType();
+            });
+
+            function SelectAccessType() {
+                var access_area = document.getElementById('access_area');
+                if ($("#access_type").val() != 2) {
+                    access_area.style.display = 'none';
+                }
+                else {
+                    access_area.style.display = '';
+                }
+            }
+
+            function GetAccessUsers(WishId) {
+                var url = mainURL + "/Monitor/GetAccessUsers?WishId=" + WishId;
+                $.ajax({
+                    type: "GET",
+                    url: url,
+                    success: function (UserList) {
+                        $("#access_users").val(UserList).trigger('chosen:updated');
+                    }
+                })   
+            }
+
+            function AddUsersInSelect(ReportTypeId) {
+                switch (ReportTypeId) {
+                    case -1:
+                        var url = mainURL + "/Report/GetUsersByReportTypeId?ReportTypeId=-1";
+                        break;
+                    case 0:
+                        var url = mainURL + "/Report/GetUsersByReportTypeId?ReportTypeId=0";
+                        break;
+                    default:
+                        var url = mainURL + "/Report/GetUsersByReportTypeId?ReportTypeId=" + ReportTypeId;
+                        break;
+                }
+
+                $.ajax({
+                    type: "GET",
+                    url: url,
+                    success: function (UserList) {
+                        $("#access_users").val(UserList).trigger('chosen:updated');
+                    }
+                });
+            }
+
+            function GetTasks(WishId, UserId) {
                 if ($('#busy_page').val() == "false") {
                     $('#busy_page').val("true");
+
+                    if (UserId != 0) {
+                        if ($('#current_user_id').val() != UserId)
+                            $(".access").addClass("disabledaction");
+                        else
+                            $(".access").removeClass("disabledaction");
+                    }
 
                     var url = mainURL + "/Monitor/GetTasks?WishId=" + WishId;
                     $("#found_tasks").modal();
@@ -426,6 +595,7 @@
                         success: function (TaskList) {
                             $('#busy_page').val("false");
                             GetParamValue(WishId);
+                            GetAccess(WishId);
                             var GetExcelButton = document.getElementById('GetExcelButton');
                             if (TaskList.some(item => item.Task_status === 'завершено')) {
                                 GetExcelButton.style.display = '';
