@@ -7,6 +7,7 @@ using System.Web.Mvc;
 using System.Net.Mail;
 using System.Web.Configuration;
 using ReportScheduleInWeb.App.Tool;
+using System.Collections.Generic;
 
 namespace ReportScheduleInWeb.Controllers
 {
@@ -59,14 +60,22 @@ namespace ReportScheduleInWeb.Controllers
                     ViewBag.Action = "Login";
                     return View("Index", userModel);
                 }
-                else
-                {
-                    Session["userID"] = userDetails.user_id;
-                    Session["userSurname"] = userDetails.user_surname;
-                    Session["userName"] = userDetails.user_name;
 
-                    return RedirectToAction("Index", "Home");
+                List<int> userRoles = db.User_roles.Where(x => x.userrole_user_id == userDetails.user_id).Select(x => x.userrole_role_id).ToList();
+
+                if (userRoles == null)
+                {
+                    userModel.LoginErrorMessage = "Пользователю не назначена ни одна роль";
+                    ViewBag.Action = "Login";
+                    return View("Index", userModel);
                 }
+
+                Session["userID"] = userDetails.user_id;
+                Session["userSurname"] = userDetails.user_surname;
+                Session["userName"] = userDetails.user_name;
+                Session["userRoles"] = userRoles;
+
+                return RedirectToAction("Index", "Home");
             }
         }
 
@@ -124,9 +133,12 @@ namespace ReportScheduleInWeb.Controllers
                     db.Registered.Remove(reg);
                     db.SaveChanges();
 
+                    List<int> userRoles = db.User_roles.Where(x => x.userrole_user_id == user.user_id).Select(x => x.userrole_role_id).ToList();
+
                     Session["userID"] = user.user_id;
                     Session["userSurname"] = user.user_surname;
                     Session["userName"] = user.user_name;
+                    Session["userRoles"] = userRoles;
                 }
 
                 ViewBag.Action = "Login";

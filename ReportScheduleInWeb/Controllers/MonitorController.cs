@@ -41,6 +41,8 @@ namespace ReportScheduleInWeb.Controllers
         {
             try
             {
+                List<int> userRoles = (List<int>)Session["userRoles"];
+
                 int current_user_id = Convert.ToInt32(Session["userID"]);
                 int user_id = (Request.Form["search_user_id"] == "") ? 0 : Convert.ToInt32(Request.Form["search_user_id"]);
                 int report_type_id = (Request.Form["search_report_type_id"] == "") ? 0 : Convert.ToInt32(Request.Form["search_report_type_id"]);
@@ -79,31 +81,40 @@ namespace ReportScheduleInWeb.Controllers
                     //Проверяем доступы
                     foreach (var w in WishList)
                     {
-                        Wish_report_relation wrr = db.Wish_report_relation.Where(x => x.wrr_wish_id == w.Wish_id).SingleOrDefault();
-
-                        if (wrr != null)
+                        //Суперадмин или админ
+                        if (userRoles.Contains(1) || userRoles.Contains(2))
                         {
-                            switch (wrr.wrr_access_type)
-                            {
-                                //Задание видно для всех
-                                case 0:
-                                    ResultList.Add(w);
-                                    break;
-                                //Для пользователей отчета
-                                case 1:
-                                    if (db.Report_user_relation.Where(x => x.rur_report_type_id == wrr.wrr_report_type_id && x.rur_user_id == current_user_id).Count() != 0)
-                                        ResultList.Add(w);
-                                    break;
-                                //Для конкретных пользователей
-                                case 2:
-                                    if (db.Wish_user_relation.Where(x => x.wur_wish_id == w.Wish_id && x.wur_user_id == current_user_id).Count() != 0)
-                                        ResultList.Add(w);
-                                    break;
-                            }
+                            ResultList.Add(w);
                         }
                         else
                         {
-                            ResultList.Add(w);
+
+                            Wish_report_relation wrr = db.Wish_report_relation.Where(x => x.wrr_wish_id == w.Wish_id).SingleOrDefault();
+
+                            if (wrr != null)
+                            {
+                                switch (wrr.wrr_access_type)
+                                {
+                                    //Задание видно для всех
+                                    case 0:
+                                        ResultList.Add(w);
+                                        break;
+                                    //Для пользователей отчета
+                                    case 1:
+                                        if (db.Report_user_relation.Where(x => x.rur_report_type_id == wrr.wrr_report_type_id && x.rur_user_id == current_user_id).Count() != 0)
+                                            ResultList.Add(w);
+                                        break;
+                                    //Для конкретных пользователей
+                                    case 2:
+                                        if (db.Wish_user_relation.Where(x => x.wur_wish_id == w.Wish_id && x.wur_user_id == current_user_id).Count() != 0)
+                                            ResultList.Add(w);
+                                        break;
+                                }
+                            }
+                            else
+                            {
+                                ResultList.Add(w);
+                            }
                         }
                     }
 
