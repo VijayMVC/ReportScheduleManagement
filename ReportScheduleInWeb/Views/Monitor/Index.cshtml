@@ -1,6 +1,7 @@
 ﻿@model ReportScheduleInWeb.Models.WishViewModel
 @{
     ReportScheduleInWeb.Models.TaskViewModel taskModel = null;
+    ReportScheduleInWeb.Models.ParameterType parameterModel = null;
 }
 
 @{
@@ -98,13 +99,14 @@
         <div class="modal-dialog vertical-align-top modal-lg">
             <div class="modal-content bg-dark" id="mainContent" style="min-width:800px;">
                 <div class="modal-header">
-                    <h4 class="modal-title text-white" id="ModalTitle">Задачи</h4>
+                    <h4 class="modal-title text-white">Задачи</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
                     <input type="hidden" id="wish_id" />
+                    <input type="hidden" id="user_id" />
                     <div class="row">
                         <div class="col-3">
                             <label class="text-warning h6">Дедлайн:</label>
@@ -162,9 +164,10 @@
                             <input value="Очистить" class="btn btn-outline-danger" type="button" onclick="AddUsersInSelect(-1)">
                         </div>
                     </div>
-                    <div class="row">
+                    <div class="row mt-2">
                         <div class="col-4">
-                            <button class="btn btn-outline-danger my-2 my-sm-0 container-fluid" type="button" onclick="EndWish()" id="EndButton">Завершить досрочно</button>
+                            <button class="btn btn-outline-danger container-fluid" type="button" onclick="EndWish()" id="EndButton">Завершить досрочно</button>
+                            <button class="btn btn-outline-primary container-fluid" type="button" onclick="RepeatWish()" id="RepeatButton">Повторить задание</button>
                         </div>
                     </div>
                 </div>
@@ -195,6 +198,136 @@
     </div>
 </div>
 
+<div class="modal fade" id="repeat_tasks" tabindex="-1" role="dialog" data-backdrop="static">
+    <div class="vertical-alignment-helper">
+        <div class="modal-dialog vertical-align-top modal-lg">
+            <div class="modal-content bg-dark" id="mainContent" style="min-width:800px;">
+                <div class="modal-header">
+                    <h4 class="modal-title text-white">Повторить задание</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row align-items-center pb-2">
+                        <div class="col-12 input-group mb-2">
+                            <select class="custom-select form-control" id="repeat_type" name="repeat_type">
+                                <option value="0">не создавать новое задание</option>
+                                <option value="1">сделать копию задания</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row align-items-center pb-2">
+                        <div class="col-12 input-group mb-2">
+                            <div class="custom-control custom-checkbox pb-3">
+                                <input type="checkbox" class="custom-control-input" id="customCheck">
+                                <label class="custom-control-label text-white" for="customCheck">- только неудачи</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row align-items-center pb-2">
+                        <div class="col-12 input-group mb-2">
+                            <table class="table table-bordered table-hover table-striped table-light">
+                                <tr class="bg-secondary" style="text-align:center">
+                                    <th scope="col">
+                                        @Html.DisplayNameFor(p => parameterModel.Alias).ToString()
+                                    </th>
+                                    <th scope="col">
+                                        @Html.DisplayNameFor(p => parameterModel.Type).ToString()
+                                    </th>
+                                    <th scope="col">
+                                        @Html.DisplayNameFor(p => parameterModel.Value).ToString()
+                                    </th>
+                                </tr>
+                                <tbody id="SetParameterList"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="row pb-3">
+                        <div class="col-4 text-right">
+                            <div class="custom-control custom-switch">
+                                <input type="checkbox" class="custom-control-input" id="customSwitch" checked>
+                                <label class="custom-control-label text-white" for="customSwitch">- общий запуск</label>
+                            </div>
+                        </div>
+                        <div class="col-5">
+                            <input type='datetime-local' class='startdateValue' id="startdateValue" required>
+                        </div>
+                        <div class="col-3">
+                            <input value="Установить всем" class="btn btn-sm btn-info" type="button" onclick="SetStartDateForAll()" id="startdateButton">
+                        </div>
+                    </div>
+                    <div class="row pb-3">
+                        <div class="col-4 text-right">
+                            <label class="text-white">Дедлайн</label>
+                        </div>
+                        <div class="col-5">
+                            <input type='datetime-local' class='deadlineValue' id="deadlineValue" required>
+                        </div>
+                        <div class="col-3">
+                            &nbsp;
+                        </div>
+                    </div>
+                    <div class="row pb-3">
+                        <div class="col-4 text-right">
+                            <label class="text-white">Количество попыток</label>
+                        </div>
+                        <div class="col-5">
+                            <input type='number' class='attemptsValue' id="attemptsValue" min="0" max="99" title="Введите количество попыток, максимум = 99. Можно не заполнять.">
+                        </div>
+                        <div class="col-3">
+                            &nbsp;
+                        </div>
+                    </div>
+                    <table class="table table-bordered table-hover table-striped table-light" id="scheduleTable" style="display:none">
+                        <tr class="bg-secondary" style="text-align:center">
+                            <th scope="col" width="5%">
+                                ID
+                            </th>
+                            <th scope="col" width="65%">
+                                Место
+                            </th>
+                            <th scope="col" width="30%">
+                                Запуск
+                            </th>
+                        </tr>
+                        <tbody id="SetScheduleList"></tbody>
+                    </table>
+                    <div class="row repeat_access">
+                        <div class="col-3">
+                            <label class="text-warning h6">Доступы:</label>
+                        </div>
+                        <div class="col-9">
+                            <select class="custom-select form-control" id="repeat_access_type" name="repeat_access_type">
+                                <option value="0">Для всех</option>
+                                <option value="1">Из настроек отчета</option>
+                                <option value="2">Выбранные пользователи</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mt-2 repeat_access" id="repeat_access_area" style="display:none">
+                        <div class="col-3">
+                            <label class="text-warning h6">Пользователи:</label>
+                        </div>
+                        <div class="col-6">
+                            @Html.DropDownList("repeat_access_users", (SelectList)ViewBag.Wish_users, new { @class = "form-control chosen-select chosen-select-users", @multiple = "true" })
+                        </div>
+                        <div class="col-3 input-group">
+                            <input value="Все" class="btn btn-outline-info mr-4" type="button" onclick="AddUsersInRepeatSelect(0)">
+                            <input value="Очистить" class="btn btn-outline-danger" type="button" onclick="AddUsersInRepeatSelect(-1)">
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-4">
+                            <input value="Заказать отчет" class="btn btn-success" type="submit" onclick="CreateRepeatWish()">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
     @section scripts {
         <script>
             $(".chosen-select").chosen({
@@ -209,6 +342,163 @@
 
             $(".chosen-choices").css('font-size', '16px');
             $(".chosen-choices").css('min-height', '38px');
+
+            function RepeatWish() {
+                if ($('#busy_page').val() == "false") {
+                    $('#busy_page').val("true");
+
+                    var UserId = $("#user_id").val();
+
+                    if (UserId != 0) {
+                        if (($('#current_user_id').val() != UserId) && ($('#current_user_id').val() != 1) && ($('#current_user_id').val() != 2)) {
+                            $('#busy_page').val("false");
+                            return false;
+                        }
+                    }
+                    else {
+                        $('#busy_page').val("false");
+                        return false;
+                    }
+
+                    var WishId = $('#wish_id').val();
+
+                    var url = mainURL + "/Monitor/GetTasks?WishId=" + WishId;
+                    $("#repeat_tasks").modal();
+                    $("#repeat_type").val(0);
+
+                    var checkBox = document.getElementById('customCheck');
+                    checkBox.checked = false;
+
+                    fillParameterList(WishId);
+                    fillstartdateValue();
+
+                    //SelectRepeatType();
+
+                    $.ajax({
+                        type: "GET",
+                        url: url,
+                        success: function (TaskList) {
+                            $('#busy_page').val("false");
+                            //GetParamValue(WishId);
+                            //GetAccess(WishId);
+                        },
+                        error: function (xhr, status, p3) {
+                            $('#busy_page').val("false");
+                            alert(xhr.responseText);
+                        }
+                    })
+                }
+            }
+
+            function fillscheduleTable(WishId, ) {
+                var arr1 = $('#wish_places option:selected').map(function () {
+                    return {
+                        'id': $(this).val(),
+                        'name': $(this).text(),
+                        'startDate': ""
+                    }
+                }).get();
+
+                var arr2 = $('#SetScheduleList tr').map(function (i, row) {
+                    return {
+                        'id': row.cells[0].textContent,
+                        'name': row.cells[1].textContent,
+                        'startDate': row.cells[2].childNodes[0].value
+                    }
+                }).get();
+
+                var now = new Date();
+
+                arr1.forEach(function (item) {
+                    var result = $.grep(arr2, function (e) { return e.id == item.id && e.name == item.name; });
+                    if (result.length > 0) {
+                        item.startDate = result[0].startDate;
+                    }
+                    else {
+                        item.startDate = now.getFullYear() + "-" + ("0" + (now.getMonth() + 1)).slice(-2) + "-" + ("0" + now.getDate()).slice(-2) + "T00:00";
+                    }
+                });
+
+                var SetData = $("#SetScheduleList");
+                SetData.empty();
+                for (var i = 0; i < arr1.length; i++) {
+                    var Data = "<tr><td>" + arr1[i].id + "</td><td>" + arr1[i].name + "</td>";
+                    Data += "<td><input type='datetime-local' class='startDatePlace' value='" + arr1[i].startDate + "' required></td></tr>";
+                    SetData.append(Data);
+                }
+            }
+
+            $("#customSwitch").change(function () {
+                var checkBox = document.getElementById('customSwitch');
+                var startDate = document.getElementById('startdateValue');
+                var scheduleTable = document.getElementById('scheduleTable');
+                var startDateButton = document.getElementById('startdateButton');
+                if (checkBox.checked) {
+                    startDate.style.display = 'block';
+                    startDateButton.style.display = 'block';
+                    scheduleTable.style.display = 'none';
+                }
+                else {
+                    startDate.style.display = 'none';
+                    startDateButton.style.display = 'none';
+                    scheduleTable.style.display = '';
+                }
+            });
+
+            function fillParameterList(WishId) {
+                var url = mainURL + "/Monitor/GetParameters?WishId=" + WishId;
+
+                $.ajax({
+                    type: "GET",
+                    url: url,
+                    success: function (ParameterList) {
+                        var SetData = $("#SetParameterList");
+                        SetData.empty();
+                        if (ParameterList.length == 0) {
+                            var Data = "<tr class='row_0'> <td colspan='3'>Параметров нет.</td></tr>";
+                            SetData.append(Data);
+                        }
+                        else {
+                            for (var i = 0; i < ParameterList.length; i++) {
+                                if ((ParameterList[i].Type != "deadline") && (ParameterList[i].Type != "attempts")) {
+                                    var Data = "<tr class='row_" + ParameterList[i].Name + "'>" +
+                                        "<td>" + ParameterList[i].Alias + "</td>" +
+                                        "<td>" + ParameterList[i].Type + "</td>";
+                                    switch (ParameterList[i].Type) {
+                                        case 'string':
+                                            Data += "<td><input type='text' class='parameterValue' placeholder='Введите значение' value='" + ParameterList[i].Value + "' required></td>";
+                                            break;
+                                        case 'integer':
+                                            Data += "<td><input type='number' class='parameterValue' value'" + ParameterList[i].Value + "' required></td>";
+                                            break;
+                                        case 'startdate':
+                                            var now = ParameterList[i].Value.split(/\.|\s|\:/);
+                                            Data += "<td><input type='datetime-local' class='parameterValue' value='" + now[2] + "-" + now[1] + "-" + now[0] + "T" + ("0" + now[3]).slice(-2) + ":" + now[4] + "' required></td>";
+                                            break;
+                                        case 'enddate':
+                                            var now = ParameterList[i].Value.split(/\.|\s|\:/);
+                                            Data += "<td><input type='datetime-local' class='parameterValue' value='" + now[2] + "-" + now[1] + "-" + now[0] + "T" + ("0" + now[3]).slice(-2) + ":" + now[4] + "' required></td>";
+                                            break;
+                                    }
+
+                                    Data += "</tr>";
+                                    SetData.append(Data);
+                                }
+                            }
+                        }
+                    }
+                })
+            }
+
+            function fillstartdateValue() {
+                var now = new Date();
+                var startDate = document.getElementById('startdateValue');
+                startDate.value = now.getFullYear() + "-" + ("0" + (now.getMonth() + 1)).slice(-2) + "-" + ("0" + now.getDate()).slice(-2) + "T00:00";
+
+                var deadlineDate = document.getElementById('deadlineValue');
+                now.setDate(now.getDate() + 1);
+                deadlineDate.value = now.getFullYear() + "-" + ("0" + (now.getMonth() + 1)).slice(-2) + "-" + ("0" + now.getDate()).slice(-2) + "T00:00";
+            }
 
             function fillReportTypeList(user_id) {
                 var url = mainURL + "/Wish/GetReportTypes?UserId=" + user_id;
@@ -543,6 +833,16 @@
                 }
             }
 
+            function SelectRepeatAccessType() {
+                var repeat_access_area = document.getElementById('repeat_access_area');
+                if ($("#repeat_access_type").val() != 2) {
+                    repeat_access_area.style.display = 'none';
+                }
+                else {
+                    repeat_access_area.style.display = '';
+                }
+            }
+
             function GetAccessUsers(WishId) {
                 var url = mainURL + "/Monitor/GetAccessUsers?WishId=" + WishId;
                 $.ajax({
@@ -581,7 +881,7 @@
                     $('#busy_page').val("true");
 
                     if (UserId != 0) {
-                        if ($('#current_user_id').val() != UserId)
+                        if (($('#current_user_id').val() != UserId) && ($('#current_user_id').val() != 1) && ($('#current_user_id').val() != 2))
                             $(".access").addClass("disabledaction");
                         else
                             $(".access").removeClass("disabledaction");
@@ -605,14 +905,32 @@
                             }
 
                             var EndButton = document.getElementById('EndButton');
-                            if (TaskList.some(item => item.Task_status !== 'завершено' && item.Task_status !== 'завершено с ошибкой')) {
-                                EndButton.style.display = '';
+                            var RepeatButton = document.getElementById('RepeatButton');
+
+                            if (UserId != 0) {
+                                if (($('#current_user_id').val() != UserId) && ($('#current_user_id').val() != 1) && ($('#current_user_id').val() != 2)) {
+                                    EndButton.style.display = 'none';
+                                    RepeatButton.style.display = '';
+                                }
+                                else {
+                                    if (TaskList.some(item => item.Task_status !== 'завершено' && item.Task_status !== 'завершено с ошибкой')) {
+                                        EndButton.style.display = '';
+                                        RepeatButton.style.display = 'none';
+                                    }
+                                    else {
+                                        EndButton.style.display = 'none';
+                                        RepeatButton.style.display = '';
+                                    }
+                                }
                             }
                             else {
                                 EndButton.style.display = 'none';
+                                RepeatButton.style.display = '';
                             }
 
+
                             $('#wish_id').val(WishId);
+                            $('#user_id').val(UserId);
 
                             //Места
                             var SetData = $("#FoundTasksList");
