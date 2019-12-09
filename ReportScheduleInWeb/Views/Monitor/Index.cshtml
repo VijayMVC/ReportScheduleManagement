@@ -225,7 +225,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="row align-items-center pb-2">
+                    <div class="row align-items-center pb-2 repeat">
                         <div class="col-12 input-group mb-2">
                             <table class="table table-bordered table-hover table-striped table-light">
                                 <tr class="bg-secondary" style="text-align:center">
@@ -343,6 +343,8 @@
             $(".chosen-choices").css('font-size', '16px');
             $(".chosen-choices").css('min-height', '38px');
 
+
+
             function RepeatWish() {
                 if ($('#busy_page').val() == "false") {
                     $('#busy_page').val("true");
@@ -362,71 +364,68 @@
 
                     var WishId = $('#wish_id').val();
 
-                    var url = mainURL + "/Monitor/GetTasks?WishId=" + WishId;
+                    $("#found_tasks").modal('hide');
                     $("#repeat_tasks").modal();
+
                     $("#repeat_type").val(0);
+                    SelectRepeatType();
 
                     var checkBox = document.getElementById('customCheck');
-                    checkBox.checked = false;
+                    checkBox.checked = true;
 
                     fillParameterList(WishId);
                     fillstartdateValue();
 
-                    //SelectRepeatType();
+                    fillscheduleTable(WishId);
 
-                    $.ajax({
-                        type: "GET",
-                        url: url,
-                        success: function (TaskList) {
-                            $('#busy_page').val("false");
-                            //GetParamValue(WishId);
-                            //GetAccess(WishId);
-                        },
-                        error: function (xhr, status, p3) {
-                            $('#busy_page').val("false");
-                            alert(xhr.responseText);
-                        }
-                    })
+                    $('#busy_page').val("false");
                 }
             }
 
-            function fillscheduleTable(WishId, ) {
-                var arr1 = $('#wish_places option:selected').map(function () {
-                    return {
-                        'id': $(this).val(),
-                        'name': $(this).text(),
-                        'startDate': ""
-                    }
-                }).get();
+            $("#repeat_tasks").on("hidden.bs.modal", function () {
+                $("#found_tasks").modal('show');
+            });
 
-                var arr2 = $('#SetScheduleList tr').map(function (i, row) {
-                    return {
-                        'id': row.cells[0].textContent,
-                        'name': row.cells[1].textContent,
-                        'startDate': row.cells[2].childNodes[0].value
-                    }
-                }).get();
+            $("#repeat_tasks").on("shown.bs.modal", function () {
+                $(document.body).addClass("modal-open");
+            });
 
-                var now = new Date();
+            function fillscheduleTable(WishId) {
+                var url = mainURL + "/Monitor/GetTasks?WishId=" + WishId;
+                $.ajax({
+                    type: "GET",
+                    url: url,
+                    success: function (TaskList) {
+                        var now = new Date(); 
+                        var startDate = now.getFullYear() + "-" + ("0" + (now.getMonth() + 1)).slice(-2) + "-" + ("0" + now.getDate()).slice(-2) + "T00:00";
 
-                arr1.forEach(function (item) {
-                    var result = $.grep(arr2, function (e) { return e.id == item.id && e.name == item.name; });
-                    if (result.length > 0) {
-                        item.startDate = result[0].startDate;
-                    }
-                    else {
-                        item.startDate = now.getFullYear() + "-" + ("0" + (now.getMonth() + 1)).slice(-2) + "-" + ("0" + now.getDate()).slice(-2) + "T00:00";
+                        var SetData = $("#SetScheduleList");
+                        SetData.empty();
+                        if (TaskList.length == 0) {
+                            var Data = "<tr class='font-italic font-weight-light'> <td colspan='3'>Ничего не найдено</td></tr>";
+                            SetData.append(Data);
+                        }
+                        else {
+                            for (var i = 0; i < TaskList.length; i++) {
+                                var Data = "<tr><td>" + TaskList[i].Task_place_id + "</td><td>" + TaskList[i].Task_place_name + "</td>";
+                                Data += "<td><input type='datetime-local' class='startDatePlace' value='" + startDate + "' required></td></tr>";
+                                SetData.append(Data);
+                            }
+                        }
                     }
                 });
-
-                var SetData = $("#SetScheduleList");
-                SetData.empty();
-                for (var i = 0; i < arr1.length; i++) {
-                    var Data = "<tr><td>" + arr1[i].id + "</td><td>" + arr1[i].name + "</td>";
-                    Data += "<td><input type='datetime-local' class='startDatePlace' value='" + arr1[i].startDate + "' required></td></tr>";
-                    SetData.append(Data);
-                }
             }
+
+            $("#repeat_type").change(function () {
+                SelectRepeatType();
+            });
+
+            function SelectRepeatType() {
+                if ($('#repeat_type').val() == 0)
+                    $(".repeat").addClass("disabledaction");
+                else
+                    $(".repeat").removeClass("disabledaction");
+            };
 
             $("#customSwitch").change(function () {
                 var checkBox = document.getElementById('customSwitch');
