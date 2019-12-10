@@ -226,7 +226,7 @@ namespace ReportScheduleService
 
                         foreach (var t in db.Tasks.Where(x => x.task_wish_id == wish_id && x.task_status == "done").Where(x => (task_id != 0) ? (x.task_id == task_id) : (x.task_id == x.task_id)))
                         {
-                            string report_data_xml = db.Report_data.Where(x => x.report_data_task_id == t.task_id).SingleOrDefault().report_data_xml;
+                            string report_data_xml = db.Report_data.Where(x => x.report_data_task_id == t.task_id).OrderByDescending(x => x.report_data_createdate).FirstOrDefault().report_data_xml;
                             string place_name = db.Places.Where(x => x.place_id == t.task_place_id).SingleOrDefault().place_name_in_report;
                             Place_done.Add(place_name);
 

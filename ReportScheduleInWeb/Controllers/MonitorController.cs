@@ -1,4 +1,5 @@
-﻿using OfficeOpenXml;
+﻿using Newtonsoft.Json;
+using OfficeOpenXml;
 using ReportScheduleInWeb.Models;
 using System;
 using System.Collections.Generic;
@@ -257,19 +258,38 @@ namespace ReportScheduleInWeb.Controllers
         }
 
         [HttpGet]
-        public JsonResult GetTasks(int WishId)
+        public JsonResult GetTasks(int WishId, bool OnlyFail)
         {
-            List<TaskViewModel> TaskList = db.Tasks.Where(x => x.task_wish_id == WishId).Select(x => new TaskViewModel
+            List<TaskViewModel> TaskList = new List<TaskViewModel>();
+
+            if (OnlyFail)
             {
-                Task_id = x.task_id,
-                Task_wish_id = x.task_wish_id,
-                Task_place_id = x.task_place_id,
-                Task_startdate = x.task_startdate,
-                Task_number_attempts = x.task_number_attempts,
-                Task_last_error_text_short = x.task_last_error_text == null ? "-" : x.task_last_error_text.Length > 40 ? x.task_last_error_text.Substring(0, 35) + "..." : x.task_last_error_text,
-                Task_last_error_text = x.task_last_error_text,
-                Task_status = x.task_status
-            }).ToList();
+                TaskList = db.Tasks.Where(x => x.task_wish_id == WishId && x.task_status == "fail").Select(x => new TaskViewModel
+                {
+                    Task_id = x.task_id,
+                    Task_wish_id = x.task_wish_id,
+                    Task_place_id = x.task_place_id,
+                    Task_startdate = x.task_startdate,
+                    Task_number_attempts = x.task_number_attempts,
+                    Task_last_error_text_short = x.task_last_error_text == null ? "-" : x.task_last_error_text.Length > 40 ? x.task_last_error_text.Substring(0, 35) + "..." : x.task_last_error_text,
+                    Task_last_error_text = x.task_last_error_text,
+                    Task_status = x.task_status
+                }).ToList();
+            }
+            else
+            {
+                TaskList = db.Tasks.Where(x => x.task_wish_id == WishId).Select(x => new TaskViewModel
+                {
+                    Task_id = x.task_id,
+                    Task_wish_id = x.task_wish_id,
+                    Task_place_id = x.task_place_id,
+                    Task_startdate = x.task_startdate,
+                    Task_number_attempts = x.task_number_attempts,
+                    Task_last_error_text_short = x.task_last_error_text == null ? "-" : x.task_last_error_text.Length > 40 ? x.task_last_error_text.Substring(0, 35) + "..." : x.task_last_error_text,
+                    Task_last_error_text = x.task_last_error_text,
+                    Task_status = x.task_status
+                }).ToList();
+            }
 
             foreach (var t in TaskList)
             {
@@ -448,7 +468,8 @@ namespace ReportScheduleInWeb.Controllers
 
                     foreach (var t in db.Tasks.Where(x => x.task_wish_id == wish_id && x.task_status == "done").Where(x => (task_id != 0) ? (x.task_id == task_id) : (x.task_id == x.task_id)))
                     {
-                        string report_data_xml = db.Report_data.Where(x => x.report_data_task_id == t.task_id).SingleOrDefault().report_data_xml;
+                        string report_data_xml = db.Report_data.Where(x => x.report_data_task_id == t.task_id).OrderByDescending(x => x.report_data_createdate).FirstOrDefault().report_data_xml;
+
                         string place_name = db.Places.Where(x => x.place_id == t.task_place_id).SingleOrDefault().place_name_in_report;
                         Place_done.Add(place_name);
 
@@ -665,5 +686,6 @@ namespace ReportScheduleInWeb.Controllers
 
             return Json(result, JsonRequestBehavior.AllowGet);
         }
+
     }
 }

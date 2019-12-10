@@ -385,7 +385,7 @@ namespace ReportScheduleInForm
                 Wishes w = db.Wishes.Where(x => x.wish_id == wish_id).SingleOrDefault();
 
                 string email = db.Users.Where(x => x.user_id == w.wish_user_id).SingleOrDefault().user_email;
-                string subject = "Заказ отчета выполнен";
+                string subject = w.wish_report_type_name;
 
                 StringBuilder param = new StringBuilder();
 

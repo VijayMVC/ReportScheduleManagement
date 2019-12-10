@@ -343,7 +343,200 @@
             $(".chosen-choices").css('font-size', '16px');
             $(".chosen-choices").css('min-height', '38px');
 
+            function sleep(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
 
+            function CreateRepeatWish() {
+                if ($('#busy_page').val() == "false") {
+                    $('#busy_page').val("true");
+
+                    //Проверка всех данных перед отправкой
+                    var deadlineValue;
+                    var attemptsCount;
+                    var WishId = $('#wish_id').val();
+                    var parameters = [];
+                    var places = [];
+                    try {
+                        //----------Дедлайн---------------
+                        var deadline = document.getElementById('deadlineValue');
+                        deadlineValue = deadline.value;
+
+                        if ((deadline.validity.badInput) || (deadlineValue.length === 0)) {
+                            $('#busy_page').val("false");
+                            alert("Ошибка! Проверьте дату и время дедлайна.");
+                            return false;
+                        }
+
+                        //----------Попытки---------------
+                        var attempts = document.getElementById('attemptsValue');
+                        if (attempts.value == '')
+                            attemptsCount = null
+                        else
+                            attemptsCount = attempts.value;
+
+                        //----------Параметры-------------
+
+                        if (!checkParameters()) {
+                            $('#busy_page').val("false");
+                            return false;
+                        }
+
+                        var ParamTable = document.getElementById('SetParameterList');
+                        if (ParamTable.rows[0].cells.length > 1) {
+                            parameters = $('#SetParameterList tr').map(function (i, row) {
+                                return {
+                                    'name': row.className.replace('row_', ''),
+                                    'value': row.cells[2].childNodes[0].value
+                                }
+                            }).get();
+                        }
+
+                        //----------Места-----------------
+                        if ($('#scheduleTable tr > td:contains(Ничего не найдено)').length != 0) {
+                            $('#busy_page').val("false");
+                            alert("Нет ни одного выбранного места! Задание невозможно повторить.");
+                            return false;
+                        }
+
+                        var checkBox = document.getElementById('customSwitch');
+                        if (checkBox.checked) {
+                            var startDate = document.getElementById('startdateValue');
+                            var startdateValue = startDate.value;
+
+                            if ((startDate.validity.badInput) || (startdateValue.length === 0)) {
+                                $('#busy_page').val("false");
+                                alert("Ошибка! Проверьте дату и время запуска.");
+                                return false;
+                            }
+                            places = $('#SetScheduleList tr').map(function (i, row) {
+                                return {
+                                    'id': row.cells[0].textContent,
+                                    'startdate': startdateValue
+                                }
+                            }).get();
+                        }
+                        else {
+                            places = $('#SetScheduleList tr').map(function (i, row) {
+                                return {
+                                    'id': row.cells[0].textContent,
+                                    'startdate': row.cells[2].childNodes[0].value
+                                }
+                            }).get();
+                        }
+                    }
+                    catch
+                    {
+                        $('#busy_page').val("false");
+                        alert("Ошибка при проверке данных! Проверьте данные по вкладкам.");
+                        return false;
+                    }
+
+                    var data = 'wish_id=' + WishId.toString();
+
+                    var repeat_type = document.getElementById('repeat_type');
+                    data += '&repeat_type=' + repeat_type.value;
+
+                    data += '&user_id=' + $('#current_user_id').val();
+
+                    data += '&deadlineValue=' + deadlineValue;
+
+                    if (attemptsCount == null)
+                        data += '&attemptsCount=null'
+                    else
+                        data += '&attemptsCount=' + attemptsCount.toString();
+
+                    data += '&parameters=' + JSON.stringify(parameters)
+
+                    data += '&places=' + JSON.stringify(places)
+
+                    var access_type = document.getElementById('repeat_access_type');
+
+                    switch (access_type.value) {
+                        case '0':
+                            data += '&access_user=0';
+                            break
+                        case '1':
+                            data += '&access_user=-1';
+                            break;
+                        case '2':
+                            var user_id = $("#repeat_access_users").val();
+                            $.each(user_id, function (index, value) {
+                                if (value != $('#current_user_id').val())
+                                    data += '&access_user=' + value.toString();
+                            });
+                            data += '&access_user=' + $('#current_user_id').val();
+                            break;
+                    }
+                    $('#busy_page').val("false");
+                    $.ajax({
+                        type: "Post",
+                        data: data,
+                        url: mainURL + "/Wish/RepeatWish",
+                        success: function (result) {
+                            $('#busy_page').val("false");
+
+                            if (result == -1) {
+                                alert("Произошла ошибка при сохранении данных! Задание не повторено!");
+                                return false;
+                            }
+
+                            if (repeat_type.value == '0') {
+                                alert("Задание обновлено")
+                            }
+                            else {
+                                alert("Новое задание добавлено");
+                            }
+
+                            $("#repeat_tasks").modal('hide');
+                            GetTasks(result, $('#current_user_id').val());
+                        },
+                        error: function (xhr, status, p3) {
+                            $('#busy_page').val("false");
+                            alert(xhr.responseText);
+                        }
+                    })
+                }
+            }
+
+            function checkParameters() {
+                var no_param = $('#row_0');
+
+                //Есть параметры
+                if (no_param.length == 0) {
+                    var flag = true;
+                    $('input.parameterValue').each(function () {
+                        switch ($(this).attr('type')) {
+                            case 'text':
+                                var value = $(this).val().replace(/ +/g, '');
+                                if (value.length === 0) {
+                                    flag = false;
+                                }
+                                break;
+                            case 'number':
+                                var value = $(this).val();
+                                if ((this.validity.badInput) || (value.length === 0)) {
+                                    flag = false;
+                                }
+                                break;
+                            case 'datetime-local':
+                                var value = $(this).val();
+                                if ((this.validity.badInput) || (value.length === 0)) {
+                                    flag = false;
+                                }
+                                break;
+                        }
+                        if (!flag)
+                            return false;
+                    });
+
+                    if (!flag) {
+                        alert("Ошибка! Проверьте введенные значения параметров.");
+                        return false;
+                    }
+                }
+                return true;
+            }
 
             function RepeatWish() {
                 if ($('#busy_page').val() == "false") {
@@ -373,29 +566,106 @@
                     var checkBox = document.getElementById('customCheck');
                     checkBox.checked = true;
 
+                    var customSwitch = document.getElementById('customSwitch');
+                    customSwitch.checked = true;
+                    ChangeCustomSwitch();
+
+
                     fillParameterList(WishId);
                     fillstartdateValue();
 
-                    fillscheduleTable(WishId);
+                    ChangeCustomCheck();
+
+                    GetWishUserId(WishId);
 
                     $('#busy_page').val("false");
                 }
             }
 
-            $("#repeat_tasks").on("hidden.bs.modal", function () {
-                $("#found_tasks").modal('show');
-            });
+            function GetRepeatAccessUsers(WishId) {
+                var url = mainURL + "/Monitor/GetAccessUsers?WishId=" + WishId;
+                $.ajax({
+                    type: "GET",
+                    url: url,
+                    success: function (UserList) {
+                        $("#repeat_access_users").val(UserList).trigger('chosen:updated');
+                    }
+                })   
+            }
 
-            $("#repeat_tasks").on("shown.bs.modal", function () {
-                $(document.body).addClass("modal-open");
-            });
+            function AddUsersInRepeatSelect(ReportTypeId) {
+                switch (ReportTypeId) {
+                    case -1:
+                        var url = mainURL + "/Report/GetUsersByReportTypeId?ReportTypeId=-1";
+                        break;
+                    case 0:
+                        var url = mainURL + "/Report/GetUsersByReportTypeId?ReportTypeId=0";
+                        break;
+                    default:
+                        var url = mainURL + "/Report/GetUsersByReportTypeId?ReportTypeId=" + ReportTypeId;
+                        break;
+                }
 
-            function fillscheduleTable(WishId) {
-                var url = mainURL + "/Monitor/GetTasks?WishId=" + WishId;
+                $.ajax({
+                    type: "GET",
+                    url: url,
+                    success: function (UserList) {
+                        $("#repeat_access_users").val(UserList).trigger('chosen:updated');
+                    }
+                });
+            }
+
+            function GetWishUserId(WishId) {
+                var url = mainURL + "/Monitor/GetAccess?WishId=" + WishId;
+                $.ajax({
+                    type: "GET",
+                    url: url,
+                    success: function (result) {
+                        if (result == -1) {
+                            return false;
+                        }
+
+                        $("#repeat_access_type").val("");
+                        if (result != null) {
+                            $("#repeat_access_type").val(result);
+                            SelectRepeatAccessType();
+                            GetRepeatAccessUsers(WishId);
+                        }
+                    }
+                })
+    }
+
+            function ChangeCustomCheck() {
+                var WishId = $('#wish_id').val();
+                var checkBox = document.getElementById('customCheck');
+                var url = mainURL + "/Monitor/GetTasks?WishId=" + WishId + "&OnlyFail=" + checkBox.checked;
                 $.ajax({
                     type: "GET",
                     url: url,
                     success: function (TaskList) {
+                        var SetData = $("#SetScheduleList");
+                        SetData.empty();
+
+                        if (TaskList.length == 0) {
+                            var Data = "<tr class='font-italic font-weight-light'> <td colspan='3'>Ничего не найдено</td></tr>";
+                            SetData.append(Data);
+                        }
+                        else {
+                            var arr1 = [];
+
+                            for (var i = 0; i < TaskList.length; i++) {
+                                arr1.push({ 'id': TaskList[i].Task_place_id, 'name': TaskList[i].Task_place_name, 'startDate': "" });
+                            }
+
+                            var arr2 = $('#SetScheduleList tr').map(function (i, row) {
+                                return {
+                                    'id': row.cells[0].textContent,
+                                    'name': row.cells[1].textContent,
+                                    'startDate': row.cells[2].childNodes[0].value
+                                }
+                            }).get();
+                        }
+
                         var now = new Date(); 
                         var startDate = now.getFullYear() + "-" + ("0" + (now.getMonth() + 1)).slice(-2) + "-" + ("0" + now.getDate()).slice(-2) + "T00:00";
 
@@ -416,6 +686,55 @@
                 });
             }
 
+            $("#customCheck").change(function () {
+                ChangeCustomCheck();
+            });
+
+            function CheckStartDateForAll() {
+                var startDate = document.getElementById('startdateValue');
+                var value = startDate.value;
+
+                if ((startDate.validity.badInput) || (value.length === 0)) {
+                    alert("Ошибка! Сначала установите дату и время запуска.");
+                    return false;
+                }
+
+                return true;
+            }
+            
+            function SetStartDateForAll() {
+                if (!CheckStartDateForAll())
+                    return false;
+
+                var startDate = document.getElementById('startdateValue');
+                var value = startDate.value;
+
+                var arr1 = $('#SetScheduleList tr').map(function (i, row) {
+                    return {
+                        'id': row.cells[0].textContent,
+                        'name': row.cells[1].textContent,
+                        'startDate': value
+                    }
+                }).get();
+
+                var SetData = $("#SetScheduleList");
+                SetData.empty();
+                for (var i = 0; i < arr1.length; i++) {
+                    var Data = "<tr><td>" + arr1[i].id + "</td><td>" + arr1[i].name + "</td>";
+                    Data += "<td><input type='datetime-local' class='startDatePlace' value='" + arr1[i].startDate + "' required></td></tr>";
+                    SetData.append(Data);
+                }
+            }
+
+            $("#repeat_tasks").on("hidden.bs.modal", function () {
+                if (!$('#found_tasks').hasClass('show'))
+                    $("#found_tasks").modal('show');
+            });
+
+            $("#repeat_tasks").on("shown.bs.modal", function () {
+                $(document.body).addClass("modal-open");
+            });
+
             $("#repeat_type").change(function () {
                 SelectRepeatType();
             });
@@ -427,7 +746,7 @@
                     $(".repeat").removeClass("disabledaction");
             };
 
-            $("#customSwitch").change(function () {
+            function ChangeCustomSwitch() {
                 var checkBox = document.getElementById('customSwitch');
                 var startDate = document.getElementById('startdateValue');
                 var scheduleTable = document.getElementById('scheduleTable');
@@ -442,6 +761,10 @@
                     startDateButton.style.display = 'none';
                     scheduleTable.style.display = '';
                 }
+            }
+
+            $("#customSwitch").change(function () {
+                ChangeCustomSwitch();
             });
 
             function fillParameterList(WishId) {
@@ -572,7 +895,7 @@
             }
 
             function UpdateInfo() {
-                GetTasks($("#wish_id").val(), 0);
+                GetTasks($("#wish_id").val(), $("#user_id").val());
             }
 
             function GetExcel(TaskId) {
@@ -641,7 +964,7 @@
                         url: mainURL + "/Monitor/EndWish",
                         success: function (result) {
                             $('#busy_page').val("false");
-                            UpdateInfo();
+                            sleep(3000).then(() => UpdateInfo());
                         },
                         error: function (xhr, status, p3) {
                             $('#busy_page').val("false");
@@ -798,26 +1121,6 @@
                 })
             }
 
-            function GetWishUserId(WishId) {
-                var url = mainURL + "/Monitor/GetAccess?WishId=" + WishId;
-                $.ajax({
-                    type: "GET",
-                    url: url,
-                    success: function (result) {
-                        if (result == -1) {
-                            return false;
-                        }
-
-                        $("#access_type").val("");
-                        if (result != null) {
-                            $("#access_type").val(result);
-                            SelectAccessType();
-                            GetAccessUsers(WishId);
-                        }
-                    }
-                })
-            }
-
             $("#access_type").change(function () {
                 SelectAccessType();
             });
@@ -831,6 +1134,10 @@
                     access_area.style.display = '';
                 }
             }
+
+            $("#repeat_access_type").change(function () {
+                SelectRepeatAccessType();
+            });
 
             function SelectRepeatAccessType() {
                 var repeat_access_area = document.getElementById('repeat_access_area');
@@ -886,7 +1193,7 @@
                             $(".access").removeClass("disabledaction");
                     }
 
-                    var url = mainURL + "/Monitor/GetTasks?WishId=" + WishId;
+                    var url = mainURL + "/Monitor/GetTasks?WishId=" + WishId + "&OnlyFail=false";
                     $("#found_tasks").modal();
                     $.ajax({
                         type: "GET",
@@ -909,7 +1216,7 @@
                             if (UserId != 0) {
                                 if (($('#current_user_id').val() != UserId) && ($('#current_user_id').val() != 1) && ($('#current_user_id').val() != 2)) {
                                     EndButton.style.display = 'none';
-                                    RepeatButton.style.display = '';
+                                    RepeatButton.style.display = 'none';
                                 }
                                 else {
                                     if (TaskList.some(item => item.Task_status !== 'завершено' && item.Task_status !== 'завершено с ошибкой')) {
@@ -922,11 +1229,6 @@
                                     }
                                 }
                             }
-                            else {
-                                EndButton.style.display = 'none';
-                                RepeatButton.style.display = '';
-                            }
-
 
                             $('#wish_id').val(WishId);
                             $('#user_id').val(UserId);
