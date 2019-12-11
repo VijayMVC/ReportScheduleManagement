@@ -21,11 +21,19 @@ namespace ReportScheduleInForm
     {
         public MainForm()
         {
+            bool success = Int32.TryParse(ConfigurationManager.AppSettings.Get("command_timeout"), out command_timeout);
+
+            if (!success)
+            {
+                //Полчаса на выполнение запроса
+                command_timeout = 1800;
+            }
             InitializeComponent();
             this.StyleManager = metroStyleManager1;
         }
 
         string password = ConfigurationManager.AppSettings.Get("password");
+        int command_timeout;
 
         private readonly string smtpFrom = ConfigurationManager.AppSettings["smtp:from"];
 
@@ -198,7 +206,14 @@ namespace ReportScheduleInForm
                 db.SaveChanges();
                 if ((wish.wish_status == "done") || (wish.wish_status == "fail"))
                 {
-                    SendNotify(wish.wish_id);
+                    try
+                    {
+                        SendNotify(wish.wish_id);
+                    }
+                    catch
+                    {
+                        WriteOnStory("Не удалось отправить письмо по email! Что-то с почтовым сервером!");
+                    }
                 }
             }
         }
@@ -230,7 +245,7 @@ namespace ReportScheduleInForm
                         {
                             sqlConnection.Open();
                             SqlCommand sqlCmd = new SqlCommand(cmd_text, sqlConnection);
-                            sqlCmd.CommandTimeout = 1800;
+                            sqlCmd.CommandTimeout = command_timeout;
                             foreach (var p in report.Parameters)
                             {
                                 sqlCmd.Parameters.AddWithValue(p.ParameterName, p.ParameterValue);
@@ -408,14 +423,27 @@ namespace ReportScheduleInForm
                 }
 
                 var ru = CultureInfo.GetCultureInfo("ru-RU");
-
                 var body = new StringBuilder();
-                body.AppendLine("Тук-тук!");
-                body.AppendLine().AppendLine("С пылу с жару готов отчет \"" + w.wish_report_type_name +"\" по заданию, созданному Вами " + w.wish_createdate.Day.ToString() + " " + ru.DateTimeFormat.MonthGenitiveNames[w.wish_createdate.Month - 1] + " " + w.wish_createdate.Year.ToString() + " году в " + w.wish_createdate.ToString("HH:mm"));
-                body.AppendLine().AppendLine("ИНФОРМАЦИЯ:");
-                body.AppendLine("Параметры:");
-                body.AppendLine(param.ToString());
-                body.AppendLine().AppendLine("Скачать отчет Вы можете по ссылке: " + GetPathExcelFile(wish_id));
+
+                if (db.Tasks.Where(x => x.task_wish_id == wish_id && x.task_status == "done").Count() == 0)
+                {
+                    body.AppendLine("ПРОВАЛ!!");
+                    body.AppendLine().AppendLine("ПРОВАЛЕНО задание на выгрузку отчета \"" + w.wish_report_type_name + "\", созданному Вами " + w.wish_createdate.Day.ToString() + " " + ru.DateTimeFormat.MonthGenitiveNames[w.wish_createdate.Month - 1] + " " + w.wish_createdate.Year.ToString() + " году в " + w.wish_createdate.ToString("HH:mm") + ".");
+                    body.AppendLine().AppendLine("Никаких данных извлечь не удалось. Для более подробной информации об ошибке зайдите на страницу \"Мониторинг\" в веб-приложении \"Планировщик отчетов\".");
+                    body.AppendLine().AppendLine("ИНФОРМАЦИЯ:");
+                    body.AppendLine("Параметры:");
+                    body.AppendLine(param.ToString());
+                }
+                else
+                {
+                    body.AppendLine("Тук-тук!");
+                    body.AppendLine().AppendLine("С пылу с жару готов отчет \"" + w.wish_report_type_name + "\" по заданию, созданному Вами " + w.wish_createdate.Day.ToString() + " " + ru.DateTimeFormat.MonthGenitiveNames[w.wish_createdate.Month - 1] + " " + w.wish_createdate.Year.ToString() + " году в " + w.wish_createdate.ToString("HH:mm"));
+                    body.AppendLine().AppendLine("ИНФОРМАЦИЯ:");
+                    body.AppendLine("Параметры:");
+                    body.AppendLine(param.ToString());
+                    body.AppendLine().AppendLine("Скачать отчет Вы можете по ссылке: " + GetPathExcelFile(wish_id));
+                }
+
                 body.AppendLine().AppendLine("С уважением, центр «Мои Документы».");
                 body.AppendLine().AppendLine("---");
                 body.AppendLine("Данное сообщение сформировано автоматически. Пожалуйста, не отвечайте на него.");
