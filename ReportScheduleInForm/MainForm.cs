@@ -13,7 +13,6 @@ using System.Text;
 using System.Net.Mail;
 using System.Globalization;
 using System.Net;
-using System.Text.RegularExpressions;
 
 namespace ReportScheduleInForm
 {
@@ -481,6 +480,15 @@ namespace ReportScheduleInForm
         private void ClearButton_Click(object sender, EventArgs e)
         {
             StoryTextBox.Clear();
+        }
+
+        //Закодировать строку в текстбоксе
+        private void MetroButton3_Click(object sender, EventArgs e)
+        {
+            if (!String.IsNullOrEmpty(metroTextBox1.Text))
+            {
+                metroTextBox1.Text = StringCipher.Encrypt(metroTextBox1.Text, password);
+            }
         }
     }
 
