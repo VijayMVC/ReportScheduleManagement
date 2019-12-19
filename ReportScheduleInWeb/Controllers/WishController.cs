@@ -214,7 +214,7 @@ namespace ReportScheduleInWeb.Controllers
                     Task.task_startdate = DateTime.ParseExact(p.startdate, "yyyy-MM-ddTHH:mm", System.Globalization.CultureInfo.InvariantCulture);
                     Task.task_wish_id = Wish.wish_id;
                     Task.task_place_id = p.id;
-                    Task.task_number_attempts = null;
+                    Task.task_number_attempts = 0;
                     Task.task_status = "new";
                     Task.task_last_error_text = null;
                     db.Tasks.Add(Task);
@@ -353,7 +353,7 @@ namespace ReportScheduleInWeb.Controllers
                     {
                         Tasks Task = db.Tasks.Where(x => x.task_wish_id == wish_id && x.task_place_id == p.id).SingleOrDefault();
                         Task.task_startdate = DateTime.ParseExact(p.startdate, "yyyy-MM-ddTHH:mm", System.Globalization.CultureInfo.InvariantCulture);
-                        Task.task_number_attempts = null;
+                        Task.task_number_attempts = 0;
                         Task.task_status = "new";
                         Task.task_last_error_text = null;
                     }
@@ -430,7 +430,7 @@ namespace ReportScheduleInWeb.Controllers
                         Task.task_startdate = DateTime.ParseExact(p.startdate, "yyyy-MM-ddTHH:mm", System.Globalization.CultureInfo.InvariantCulture); ;
                         Task.task_wish_id = Wish.wish_id;
                         Task.task_place_id = p.id;
-                        Task.task_number_attempts = null;
+                        Task.task_number_attempts = 0;
                         Task.task_status = "new";
                         Task.task_last_error_text = null;
                         db.Tasks.Add(Task);
