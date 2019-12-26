@@ -24,6 +24,7 @@ namespace ReportScheduleInForm
         public string place_name { get; set; }
         public string place_connection { get; set; }
         public string place_name_in_report { get; set; }
+        public string place_type_DB { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Tasks> Tasks { get; set; }

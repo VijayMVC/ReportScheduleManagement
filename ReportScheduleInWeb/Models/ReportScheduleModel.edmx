@@ -28,6 +28,7 @@
           <Property Name="place_name" Type="nvarchar(max)" Nullable="false" />
           <Property Name="place_connection" Type="nvarchar(max)" Nullable="false" />
           <Property Name="place_name_in_report" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="place_type_DB" Type="nvarchar" MaxLength="50" />
         </EntityType>
         <EntityType Name="Registered">
           <Key>
@@ -489,6 +490,7 @@
           <NavigationProperty Name="Tasks" Relationship="Self.FK_Tasks_Places" FromRole="Places" ToRole="Tasks" />
           <NavigationProperty Name="Place_type_relation" Relationship="ReportScheduleModel.FK_Place_type_relation_Places" FromRole="Places" ToRole="Place_type_relation" />
           <NavigationProperty Name="Report_place_relation" Relationship="ReportScheduleModel.FK_Report_place_relation_Places" FromRole="Places" ToRole="Report_place_relation" />
+          <Property Name="place_type_DB" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
         </EntityType>
         <EntityType Name="Report_data">
           <Key>
@@ -992,6 +994,7 @@
           <EntitySetMapping Name="Places">
             <EntityTypeMapping TypeName="ReportScheduleModel.Places">
               <MappingFragment StoreEntitySet="Places">
+                <ScalarProperty Name="place_type_DB" ColumnName="place_type_DB" />
                 <ScalarProperty Name="place_id" ColumnName="place_id" />
                 <ScalarProperty Name="place_name" ColumnName="place_name" />
                 <ScalarProperty Name="place_connection" ColumnName="place_connection" />

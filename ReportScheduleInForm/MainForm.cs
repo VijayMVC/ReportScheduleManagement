@@ -13,6 +13,8 @@ using System.Text;
 using System.Net.Mail;
 using System.Globalization;
 using System.Net;
+using MySql.Data.MySqlClient;
+using System.Security;
 
 namespace ReportScheduleInForm
 {
@@ -234,24 +236,48 @@ namespace ReportScheduleInForm
                     {
                         ReportModel report = (ReportModel)serializer.Deserialize(reader);
 
+                        Places place = db.Places.Where(x => x.place_id == task.task_place_id).FirstOrDefault();
+
                         string report_data_xml = String.Empty;
-                        string conn_string = StringCipher.Decrypt(db.Places.Where(x => x.place_id == task.task_place_id).FirstOrDefault().place_connection, password);
+                        string conn_string = StringCipher.Decrypt(place.place_connection, password);
                         string cmd_text = report.SelectCommand;
 
                         DataTable table_result = new DataTable();
 
-                        using (SqlConnection sqlConnection = new SqlConnection(conn_string))
+                        switch (place.place_type_DB)
                         {
-                            sqlConnection.Open();
-                            SqlCommand sqlCmd = new SqlCommand(cmd_text, sqlConnection);
-                            sqlCmd.CommandTimeout = command_timeout;
-                            foreach (var p in report.Parameters)
-                            {
-                                sqlCmd.Parameters.AddWithValue(p.ParameterName, p.ParameterValue);
-                            }
+                            case "MS SQL":
+                                using (SqlConnection sqlConnection = new SqlConnection(conn_string))
+                                {
+                                    sqlConnection.Open();
+                                    SqlCommand sqlCmd = new SqlCommand(cmd_text, sqlConnection);
+                                    sqlCmd.CommandTimeout = command_timeout;
+                                    foreach (var p in report.Parameters)
+                                    {
+                                        sqlCmd.Parameters.AddWithValue(p.ParameterName, p.ParameterValue);
+                                    }
 
-                            SqlDataAdapter sda = new SqlDataAdapter(sqlCmd);
-                            sda.Fill(table_result);
+                                    SqlDataAdapter sda = new SqlDataAdapter(sqlCmd);
+                                    sda.Fill(table_result);
+                                }
+                                break;
+                            case "MySQL":
+                                using (MySqlConnection sqlConnection = new MySqlConnection(conn_string))
+                                {
+                                    sqlConnection.Open();
+                                    MySqlCommand sqlCmd = new MySqlCommand(cmd_text, sqlConnection);
+                                    sqlCmd.CommandTimeout = command_timeout;
+                                    foreach (var p in report.Parameters)
+                                    {
+                                        sqlCmd.Parameters.AddWithValue(p.ParameterName, p.ParameterValue);
+                                    }
+
+                                    MySqlDataAdapter sda = new MySqlDataAdapter(sqlCmd);
+                                    sda.Fill(table_result);
+                                }
+                                break;
+                            default:
+                                throw new Exception("В местоположении \"" + place.place_name + "\" ошибка в указании БД.");
                         }
 
                         foreach (DataRow row in table_result.Rows)
@@ -259,7 +285,7 @@ namespace ReportScheduleInForm
                             report_data_xml += @"<row>";
                             foreach (var col in report.Columns)
                             {
-                                report_data_xml += @"<" + col.ColumnAlias + @">" + row[col.ColumnName].ToString() + @"</" + col.ColumnAlias + @">";
+                                report_data_xml += @"<" + col.ColumnAlias + @">" + SecurityElement.Escape(row[col.ColumnName].ToString()) + @"</" + col.ColumnAlias + @">";
                             }
                             report_data_xml += @"</row>";
                         }
