@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security;
-using System.Web;
 using System.Web.Mvc;
 using System.Xml.Serialization;
-using EncryptStringSample;
 using Newtonsoft.Json;
 using ReportScheduleInWeb.Models;
 
@@ -481,6 +479,15 @@ namespace ReportScheduleInWeb.Controllers
             }
 
             return Json(result, JsonRequestBehavior.AllowGet);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                db.Dispose();
+            }
+            base.Dispose(disposing);
         }
     }
 }

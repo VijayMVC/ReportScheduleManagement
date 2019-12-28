@@ -23,6 +23,9 @@ namespace ReportScheduleInWeb.Models
         public string user_name { get; set; }
         [DisplayName("Отчество")]
         public string user_patronymic { get; set; }
+        [DisplayName("Email")]
+        public string user_email { get; set; }
+
         [DisplayName("Повтор пароля*")]
         [DataType(DataType.Password)]
         public string user_password_confirm { get; set; }
@@ -32,15 +35,24 @@ namespace ReportScheduleInWeb.Models
         public string user_password_old { get; set; }
 
         [DisplayName("Роли")]
-        public List<Roles> roles { get; set; }
+        public List<int> roles { get; set; }
 
+        public string user_roles { get; set; }
+
+        [DisplayName("Отчеты")]
+        public List<int> report_types { get; set; }
+
+        [DisplayName("ФИО")]
+        public string user_FIO { get; set; }
+        
         public string UserErrorMessage { get; set; }
 
         public int changeable { get; set; }
 
         public UserViewModel()
         {
-            roles = new List<Roles>();
+            roles = new List<int>();
+            report_types = new List<int>();
             changeable = 1;
         }
     }

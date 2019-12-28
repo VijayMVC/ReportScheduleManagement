@@ -687,5 +687,13 @@ namespace ReportScheduleInWeb.Controllers
             return Json(result, JsonRequestBehavior.AllowGet);
         }
 
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                db.Dispose();
+            }
+            base.Dispose(disposing);
+        }
     }
 }

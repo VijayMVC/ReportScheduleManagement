@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using System.Web;
 using System.Web.Mvc;
 
 namespace ReportScheduleInWeb.Controllers
@@ -34,6 +33,34 @@ namespace ReportScheduleInWeb.Controllers
             return sb.ToString();
         }
 
+        public JsonResult GetUserList()
+        {
+            List<UserViewModel> UserList = db.Users.Select(x => new UserViewModel
+            {
+                user_id = x.user_id,
+                user_login = x.user_login,
+                user_surname = x.user_surname,
+                user_name = x.user_name,
+                user_patronymic = x.user_patronymic,
+                user_isdeleted = x.user_isdeleted,
+                user_email = x.user_email,
+                user_FIO = (!String.IsNullOrEmpty(x.user_surname) ? x.user_surname : "") + " " + (!String.IsNullOrEmpty(x.user_name) ? x.user_name : "") + " " + (!String.IsNullOrEmpty(x.user_patronymic) ? x.user_patronymic : ""),
+                changeable = 1
+            }).OrderBy(x => x.user_surname).ThenBy(x => x.user_name).ThenBy(x => x.user_patronymic).ToList();
+
+            foreach (var user in UserList)
+            {
+                List<string> roles = (from r in db.Roles
+                                      join ur in db.User_roles on r.role_id equals ur.userrole_role_id
+                                      where ur.userrole_user_id == user.user_id
+                                      orderby r.role_id
+                                      select r.role_name).ToList<string>();
+                user.user_roles = String.Join(", ", roles.ToArray());
+            }
+
+            return Json(UserList, JsonRequestBehavior.AllowGet);
+        }
+
         public JsonResult GetUserById(int UserId)
         {
             var Usermodel = new UserViewModel();
@@ -50,6 +77,19 @@ namespace ReportScheduleInWeb.Controllers
             Usermodel.user_surname = model.user_surname;
             Usermodel.user_name = model.user_name;
             Usermodel.user_patronymic = model.user_patronymic;
+            Usermodel.user_email = model.user_email;
+
+            Usermodel.roles = (from r in db.Roles
+                               join ur in db.User_roles on r.role_id equals ur.userrole_role_id
+                               where ur.userrole_user_id == UserId
+                               orderby r.role_id
+                               select r.role_id).ToList<int>();
+
+            Usermodel.report_types = (from rt in db.Report_types
+                                      join rur in db.Report_user_relation on rt.report_type_id equals rur.rur_report_type_id
+                                      where rur.rur_user_id == UserId
+                                      orderby rt.report_type_name
+                                      select rt.report_type_id).ToList<int>();
 
             string value = string.Empty;
             value = JsonConvert.SerializeObject(Usermodel, Formatting.Indented, new JsonSerializerSettings
@@ -92,6 +132,15 @@ namespace ReportScheduleInWeb.Controllers
             }
 
             return Json(result, JsonRequestBehavior.AllowGet);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                db.Dispose();
+            }
+            base.Dispose(disposing);
         }
 
     }

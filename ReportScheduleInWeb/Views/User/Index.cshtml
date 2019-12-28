@@ -1,0 +1,245 @@
+﻿@{
+    if ((@Session["userID"] != null) && (@Convert.ToInt32(Session["userID"]) != 1) && (@Convert.ToInt32(Session["userID"]) != 2))
+    {
+        Response.Redirect("~/Home/Index");
+    }
+}
+
+@model ReportScheduleInWeb.Models.UserViewModel
+
+@{
+    ViewBag.Title = "Управление пользователями";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var db = new ReportScheduleInWeb.Models.ReportScheduleEntities();
+}
+
+<div class="row align-items-center">
+    <div class="col-6">
+        <p class="display-4" style="color: #663333 !important">Управление пользователями</p>
+    </div>
+    <div class="col-6" style="text-align:right">
+        <button class="btn btn-success" type="button" onclick="AddNewUser(0)">Добавить нового</button>
+    </div>
+</div>
+
+<input type="hidden" id="busy_page" />
+
+<table class="table table-bordered table-hover table-striped table-light table-sm">
+    <tr class="bg-secondary" style="text-align:center">
+        <th scope="col" width="50%">
+            ФИО
+        </th>
+        <th scope="col" width="10%">
+            Логин
+        </th>
+        <th scope="col" width="20%">
+            Email
+        </th>
+        <th scope="col" width="20%">
+            Роли
+        </th>
+    </tr>
+    <tbody class="table-wish" id="SetUserList">
+        <tr id="LoadingStatus"></tr>
+    </tbody>
+</table>
+
+<div class="modal fade" id="user_view" tabindex="-1" role="dialog" data-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark" id="mainContent">
+            <div class="modal-header">
+                <h4 class="modal-title text-white" id="user_view_title"></h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="form" style="width:auto">
+                    <fieldset id="SubmitForm">
+                        @Html.HiddenFor(m => m.user_id, new { @id = "UseId" })
+                        <div class="form-group" id="line_login">
+                            @Html.EditorFor(model => model.user_login, new { htmlAttributes = new { @class = "form-control", placeholder = "Логин", @required = true, style="max-width:100%" } })
+                            <div class="invalid-feedback field-validation-error">
+                                Введите логин
+                            </div>
+                        </div>
+                        <div class="form-group" id="line_password">
+                            @Html.EditorFor(model => model.user_password, new { htmlAttributes = new { @class = "form-control password", placeholder = "Пароль", @required = true } })
+                            <div class="invalid-feedback field-validation-error">
+                                Введите пароль
+                            </div>
+                        </div>
+                        <div class="form-group" id="line_password_confirm">
+                            @Html.EditorFor(model => model.user_password_confirm, new { htmlAttributes = new { @class = "form-control", placeholder = "Повтор пароля", @required = true } })
+                            <div class="invalid-feedback field-validation-error">
+                                Пароли не совпадают
+                            </div>
+                        </div>
+                        <div class="form-group" id="line_surname">
+                            @Html.EditorFor(model => model.user_surname, new { htmlAttributes = new { @class = "form-control", placeholder = "Фамилия", @required = true, style="max-width:100%" } })
+                            <div class="invalid-feedback field-validation-error">
+                                Введите фамилию
+                            </div>
+                        </div>
+                        <div class="form-group" id="line_name">
+                            @Html.EditorFor(model => model.user_name, new { htmlAttributes = new { @class = "form-control", placeholder = "Имя", @required = true, style="max-width:100%" } })
+                            <div class="invalid-feedback field-validation-error">
+                                Введите имя
+                            </div>
+                        </div>
+                        <div class="form-group" id="line_patronmymic">
+                            @Html.EditorFor(model => model.user_patronymic, new { htmlAttributes = new { @class = "form-control", placeholder = "Отчество - необязательно", style="max-width:100%" } })
+                            <div class="invalid-feedback field-validation-error">
+                                Введите отчество
+                            </div>
+                        </div>
+                        <div class="form-group" id="changepassword">
+                            <a href="#" class="btn btn-outline-info font-weight-light btn-sm" id="linkchangepassword" style="display:block">Изменить пароль</a>
+                        </div>
+                        <div class="form-group" id="line_isdeleted">
+                            <div class="custom-control custom-switch">
+                                <input type="checkbox" class="custom-control-input" id="customSwitch">
+                                <label class="custom-control-label text-white" for="customSwitch">- Удален</label>
+                            </div>
+                        </div>
+                        <div class="form-group" id="line_roles">
+                            <div class="container-fluid px-0">
+                                <div class="row">
+                                    <div class="col-md-2">
+                                        <span class="bg-dark text-white">Роли:</span>
+                                    </div>
+                                    <div class="col-md-10">
+                                        @Html.DropDownListFor(model => model.roles, new SelectList(db.Roles.ToList(), "role_id", "role_name"), new { @class = "form-control chosen-select chosen-select-roles", @multiple = "true" })
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group mb-0" id="line_reports">
+                            <div class="container-fluid px-0">
+                                <div class="row">
+                                    <div class="col-md-2">
+                                        <span class="bg-dark text-white">Отчеты:</span>
+                                    </div>
+                                    <div class="col-md-10">
+                                        @Html.DropDownListFor(model => model.report_types, new SelectList(from rt in db.Report_types join rgr in db.Report_group_relation on rt.report_type_id equals rgr.rgr_report_id join rg in db.Report_groups on rgr.rgr_report_group_id equals rg.report_group_id select new { Report_type_id = rt.report_type_id, Report_type_name = rt.report_type_name, Report_group_name = rg.report_group_name }, "report_type_id", "report_type_name", "report_group_name", 1), new { @class = "form-control chosen-select chosen-select-report_types", @multiple = "true" })
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <div class="form-group" id="line_actions">
+                    <button class="btn btn-outline-danger btn-sm" data-dismiss="modal">Отмена</button>
+                    <input class="btn btn-outline-success btn-sm" type="submit" value="Сохранить" id="SaveUserRecord" />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+<script>
+    $(".chosen-select").chosen({
+        width: "100%",
+        no_results_text: "Ничего не найдено",
+        placeholder_text_multiple: "Не выбрано",
+        search_contains: true,
+        display_disabled_options: false,
+        display_selected_options: false,
+        max_shown_results: Infinity
+    });
+
+    $(document).ready(function () {
+        $("#SetUserList").empty();
+        $("#SetUserList").append('<tr> <td colspan="4">Загрузка...</td></tr>');
+
+        var url = mainURL + "/User/GetUserList";
+
+        $.ajax({
+            type: "GET",
+            url: url,
+            success: function (UserList) {
+                var SetData = $("#SetUserList");
+                SetData.empty();
+                if (UserList.length == 0) {
+                    var Data = "<tr class='font-italic font-weight-light'> <td colspan='4'>Нет ни одного пользователя</td></tr>";
+                    SetData.append(Data);
+                }
+                else {
+                    for (var i = 0; i < UserList.length; i++) {
+                        var Data = "<tr onclick='GetUserByID(" + UserList[i].user_id + ")'>" +
+                            "<td>" + UserList[i].user_FIO + "</td>" +
+                            "<td style='text-align: center;'>" + UserList[i].user_login + "</td>" +
+                            "<td style='text-align: center;'>" + UserList[i].user_email + "</td>" +
+                            "<td style='text-align: center;'>" + UserList[i].user_roles + "</td>";
+
+                        Data += "</tr>";
+                        SetData.append(Data);
+                    }
+                }
+            }
+        })
+    });
+
+    function AddNewUser(UserId) {
+        var url = mainURL + "/User/GetUserById?UserId=" + UserId;
+        $("#form")[0].reset();
+        $("#UseId").val(0);
+        $("#user_view_title").html("Добавить нового пользователя");
+        $("#user_view").modal();
+        $.ajax({
+            type: "GET",
+            url: url,
+            success: function (data) {
+                var obj = JSON.parse(data);
+                $("#pass1").show();
+                $("#pass2").show();
+                $("#changepassword").hide();
+                $(".chosen-select-roles").trigger('chosen:updated');
+                $(".chosen-select-report_types").trigger('chosen:updated');
+            }
+        })
+    }
+
+    function GetUserByID(UserId) {
+        var url = mainURL + "/User/GetUserById?UserId=" + UserId;
+        $("#user_view_title").html("Редактирование пользователя");
+        $("#user_view").modal();
+        $.ajax({
+            type: "GET",
+            url: url,
+            success: function (data) {
+                var obj = JSON.parse(data);
+                $("#UseId").val(obj.user_id);
+                $("#user_login").val(obj.user_login);
+                $("#user_surname").val(obj.user_surname);
+                $("#user_name").val(obj.user_name);
+                $("#user_patronymic").val(obj.user_patronymic);
+                $("#user_isdeleted").prop("checked", obj.user_isdeleted);
+                $("#changepassword").show();
+                $("#linkchangepassword").attr('onclick', "ChangePassword(" + UserId + ")");
+
+                $("#roles").val("");
+                if (obj.roles != null) {
+                    $(".chosen-select-roles").val(obj.roles).trigger('chosen:updated');
+                }
+
+                $("#report_types").val("");
+                if (obj.roles != null) {
+                    $(".chosen-select-report_types").val(obj.report_types).trigger('chosen:updated');
+                }
+
+                $("#pass1").hide();
+                $("#pass2").hide();
+            }
+        })
+    } 
+
+    window.onload = function () {
+        $('#busy_page').val("false");
+    }
+</script>
+}
