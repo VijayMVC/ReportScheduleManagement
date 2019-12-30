@@ -54,55 +54,47 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form id="form" style="width:auto">
+                <form id="form" style="width:auto" oninput="validateForm()">
                     <fieldset id="SubmitForm">
                         @Html.HiddenFor(m => m.user_id, new { @id = "UseId" })
-                        <div class="form-group" id="line_login">
-                            @Html.EditorFor(model => model.user_login, new { htmlAttributes = new { @class = "form-control", placeholder = "Логин", @required = true, style="max-width:100%" } })
-                            <div class="invalid-feedback field-validation-error">
-                                Введите логин
-                            </div>
+                        <div class="form-group input-group-sm" id="line_login">
+                            @Html.EditorFor(model => model.user_login, new { htmlAttributes = new { @class = "form-control", placeholder = "Логин", @required = true, style = "max-width:100%" } })
+                            <span id="error-userview-login" class="field-validation-error"></span>
                         </div>
-                        <div class="form-group" id="line_password">
+                        <div class="form-group input-group-sm" id="line_password">
                             @Html.EditorFor(model => model.user_password, new { htmlAttributes = new { @class = "form-control password", placeholder = "Пароль", @required = true } })
-                            <div class="invalid-feedback field-validation-error">
-                                Введите пароль
-                            </div>
+                            <span id="error-userview-password" class="field-validation-error"></span>
                         </div>
-                        <div class="form-group" id="line_password_confirm">
+                        <div class="form-group input-group-sm" id="line_password_confirm">
                             @Html.EditorFor(model => model.user_password_confirm, new { htmlAttributes = new { @class = "form-control", placeholder = "Повтор пароля", @required = true } })
-                            <div class="invalid-feedback field-validation-error">
-                                Пароли не совпадают
-                            </div>
+                            <span id="error-userview-password-confirm" class="field-validation-error"></span>
                         </div>
-                        <div class="form-group" id="line_surname">
-                            @Html.EditorFor(model => model.user_surname, new { htmlAttributes = new { @class = "form-control", placeholder = "Фамилия", @required = true, style="max-width:100%" } })
-                            <div class="invalid-feedback field-validation-error">
-                                Введите фамилию
-                            </div>
+                        <div class="form-group input-group-sm" id="line_surname">
+                            @Html.EditorFor(model => model.user_surname, new { htmlAttributes = new { @class = "form-control", placeholder = "Фамилия", @required = true, style = "max-width:100%" } })
+                            <span id="error-userview-surname" class="field-validation-error"></span>
                         </div>
-                        <div class="form-group" id="line_name">
-                            @Html.EditorFor(model => model.user_name, new { htmlAttributes = new { @class = "form-control", placeholder = "Имя", @required = true, style="max-width:100%" } })
-                            <div class="invalid-feedback field-validation-error">
-                                Введите имя
-                            </div>
+                        <div class="form-group input-group-sm" id="line_name">
+                            @Html.EditorFor(model => model.user_name, new { htmlAttributes = new { @class = "form-control", placeholder = "Имя", @required = true, style = "max-width:100%" } })
+                            <span id="error-userview-name" class="field-validation-error"></span>
                         </div>
-                        <div class="form-group" id="line_patronmymic">
-                            @Html.EditorFor(model => model.user_patronymic, new { htmlAttributes = new { @class = "form-control", placeholder = "Отчество - необязательно", style="max-width:100%" } })
-                            <div class="invalid-feedback field-validation-error">
-                                Введите отчество
-                            </div>
+                        <div class="form-group input-group-sm" id="line_patronmymic">
+                            @Html.EditorFor(model => model.user_patronymic, new { htmlAttributes = new { @class = "form-control", placeholder = "Отчество - необязательно", style = "max-width:100%" } })
+                            <span id="error-userview-patronymic" class="field-validation-error"></span>
                         </div>
-                        <div class="form-group" id="changepassword">
+                        <div class="form-group input-group-sm" id="line_email">
+                            @Html.EditorFor(model => model.user_email, new { htmlAttributes = new { type = "email", @class = "form-control", placeholder = "Электроная почта", @required = true, style = "max-width:100%" } })
+                            <span id="error-userview-email" class="field-validation-error"></span>
+                        </div>
+                        <div class="form-group input-group-sm" id="changepassword">
                             <a href="#" class="btn btn-outline-info font-weight-light btn-sm" id="linkchangepassword" style="display:block">Изменить пароль</a>
                         </div>
-                        <div class="form-group" id="line_isdeleted">
+                        <div class="form-group input-group-sm" id="line_isdeleted">
                             <div class="custom-control custom-switch">
                                 <input type="checkbox" class="custom-control-input" id="customSwitch">
                                 <label class="custom-control-label text-white" for="customSwitch">- Удален</label>
                             </div>
                         </div>
-                        <div class="form-group" id="line_roles">
+                        <div class="form-group input-group-sm" id="line_roles">
                             <div class="container-fluid px-0">
                                 <div class="row">
                                     <div class="col-md-2">
@@ -113,8 +105,9 @@
                                     </div>
                                 </div>
                             </div>
+                            <span id="error-userview-roles" class="field-validation-error"></span>
                         </div>
-                        <div class="form-group mb-0" id="line_reports">
+                        <div class="form-group  input-group-sm mb-0" id="line_reports">
                             <div class="container-fluid px-0">
                                 <div class="row">
                                     <div class="col-md-2">
@@ -125,13 +118,14 @@
                                     </div>
                                 </div>
                             </div>
+                            <span id="error-userview-reports" class="field-validation-error"></span>
                         </div>
                     </fieldset>
                 </form>
             </div>
 
             <div class="modal-footer">
-                <div class="form-group" id="line_actions">
+                <div class="form-group mb-0" id="line_actions">
                     <button class="btn btn-outline-danger btn-sm" data-dismiss="modal">Отмена</button>
                     <input class="btn btn-outline-success btn-sm" type="submit" value="Сохранить" id="SaveUserRecord" />
                 </div>
@@ -189,14 +183,22 @@
         $("#form")[0].reset();
         $("#UseId").val(0);
         $("#user_view_title").html("Добавить нового пользователя");
+        document.getElementById('error-userview-login').innerHTML = "";
+        document.getElementById('error-userview-surname').innerHTML = "";
+        document.getElementById('error-userview-name').innerHTML = "";
+        document.getElementById('error-userview-email').innerHTML = "";
+        document.getElementById('error-userview-password').innerHTML = "";
+        document.getElementById('error-userview-password-confirm').innerHTML = "";
+        document.getElementById('error-userview-roles').innerHTML = "";
+        document.getElementById('error-userview-reports').innerHTML = "";
         $("#user_view").modal();
         $.ajax({
             type: "GET",
             url: url,
             success: function (data) {
                 var obj = JSON.parse(data);
-                $("#pass1").show();
-                $("#pass2").show();
+                $("#line_password").show();
+                $("#line_password_confirm").show();
                 $("#changepassword").hide();
                 $(".chosen-select-roles").trigger('chosen:updated');
                 $(".chosen-select-report_types").trigger('chosen:updated');
@@ -207,6 +209,14 @@
     function GetUserByID(UserId) {
         var url = mainURL + "/User/GetUserById?UserId=" + UserId;
         $("#user_view_title").html("Редактирование пользователя");
+        document.getElementById('error-userview-login').innerHTML = "";
+        document.getElementById('error-userview-surname').innerHTML = "";
+        document.getElementById('error-userview-name').innerHTML = "";
+        document.getElementById('error-userview-email').innerHTML = "";
+        document.getElementById('error-userview-password').innerHTML = "";
+        document.getElementById('error-userview-password-confirm').innerHTML = "";
+        document.getElementById('error-userview-roles').innerHTML = "";
+        document.getElementById('error-userview-reports').innerHTML = "";
         $("#user_view").modal();
         $.ajax({
             type: "GET",
@@ -218,7 +228,8 @@
                 $("#user_surname").val(obj.user_surname);
                 $("#user_name").val(obj.user_name);
                 $("#user_patronymic").val(obj.user_patronymic);
-                $("#user_isdeleted").prop("checked", obj.user_isdeleted);
+                $("#user_email").val(obj.user_email);
+                $("#customSwitch").prop("checked", obj.user_isdeleted);
                 $("#changepassword").show();
                 $("#linkchangepassword").attr('onclick', "ChangePassword(" + UserId + ")");
 
@@ -232,11 +243,108 @@
                     $(".chosen-select-report_types").val(obj.report_types).trigger('chosen:updated');
                 }
 
-                $("#pass1").hide();
-                $("#pass2").hide();
+                $("#line_password").hide();
+                $("#line_password_confirm").hide();
             }
         })
-    } 
+    }
+
+    function validateEmail(email) {
+        var re = /^(([^<>()[\]\\.,;:\s@@\"]+(\.[^<>()[\]\\.,;:\s@@\"]+)*)|(\".+\"))@@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        return re.test(email);
+    }
+
+    function validateForm() {
+	    var user_login = $("#user_login").val();
+	    var user_surname = $("#user_surname").val();
+	    var user_name = $("#user_name").val();
+	    var user_email = $("#user_email").val();
+	    var user_password = $("#user_password").val();
+        var user_password_confirm = $("#user_password_confirm").val();
+        var user_roles = $("#roles").val();
+
+	    user_login.trim() == "" ? document.getElementById('error-userview-login').innerHTML = "Введите логин" : document.getElementById('error-userview-login').innerHTML = "";
+	    user_surname.trim() == "" ? document.getElementById('error-userview-surname').innerHTML = "Введите фамилию" : document.getElementById('error-userview-surname').innerHTML = "";
+        user_name.trim() == "" ? document.getElementById('error-userview-name').innerHTML = "Введите имя" : document.getElementById('error-userview-name').innerHTML = "";
+        !validateEmail(user_email) ? document.getElementById('error-userview-email').innerHTML = "Некорректный email" : document.getElementById('error-userview-email').innerHTML = "";
+
+        (document.getElementById('changepassword').style.display === 'none') && (user_password.trim() == "") ? document.getElementById('error-userview-password').innerHTML = "Введите пароль" : document.getElementById('error-userview-password').innerHTML = "";
+        (document.getElementById('changepassword').style.display === 'none') && (user_password.trim() != user_password_confirm.trim()) ? document.getElementById('error-userview-password-confirm').innerHTML = "Пароли не совпадают" : document.getElementById('error-userview-password-confirm').innerHTML = "&nbsp";
+
+        user_roles == "" ? document.getElementById('error-userview-roles').innerHTML = "Выберите роль" : document.getElementById('error-userview-roles').innerHTML = "";
+
+        if (((document.getElementById('changepassword').style.display === 'none') && (user_password.trim() == "")) || (document.getElementById('changepassword').style.display === 'none') && (user_password.trim() != user_password_confirm.trim()))
+            return false
+
+	    if ((user_login.trim() == "") || (user_surname.trim() == "") || (user_name.trim() == "") || (!validateEmail(user_email)) || (user_roles == ""))
+		    return false;
+
+	    return true;
+    }
+
+    $("#roles").change(function () {
+        var user_roles = $("#roles").val();
+        user_roles == "" ? document.getElementById('error-userview-roles').innerHTML = "Выберите роль" : document.getElementById('error-userview-roles').innerHTML = "";
+    })
+
+    $("#SaveUserRecord").click(function () {
+        if ($('#busy_page').val() == "false") {
+            $('#busy_page').val("true");
+            if (!validateForm()) {
+                $('#busy_page').val("false");
+                return false;
+            }
+
+            var data = $("#SubmitForm").serialize();
+
+            var user_roles = $("#roles").val();
+            $.each(user_roles, function (index, value) {
+                data += '&user_roles=' + value.toString();
+            });
+
+            var checkBox = document.getElementById('customSwitch');
+            if (checkBox.checked) {
+                data += '&user_isdeleted=True'
+            }
+            else {
+                data += '&user_isdeleted=False';
+            }
+
+            $("#customSwitch").checked ? data += '&user_isdeleted=True' : data += '&user_isdeleted=False';
+
+            var report_types = $("#report_types").val();
+            $.each(report_types, function (index, value) {
+                data += '&report_types=' + value.toString();
+            });
+
+            data += '&report_types=0';
+
+            $.ajax({
+                type: "Post",
+                data: data,
+                url: mainURL + "/User/SaveDataInDatabase",
+                success: function (result) {
+                    $('#busy_page').val("false");
+                    if (result == 1) {
+                        alert("Произошла ошибка при сохранении данных!");
+                        return false;
+                    }
+                    alert("Данные успешно сохранены!");
+                    window.location.href = mainURL + "/User/Index";
+                    $("#user_view").modal("hide");
+                },
+                error: function (xhr, status, p3) {
+                    $('#busy_page').val("false");
+                    alert(xhr.responseText);
+                }
+            })
+        }
+    })
+
+    $("#MyModalChangePassword").on("hidden.bs.modal", function () {
+        if ($('#user_view').hasClass('show'))
+            $(document.body).addClass("modal-open");
+    });
 
     window.onload = function () {
         $('#busy_page').val("false");

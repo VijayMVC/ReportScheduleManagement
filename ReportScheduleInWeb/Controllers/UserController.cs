@@ -134,6 +134,165 @@ namespace ReportScheduleInWeb.Controllers
             return Json(result, JsonRequestBehavior.AllowGet);
         }
 
+        //Проверка на повтор логина
+        public bool CheckUserLogin(string UserLogin, int UserId)
+        {
+            try
+            {
+                if (UserId != 0)
+                {
+                    //Пользователь редактируется, поиск одинакового логина с другим ID
+                    if (db.Users.Where(x => x.user_id != UserId && x.user_login == UserLogin).FirstOrDefault() != null)
+                    {
+                        return true;
+                    }
+                }
+                else
+                {
+                    //Новый пользователь, поиск одинакового логина
+                    if (db.Users.Where(x => x.user_login == UserLogin).FirstOrDefault() != null)
+                    {
+                        return true;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return false;
+        }
+
+        [HttpPost]
+        public JsonResult SaveDataInDatabase(UserViewModel model)
+        {
+            var result = 0;
+            try
+            {
+                //Вытаскиваем выбранные роли и отчеты
+                var selroles = Request.Form["user_roles"].Split(',').Select(Int32.Parse).ToList();
+                var selreports = Request.Form["report_types"].Split(',').Select(Int32.Parse).ToList();
+                var isdeleted = Convert.ToBoolean(Request.Form["user_isdeleted"]);
+
+                //Редактирование пользователя
+                if (model.user_id > 0)
+                {
+                    if (!CheckUserLogin(model.user_login, model.user_id))
+                    {
+                        Users Use = db.Users.SingleOrDefault(x => x.user_id == model.user_id);
+                        Use.user_login = model.user_login;
+                        Use.user_surname = model.user_surname;
+                        Use.user_name = model.user_name;
+                        Use.user_patronymic = model.user_patronymic;
+                        Use.user_isdeleted = isdeleted;
+                        Use.user_email = model.user_email;
+
+                        //Роли пользователя ДО редактирования
+                        List<User_roles> Ur = new List<User_roles>();
+                        foreach (User_roles ur in db.User_roles.Where(x => x.userrole_user_id == model.user_id))
+                        {
+                            Ur.Add(ur);
+                        }
+
+                        foreach (Roles r in db.Roles)
+                        {
+                            if (selroles.Contains(r.role_id))
+                            {
+                                if (Ur.Find(x => x.userrole_role_id == r.role_id) == null)
+                                {
+                                    db.User_roles.Add(new User_roles() { userrole_user_id = model.user_id, userrole_role_id = r.role_id });
+                                }
+                            }
+                            else
+                            {
+                                if (Ur.Find(x => x.userrole_role_id == r.role_id) != null)
+                                {
+                                    db.User_roles.Remove(Ur.Find(x => x.userrole_role_id == r.role_id));
+                                }
+                            }
+                        }
+
+                        //Отчеты пользователя ДО редактирования
+                        List<Report_user_relation> Rur = new List<Report_user_relation>();
+                        foreach (Report_user_relation rur in db.Report_user_relation.Where(x => x.rur_user_id == model.user_id))
+                        {
+                            Rur.Add(rur);
+                        }
+
+                        foreach (Report_types rt in db.Report_types)
+                        {
+                            if (selreports.Contains(rt.report_type_id))
+                            {
+                                if (Rur.Find(x => x.rur_report_type_id == rt.report_type_id) == null)
+                                {
+                                    db.Report_user_relation.Add(new Report_user_relation() { rur_user_id = model.user_id, rur_report_type_id = rt.report_type_id });
+                                }
+                            }
+                            else
+                            {
+                                if (Rur.Find(x => x.rur_report_type_id == rt.report_type_id) != null)
+                                {
+                                    db.Report_user_relation.Remove(Rur.Find(x => x.rur_report_type_id == rt.report_type_id));
+                                }
+                            }
+                        }
+
+                        db.SaveChanges();
+                    }
+                    else
+                    {
+                        result = 1;
+                    }
+                }
+                //Создание нового пользователя
+                else
+                {
+                    if (!CheckUserLogin(model.user_login, 0))
+                    {
+                        Users Use = new Users();
+                        Use.user_login = model.user_login;
+                        Use.user_password = encryption(model.user_password);
+                        Use.user_surname = model.user_surname;
+                        Use.user_name = model.user_name;
+                        Use.user_patronymic = model.user_patronymic;
+                        Use.user_isdeleted = isdeleted;
+                        Use.user_email = model.user_email;
+                        db.Users.Add(Use);
+                        db.SaveChanges();
+
+                        foreach (Roles r in db.Roles)
+                        {
+                            if (selroles.Contains(r.role_id))
+                            {
+                                db.User_roles.Add(new User_roles() { userrole_user_id = Use.user_id, userrole_role_id = r.role_id });
+                            }
+                        }
+
+                        foreach (Report_types rt in db.Report_types)
+                        {
+                            if (selreports.Contains(rt.report_type_id))
+                            {
+                                db.Report_user_relation.Add(new Report_user_relation() { rur_user_id = Use.user_id, rur_report_type_id = rt.report_type_id });
+                            }
+                        }
+
+                        db.SaveChanges();
+                    }
+                    else
+                    {
+                        result = 1;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return Json(result, JsonRequestBehavior.AllowGet);
+        }
+
         protected override void Dispose(bool disposing)
         {
             if (disposing)
